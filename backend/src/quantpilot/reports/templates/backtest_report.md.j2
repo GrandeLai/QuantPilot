@@ -1,0 +1,45 @@
+# 回测复盘报告：{{ config.symbol }}
+
+**标的**: {{ config.symbol }} · {{ config.timeframe }} 周期
+**初始资金**: ¥{{ "%.2f"|format(config.initial_cash) }}
+**回测K线数**: {{ bars_processed }}
+**生成时间**: {{ generated_at }}
+
+---
+
+## 核心绩效指标
+
+| 指标 | 数值 |
+|------|------|
+| 总收益率 | {{ "%.2f%%"|format(metrics.total_return * 100) }} |
+| 年化收益率 | {{ "%.2f%%"|format(metrics.annual_return * 100) }} |
+| 夏普比率 | {{ "%.2f"|format(metrics.sharpe_ratio) }} |
+| 索提诺比率 | {{ "%.2f"|format(metrics.sortino_ratio) }} |
+| 卡尔玛比率 | {{ "%.2f"|format(metrics.calmar_ratio) }} |
+| 最大回撤 | {{ "%.2f%%"|format(metrics.max_drawdown|abs * 100) }} |
+| 最大回撤持续 | {{ metrics.max_drawdown_duration }} 根K线 |
+
+---
+
+## 交易统计
+
+| 指标 | 数值 |
+|------|------|
+| 总交易次数 | {{ metrics.total_trades }} |
+| 盈利次数 | {{ metrics.win_trades }} |
+| 亏损次数 | {{ metrics.loss_trades }} |
+| 胜率 | {{ "%.2f%%"|format(metrics.win_rate * 100) }} |
+| 盈亏比 | {{ "%.2f"|format(metrics.profit_factor) }} |
+| 平均盈利 | {{ "%.4f"|format(metrics.avg_win) }} |
+
+---
+
+## 交易记录（最多 20 笔）
+
+| 标的 | 方向 | 开仓价 | 平仓价 | 数量 | 盈亏% |
+|------|------|--------|--------|------|-------|
+{% for t in trades[:20] %}| {{ t.symbol }} | {{ t.side }} | {{ "%.4f"|format(t.entry_price) }} | {{ "%.4f"|format(t.exit_price) }} | {{ t.quantity }} | {{ "%.2f%%"|format(t.return_pct * 100) }} |
+{% endfor %}
+---
+
+*报告由 QuantPilot 自动生成*

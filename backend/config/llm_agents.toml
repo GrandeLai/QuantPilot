@@ -1,0 +1,41 @@
+# QuantPilot LLM Agent — Model Registry
+# Models are tried in ascending priority order.
+# Per-model values override [agent] defaults.
+
+[agent]
+retry_base_delay = 0.5         # seconds; exponential base
+retry_max_delay = 30.0         # max wait between retries
+circuit_breaker_threshold = 5  # consecutive failures before OPEN
+circuit_breaker_recovery = 60.0  # seconds before HALF_OPEN probe
+
+[[models]]
+id = "gpt-4o"
+name = "GPT-4o"
+provider = "openai"
+priority = 1
+timeout = 30.0
+max_retries = 3
+
+[[models]]
+id = "claude-sonnet-4-6"
+name = "Claude Sonnet 4.6"
+provider = "anthropic"
+priority = 2
+timeout = 45.0
+max_retries = 2
+
+[[models]]
+id = "gpt-4o-mini"
+name = "GPT-4o Mini"
+provider = "openai"
+priority = 3
+timeout = 20.0
+max_retries = 3
+
+[[models]]
+id = "deepseek/deepseek-chat"
+name = "DeepSeek Chat"
+provider = "deepseek"
+priority = 4
+timeout = 30.0
+max_retries = 2

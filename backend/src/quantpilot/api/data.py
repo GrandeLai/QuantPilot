@@ -1,0 +1,212 @@
+"""数据模块 API 路由.
+
+端点：
+  GET  /data/bars              查询 K 线数据
+  POST /data/fetch             触发数据拉取
+  GET  /data/symbols           查询已有标的列表
+  GET  /data/range             查询数据时间范围
+  GET  /data/onchain/btc       获取 BTC 链上指标
+  GET  /data/onchain/btc/{metric}  获取单个 BTC 链上指标
+"""
+
+from datetime import datetime
+from typing import Annotated, Any
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
+from loguru import logger
+
+from quantpilot.data.fetchers.akshare_fetcher import AKShareFetcher
+from quantpilot.data.fetchers.yfinance_fetcher import YFinanceFetcher
+from quantpilot.data.models import (
+    DataFetchRequest,
+    OHLCVBar,
+    OHLCVResponse,
+)
+from quantpilot.data.storage import MarketDataStorage
+
+router = APIRouter(prefix="/data", tags=["数据"])
+
+# 模块级单例（实际项目中应通过依赖注入管理生命周期）
+_storage: MarketDataStorage | None = None
+
+
+def get_storage() -> MarketDataStorage:
+    """依赖注入：获取存储实例."""
+    global _storage
+    if _storage is None:
+        from quantpilot.config import get_settings
+        settings = get_settings()
+        settings.data_dir.mkdir(parents=True, exist_ok=True)
+        _storage = MarketDataStorage(settings.duckdb_path)
+    return _storage
+
+
+StorageDep = Annotated[MarketDataStorage, Depends(get_storage)]
+
+
+@router.get("/bars", response_model=OHLCVResponse)
+def get_bars(
+    storage: StorageDep,
+    symbol: str = Query(..., description="标的代码"),
+    timeframe: str = Query(default="1d", description="K 线周期"),
+    limit: int = Query(default=500, ge=1, le=5000, description="返回条数"),
+    start: str | None = Query(default=None, description="开始日期 YYYY-MM-DD"),
+    end: str | None = Query(default=None, description="结束日期 YYYY-MM-DD"),
+) -> OHLCVResponse:
+    """查询 K 线数据."""
+    start_dt: datetime | None = None
+    end_dt: datetime | None = None
+
+    if start:
+        try:
+            start_dt = datetime.strptime(start, "%Y-%m-%d")
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=f"start 日期格式错误: {start}") from e
+    if end:
+        try:
+            end_dt = datetime.strptime(end, "%Y-%m-%d")
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=f"end 日期格式错误: {end}") from e
+
+    df = storage.query_bars(
+        symbol=symbol,
+        timeframe=timeframe,
+        start=start_dt,
+        end=end_dt,
+        limit=limit,
+    )
+
+    bars: list[OHLCVBar] = []
+    for row in df.iter_rows(named=True):
+        bars.append(
+            OHLCVBar(
+                symbol=symbol,
+                timeframe=timeframe,
+                timestamp=row["timestamp"],
+                open=row["open"],
+                high=row["high"],
+                low=row["low"],
+                close=row["close"],
+                volume=row["volume"],
+                turnover=row.get("turnover"),
+            )
+        )
+
+    return OHLCVResponse(symbol=symbol, timeframe=timeframe, count=len(bars), bars=bars)
+
+
+@router.post("/fetch")
+def fetch_data(
+    req: DataFetchRequest,
+    background_tasks: BackgroundTasks,
+    storage: StorageDep,
+) -> dict[str, str]:
+    """触发数据拉取（后台执行）."""
+    from datetime import date as _date
+
+    def _do_fetch() -> None:
+        try:
+            start_date = datetime.strptime(req.start, "%Y-%m-%d").date()
+            end_date = (
+                datetime.strptime(req.end, "%Y-%m-%d").date()
+                if req.end
+                else _date.today()
+            )
+
+            source = req.source
+            if source == "auto":
+                # 自动选择：A 股用 akshare，其他用 yfinance
+                source = "akshare" if len(req.symbol) == 6 and req.symbol.isdigit() else "yfinance"
+
+            if source == "yfinance":
+                fetcher = YFinanceFetcher()
+            else:
+                fetcher = AKShareFetcher()
+
+            bars = fetcher.fetch_ohlcv(req.symbol, req.timeframe, start_date, end_date)
+            if bars:
+                written = storage.upsert_bars(bars)
+                logger.info(f"[API/fetch] {req.symbol} 写入 {written} 条")
+        except Exception as e:
+            logger.error(f"[API/fetch] 后台任务失败: {e}")
+
+    background_tasks.add_task(_do_fetch)
+    return {
+        "status": "accepted",
+        "message": f"数据拉取任务已提交：{req.symbol} {req.timeframe}",
+    }
+
+
+@router.get("/symbols")
+def list_symbols(storage: StorageDep) -> dict[str, list[str]]:
+    """列出数据库中已有数据的标的."""
+    return {"symbols": storage.list_symbols()}
+
+
+@router.get("/range")
+def get_range(
+    storage: StorageDep,
+    symbol: str = Query(...),
+    timeframe: str = Query(default="1d"),
+) -> dict[str, str | None]:
+    """查询标的数据的时间范围."""
+    earliest, latest = storage.get_date_range(symbol, timeframe)
+    return {
+        "symbol": symbol,
+        "timeframe": timeframe,
+        "earliest": earliest.isoformat() if earliest else None,
+        "latest": latest.isoformat() if latest else None,
+        "count": str(storage.count_bars(symbol, timeframe)),
+    }
+
+
+@router.get("/onchain/btc")
+async def get_btc_onchain() -> dict[str, Any]:
+    """获取 BTC 链上指标（来自 blockchain.info）."""
+    from quantpilot.data.onchain import OnChainProvider
+
+    provider = OnChainProvider()
+    metrics = await provider.fetch_btc_stats()
+    return {
+        "asset": "BTC",
+        "count": len(metrics),
+        "metrics": [m.model_dump() for m in metrics],
+    }
+
+
+@router.get("/prices")
+async def get_latest_prices() -> dict[str, Any]:
+    """从 Redis 缓存读取所有标的最新价格（O(1) 查询）."""
+    from quantpilot.redis.client import RedisClient
+    from quantpilot.redis.price_cache import PriceCache
+    if RedisClient._instance is None:
+        raise HTTPException(status_code=503, detail="Redis 未连接")
+    prices = await PriceCache().get_all()
+    return {"prices": prices, "count": len(prices)}
+
+
+@router.get("/prices/{symbol}")
+async def get_symbol_price(symbol: str) -> dict[str, Any]:
+    """读取单个标的最新缓存价格."""
+    from quantpilot.redis.client import RedisClient
+    from quantpilot.redis.price_cache import PriceCache
+    if RedisClient._instance is None:
+        raise HTTPException(status_code=503, detail="Redis 未连接")
+    price = await PriceCache().get_price(symbol.upper())
+    if price is None:
+        raise HTTPException(status_code=404, detail=f"{symbol} 暂无缓存价格")
+    return {"symbol": symbol.upper(), "price": price}
+
+
+@router.get("/onchain/btc/{metric}")
+async def get_btc_metric(metric: str) -> dict[str, Any]:
+    """获取单个 BTC 链上指标."""
+    from fastapi import HTTPException
+
+    from quantpilot.data.onchain import OnChainProvider
+
+    provider = OnChainProvider()
+    result = await provider.fetch_metric(metric)
+    if result is None:
+        raise HTTPException(status_code=404, detail=f"指标 '{metric}' 未找到或不支持")
+    return result.model_dump()

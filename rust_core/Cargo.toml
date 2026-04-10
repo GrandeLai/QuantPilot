@@ -1,0 +1,18 @@
+[package]
+name = "quantpilot-core"
+version = "0.1.0"
+edition = "2021"
+description = "QuantPilot 高性能计算核心（Rust + PyO3）"
+license = "MIT"
+
+[lib]
+name = "quantpilot_core"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.22", features = ["extension-module", "abi3-py312"] }
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3
