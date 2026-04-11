@@ -3,7 +3,7 @@ import numpy as np
 import polars as pl
 import pytest
 
-from quantpilot.screener.strategies import Strategy, StrategyEvaluator, StrategyRegistry
+from quantpilot.screener.strategies import StrategyEvaluator, StrategyRegistry
 
 
 def _make_trending_df(n: int = 60) -> pl.DataFrame:

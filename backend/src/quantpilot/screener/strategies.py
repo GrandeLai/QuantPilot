@@ -9,7 +9,7 @@ import polars as pl
 from quantpilot.screener.scoring import ScoringEngine
 
 
-@dataclass
+@dataclass(frozen=True)
 class Strategy:
     """A named screening strategy with scoring and condition thresholds."""
 
@@ -71,7 +71,7 @@ class StrategyRegistry:
                 "龙头股",
                 "板块内动量最强+高分全面超标",
                 75,
-                {"min_total": 75},
+                {"min_total": 75},  # TODO: wire sector momentum when sector API available
             ),
             Strategy(
                 "bottom_reversal",
@@ -106,7 +106,7 @@ class StrategyRegistry:
                 "低估成长",
                 "低PE/PB+高成长性指标",
                 50,
-                {"min_total": 50},
+                {"min_total": 50},  # TODO: wire PE/PB when fundamental module available
             ),
             Strategy(
                 "trend_pullback",
@@ -144,6 +144,9 @@ class StrategyEvaluator:
             return False
         if "min_trend" in cond and breakdown.trend < cond["min_trend"]:
             return False
+        if cond.get("require_ema_cross"):
+            if not breakdown.details.get("macd_cross"):
+                return False
         if "min_volume" in cond and breakdown.volume < cond["min_volume"]:
             return False
         if "max_volume" in cond and breakdown.volume > cond["max_volume"]:
