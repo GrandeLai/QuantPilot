@@ -57,50 +57,66 @@ def create_app() -> FastAPI:
     )
 
     # ── 注册 API 路由 ────────────────────────────────────────────────────────
+    def include_with_api_alias(router) -> None:
+        """同时注册直连路由和 /api 别名.
+
+        前端开发环境、桌面壳和直接访问 API 的场景都可能使用不同前缀。
+        为了保持兼容性，这里统一暴露两套入口：
+        - /foo/bar
+        - /api/foo/bar
+        """
+        app.include_router(router)
+        app.include_router(router, prefix="/api")
+
     from quantpilot.api.backtest import router as backtest_router
     from quantpilot.api.data import router as data_router
     from quantpilot.api.indicators import router as indicators_router
     from quantpilot.api.security import router as security_router
     from quantpilot.api.strategy import router as strategy_router
 
-    app.include_router(data_router)
-    app.include_router(indicators_router)
-    app.include_router(strategy_router)
-    app.include_router(backtest_router)
-    app.include_router(security_router)
+    include_with_api_alias(data_router)
+    include_with_api_alias(indicators_router)
+    include_with_api_alias(strategy_router)
+    include_with_api_alias(backtest_router)
+    include_with_api_alias(security_router)
 
     from quantpilot.api.alerts import router as alerts_router
     from quantpilot.api.llm import router as llm_router
     from quantpilot.api.paper import router as paper_router
     from quantpilot.api.reports import router as reports_router
-    app.include_router(paper_router)
-    app.include_router(alerts_router)
-    app.include_router(reports_router)
-    app.include_router(llm_router)
+    from quantpilot.api.trading import router as trading_router
+    include_with_api_alias(paper_router)
+    include_with_api_alias(alerts_router)
+    include_with_api_alias(reports_router)
+    include_with_api_alias(llm_router)
+    include_with_api_alias(trading_router)
 
     from quantpilot.api.factors import router as factors_router
     from quantpilot.api.optimize import router as optimize_router
     from quantpilot.api.options import router as options_router
     from quantpilot.api.portfolio import router as portfolio_router
-    app.include_router(factors_router)
-    app.include_router(options_router)
-    app.include_router(optimize_router)
-    app.include_router(portfolio_router)
+    include_with_api_alias(factors_router)
+    include_with_api_alias(options_router)
+    include_with_api_alias(optimize_router)
+    include_with_api_alias(portfolio_router)
 
     from quantpilot.api.plugins import router as plugins_router
-    app.include_router(plugins_router, prefix="/api")
+    include_with_api_alias(plugins_router)
 
     from quantpilot.api.sentiment import router as sentiment_router
-    app.include_router(sentiment_router, prefix="/api")
+    include_with_api_alias(sentiment_router)
 
     from quantpilot.api.ml import router as ml_router
-    app.include_router(ml_router, prefix="/api")
+    include_with_api_alias(ml_router)
 
     from quantpilot.api.signals import router as signals_router
-    app.include_router(signals_router, prefix="/api")
+    include_with_api_alias(signals_router)
 
     from quantpilot.api.insights import router as insights_router
-    app.include_router(insights_router, prefix="/api")
+    include_with_api_alias(insights_router)
+
+    from quantpilot.api.screener import router as screener_router
+    include_with_api_alias(screener_router)
 
     from quantpilot.api.ws import router as ws_router
     app.include_router(ws_router)
