@@ -2,12 +2,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
 
+import numpy as np
 import polars as pl
-
-if TYPE_CHECKING:
-    import numpy as np
 
 
 @dataclass
@@ -63,7 +60,6 @@ class ScoringEngine:
         )
 
     def _ema(self, arr: np.ndarray, period: int) -> np.ndarray:
-        import numpy as np
         k = 2 / (period + 1)
         result = np.empty(len(arr))
         result[0] = arr[0]
@@ -71,26 +67,26 @@ class ScoringEngine:
             result[i] = arr[i] * k + result[i - 1] * (1 - k)
         return result
 
-    def _score_trend(self, closes: np.ndarray, details: dict) -> float:
+    def _score_trend(self, closes: np.ndarray, details: dict[str, float]) -> float:
         ema5 = self._ema(closes, 5)
         ema20 = self._ema(closes, 20)
-        slope = (ema5[-1] - ema5[-5]) / (ema5[-5] + 1e-9) if len(closes) >= 5 else 0
+        slope = float((ema5[-1] - ema5[-5]) / (ema5[-5] + 1e-9))
         above = 1.0 if closes[-1] > ema20[-1] else 0.0
         details["ema_slope"] = slope
         details["above_ema20"] = above
         slope_score = min(max(slope * 500 + 50, 0), 100)
-        return slope_score * 0.6 + above * 40
+        return float(slope_score * 0.6 + above * 40)
 
-    def _score_bias(self, closes: np.ndarray, details: dict) -> float:
+    def _score_bias(self, closes: np.ndarray, details: dict[str, float]) -> float:
         mean20 = closes[-20:].mean()
         bias = (closes[-1] - mean20) / (mean20 + 1e-9)
         details["bias"] = bias
         if bias < -0.15 or bias > 0.20:
             return 10.0
         score = 100 - abs(bias - 0.03) * 600
-        return min(max(score, 0), 100)
+        return float(min(max(score, 0), 100))
 
-    def _score_volume(self, volumes: np.ndarray, details: dict) -> float:
+    def _score_volume(self, volumes: np.ndarray, details: dict[str, float]) -> float:
         avg20 = volumes[-20:].mean()
         ratio = volumes[-1] / (avg20 + 1e-9)
         details["volume_ratio"] = ratio
@@ -98,9 +94,9 @@ class ScoringEngine:
             return 20.0
         if ratio > 5.0:
             return 50.0
-        return min(ratio / 3.0 * 100, 100)
+        return float(min(ratio / 3.0 * 100, 100))
 
-    def _score_support(self, closes: np.ndarray, details: dict) -> float:
+    def _score_support(self, closes: np.ndarray, details: dict[str, float]) -> float:
         period = min(60, len(closes))
         window = closes[-period:]
         support = window.min()
@@ -110,23 +106,23 @@ class ScoringEngine:
             return 50.0
         pos = (closes[-1] - support) / rng
         details["support_position"] = pos
-        return min(max(100 - abs(pos - 0.55) * 180, 0), 100)
+        return float(min(max(100 - abs(pos - 0.55) * 180, 0), 100))
 
-    def _score_macd(self, closes: np.ndarray, details: dict) -> float:
+    def _score_macd(self, closes: np.ndarray, details: dict[str, float]) -> float:
         ema12 = self._ema(closes, 12)
         ema26 = self._ema(closes, 26)
         dif = ema12 - ema26
         dea = self._ema(dif, 9)
-        hist = dif[-1] - dea[-1]
-        prev_hist = dif[-2] - dea[-2] if len(dif) >= 2 else hist
+        hist = float(dif[-1] - dea[-1])
+        prev_hist = float(dif[-2] - dea[-2]) if len(dif) >= 2 else hist
         details["macd_hist"] = hist
         details["macd_cross"] = float(hist > 0 and prev_hist <= 0)
-        if hist > 0:
-            return min(50 + hist * 1000, 100)
-        return max(50 + hist * 1000, 0)
+        hist_pct = hist / (float(closes[-1]) + 1e-9) * 100
+        if hist_pct > 0:
+            return float(min(50 + hist_pct * 20, 100))
+        return float(max(50 + hist_pct * 20, 0))
 
-    def _score_rsi(self, closes: np.ndarray, details: dict) -> float:
-        import numpy as np
+    def _score_rsi(self, closes: np.ndarray, details: dict[str, float]) -> float:
         period = 14
         if len(closes) < period + 1:
             return 50.0
@@ -134,10 +130,7 @@ class ScoringEngine:
         gains = np.where(deltas > 0, deltas, 0).mean()
         losses = np.where(deltas < 0, -deltas, 0).mean()
         rs = gains / (losses + 1e-9)
-        rsi = 100 - 100 / (1 + rs)
+        rsi = float(100 - 100 / (1 + rs))
         details["rsi"] = rsi
-        if rsi < 30:
-            return 20.0
-        if rsi > 80:
-            return 30.0
-        return min(max((rsi - 30) / 35 * 100, 0), 100)
+        score = float(100 - abs(rsi - 55) * 2)
+        return float(min(max(score, 0), 100))

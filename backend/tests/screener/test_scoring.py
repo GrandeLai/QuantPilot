@@ -45,3 +45,16 @@ def test_score_details_present():
     assert "ema_slope" in r.details
     assert "volume_ratio" in r.details
     assert "rsi" in r.details
+
+def test_insufficient_data():
+    import numpy as np
+    rng = np.random.default_rng(0)
+    closes = 10.0 + np.cumsum(rng.normal(0, 0.1, 19))  # 19 rows < 20
+    volumes = rng.integers(1_000_000, 5_000_000, 19).astype(float)
+    df = pl.DataFrame({"close": closes, "open": closes * 0.99,
+                       "high": closes * 1.01, "low": closes * 0.98, "volume": volumes})
+    engine = ScoringEngine()
+    r = engine.score(df)
+    assert r.total == 0.0
+    assert r.trend == 0.0
+    assert r.details == {}
