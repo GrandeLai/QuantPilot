@@ -2,7 +2,14 @@
  * QuantPilot 主应用 — 标签页导航.
  * Header / Footer 设计来自 sample/quantpilot-portfolio-manager.
  */
-import { useEffect, useRef, useState, type ComponentType } from "react";
+import {
+  Suspense,
+  lazy,
+  useEffect,
+  useRef,
+  useState,
+  type ComponentType,
+} from "react";
 import {
   LayoutDashboard,
   LineChart,
@@ -18,17 +25,20 @@ import {
   X,
   AlertTriangle,
   Info,
+  Filter,
 } from "lucide-react";
 import { cn } from "./lib/utils";
 import { useStrategyStore } from "./store/strategyStore";
-import AIPanel from "./components/AIPanel";
-import BacktestPanel from "./components/BacktestPanel";
-import MarketPanel from "./components/MarketPanel";
-import OptionsGreeksPanel from "./components/OptionsGreeksPanel";
-import PortfolioPanel from "./components/PortfolioPanel";
-import StrategyWorkshop from "./components/StrategyWorkshop";
-import SystemPanel from "./components/SystemPanel";
-import TradingPanel from "./components/TradingPanel";
+
+const MarketPanel = lazy(() => import("./components/MarketPanel"));
+const StrategyWorkshop = lazy(() => import("./components/StrategyWorkshop"));
+const TradingPanel = lazy(() => import("./components/TradingPanel"));
+const BacktestPanel = lazy(() => import("./components/BacktestPanel"));
+const OptionsGreeksPanel = lazy(() => import("./components/OptionsGreeksPanel"));
+const PortfolioPanel = lazy(() => import("./components/PortfolioPanel"));
+const AIPanel = lazy(() => import("./components/AIPanel"));
+const SystemPanel = lazy(() => import("./components/SystemPanel"));
+const ScreenerPanel = lazy(() => import("./components/ScreenerPanel"));
 
 type Tab =
   | "market"
@@ -38,7 +48,8 @@ type Tab =
   | "options"
   | "portfolio"
   | "ai"
-  | "system";
+  | "system"
+  | "screener";
 
 const TABS: {
   key: Tab;
@@ -53,6 +64,7 @@ const TABS: {
   { key: "portfolio", label: "组合",  icon: Layers },
   { key: "ai",        label: "AI",    icon: BrainCircuit },
   { key: "system",    label: "系统",  icon: Settings },
+  { key: "screener",  label: "选股",  icon: Filter },
 ];
 
 // ── 告警事件类型 ──────────────────────────────────────────────────────────────
@@ -329,6 +341,31 @@ export default function App() {
 
   const navigate = (tab: Tab) => setActiveTab(tab);
 
+  const ActivePanel = (() => {
+    switch (activeTab) {
+      case "market":
+        return <MarketPanel />;
+      case "strategy":
+        return <StrategyWorkshop onNavigate={navigate} />;
+      case "trading":
+        return <TradingPanel />;
+      case "backtest":
+        return <BacktestPanel />;
+      case "options":
+        return <OptionsGreeksPanel />;
+      case "portfolio":
+        return <PortfolioPanel />;
+      case "ai":
+        return <AIPanel />;
+      case "system":
+        return <SystemPanel />;
+      case "screener":
+        return <ScreenerPanel />;
+      default:
+        return null;
+    }
+  })();
+
   return (
     <>
       <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} onNavigate={navigate} />
@@ -418,14 +455,17 @@ export default function App() {
 
         {/* ── 主内容 ──────────────────────────────────── */}
         <main className="flex-1 overflow-y-auto py-4 px-5">
-          {activeTab === "market"    && <MarketPanel />}
-          {activeTab === "strategy"  && <StrategyWorkshop onNavigate={navigate} />}
-          {activeTab === "trading"   && <TradingPanel />}
-          {activeTab === "backtest"  && <BacktestPanel />}
-          {activeTab === "options"   && <OptionsGreeksPanel />}
-          {activeTab === "portfolio" && <PortfolioPanel />}
-          {activeTab === "ai"        && <AIPanel />}
-          {activeTab === "system"    && <SystemPanel />}
+          <Suspense
+            fallback={
+              <div className="flex min-h-[420px] items-center justify-center">
+                <div className="rounded-2xl border border-[#2A2D35] bg-[#151619] px-5 py-4 text-sm text-[#8E9299]">
+                  正在加载 {TABS.find((tab) => tab.key === activeTab)?.label ?? "模块"}…
+                </div>
+              </div>
+            }
+          >
+            {ActivePanel}
+          </Suspense>
         </main>
 
         {/* ── 底部状态栏 ──────────────────────────────── */}
