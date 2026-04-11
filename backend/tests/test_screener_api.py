@@ -1,7 +1,11 @@
 """Screener API endpoint tests."""
 from __future__ import annotations
 
+from unittest.mock import AsyncMock, patch
+
 from fastapi.testclient import TestClient
+
+from quantpilot.screener.market_review import MarketReview
 
 
 def test_get_strategies(client: TestClient) -> None:
@@ -32,8 +36,24 @@ def test_screen_unknown_strategy(client: TestClient) -> None:
 
 
 def test_get_market_returns_stance(client: TestClient) -> None:
-    """GET /api/screener/market returns a stance field."""
-    r = client.get("/api/screener/market")
+    """GET /api/screener/market returns a stance field (mocked AKShare)."""
+    stub = MarketReview(
+        date="2024-01-01",
+        advances=1500,
+        declines=800,
+        flat=100,
+        advance_ratio=0.65,
+        volume_ratio=1.0,
+        stance="A",
+        indices=[],
+        top_sectors=[],
+        bottom_sectors=[],
+    )
+    with patch(
+        "quantpilot.api.screener._market.get_review",
+        new=AsyncMock(return_value=stub),
+    ):
+        r = client.get("/api/screener/market")
     assert r.status_code == 200
     data = r.json()
     assert "stance" in data
