@@ -27,3 +27,11 @@ class FactEnvelope(BaseModel):
     version: str = Field(min_length=1)
     generated_at: datetime
     payload: dict[str, Any]
+
+
+class PlatformSummaryResponse(BaseModel):
+    """HTTP response model for the shared platform summary endpoint."""
+
+    version: str = Field(min_length=1)
+    generated_at: datetime
+    domains: dict[str, DomainStatus]

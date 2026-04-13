@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
@@ -33,7 +33,7 @@ class AdviceCard(BaseModel):
     subject: str = Field(min_length=1)
     recommendation: str = Field(min_length=1)
     confidence: float = Field(ge=0.0, le=1.0)
-    evidence: list[AdviceEvidence]
-    risk_notes: list[str]
+    evidence: Annotated[list[AdviceEvidence], Field(min_length=1)]
+    risk_notes: Annotated[list[str], Field(min_length=1)]
     generated_at: datetime
     freshness: FreshnessState
