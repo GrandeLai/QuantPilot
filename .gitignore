@@ -22,6 +22,9 @@ rust_core/Cargo.lock
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
+assistant_frontend/node_modules/
+assistant_frontend/dist/
+assistant_frontend/.vite/
 
 # Data
 data/*.duckdb
