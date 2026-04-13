@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { WORKBENCH_SECTIONS } from "./sections.ts";
+import { CRYPTO_WORKBENCH_SECTIONS, WORKBENCH_SECTIONS } from "./sections.ts";
 
 test("topic-only tabs are removed from first-class workbench sections", () => {
   assert.deepEqual(Object.keys(WORKBENCH_SECTIONS), [
@@ -15,4 +15,9 @@ test("topic-only tabs are removed from first-class workbench sections", () => {
   assert.equal(WORKBENCH_SECTIONS.research.includes("options"), false);
   assert.equal(WORKBENCH_SECTIONS.research.includes("plugins"), false);
   assert.deepEqual(WORKBENCH_SECTIONS.risk_review, ["portfolio", "backtest"]);
+  assert.deepEqual(WORKBENCH_SECTIONS.run, ["trading"]);
+  assert.deepEqual(CRYPTO_WORKBENCH_SECTIONS.research, ["market", "chart"]);
+  assert.deepEqual(CRYPTO_WORKBENCH_SECTIONS.validation, ["backtest"]);
+  assert.deepEqual(CRYPTO_WORKBENCH_SECTIONS.run, ["trade", "futures", "options"]);
+  assert.deepEqual(CRYPTO_WORKBENCH_SECTIONS.risk_review, ["portfolio", "orders"]);
 });

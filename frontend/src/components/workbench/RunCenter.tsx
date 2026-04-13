@@ -1,11 +1,11 @@
-import PaperTradingPanel from "../PaperTradingPanel";
 import TradingPanel from "../TradingPanel";
+import CryptoPanel from "../CryptoPanel";
 
 export default function RunCenter() {
   return (
     <div className="space-y-6">
-      <PaperTradingPanel />
       <TradingPanel />
+      <CryptoPanel allowedTabs={["trade", "futures", "options"]} defaultTab="trade" />
     </div>
   );
 }

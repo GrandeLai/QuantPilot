@@ -51,6 +51,35 @@ export interface StrategyRecord {
   code: string;
 }
 
+export interface CryptoResearchWindowMetric {
+  train_start: number;
+  train_end: number;
+  test_start: number;
+  test_end: number;
+  accuracy: number;
+  strategy_return: number;
+}
+
+export interface CryptoResearchSummary {
+  symbol: string;
+  base_timeframe: string;
+  higher_timeframes: string[];
+  rows: number;
+  dataset_version: string;
+  feature_count: number;
+  feature_columns: string[];
+  validation_windows: number;
+  window_metrics: CryptoResearchWindowMetric[];
+  mean_accuracy: number;
+  mean_strategy_return: number;
+  latest_class_signal: number;
+  latest_class_probabilities: Record<string, number>;
+  feature_importance: Record<string, number>;
+  reversal_probability: number;
+  reversal_signal: string;
+  reversal_evidence: string[];
+}
+
 // ── 数据接口 ─────────────────────────────────────────────────────────────────
 
 export async function fetchBars(
@@ -152,4 +181,25 @@ export async function updateStrategy(
 export async function deleteStrategy(id: string): Promise<void> {
   const res = await fetch(`${BASE}/strategies/${id}`, { method: "DELETE" });
   if (!res.ok) throw new Error("删除策略失败");
+}
+
+export async function fetchCryptoResearchSummary(symbol: string): Promise<CryptoResearchSummary> {
+  const res = await fetch(`${BASE}/crypto/research/train`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      symbol,
+      base_timeframe: "15m",
+      higher_timeframes: ["1h", "4h", "1d", "1w"],
+      limit: 180,
+      validation: {
+        train_size: 60,
+        test_size: 20,
+        step_size: 20,
+        embargo_size: 2,
+      },
+    }),
+  });
+  if (!res.ok) throw new Error(`获取加密研究摘要失败 (${res.status}): ${await res.text()}`);
+  return (await res.json()) as CryptoResearchSummary;
 }

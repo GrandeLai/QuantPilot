@@ -7,7 +7,7 @@ export default function ResearchCenter() {
     <div className="space-y-6">
       <MarketPanel />
       <ScreenerPanel />
-      <CryptoPanel />
+      <CryptoPanel allowedTabs={["market", "chart"]} defaultTab="market" />
     </div>
   );
 }
