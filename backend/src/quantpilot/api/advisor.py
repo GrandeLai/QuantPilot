@@ -8,6 +8,8 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 from quantpilot.platform.advisor_service import (
+    build_crypto_opportunity_cards,
+    build_crypto_risk_cards,
     build_opportunity_cards,
     build_overview_snapshot,
 )
@@ -41,3 +43,15 @@ async def get_advisor_overview() -> AdvisorOverviewResponse:
 async def get_advisor_opportunities() -> AdvisorOpportunitiesResponse:
     """Return assistant opportunity cards."""
     return AdvisorOpportunitiesResponse(items=build_opportunity_cards())
+
+
+@router.get("/crypto/opportunities", response_model=AdvisorOpportunitiesResponse)
+async def get_crypto_opportunities(symbol: str = "BTC-USDT") -> AdvisorOpportunitiesResponse:
+    """Return crypto opportunity cards derived from the research stack."""
+    return AdvisorOpportunitiesResponse(items=build_crypto_opportunity_cards(symbol))
+
+
+@router.get("/crypto/risks", response_model=AdvisorOpportunitiesResponse)
+async def get_crypto_risks(symbol: str = "BTC-USDT") -> AdvisorOpportunitiesResponse:
+    """Return crypto risk alert cards derived from the research stack."""
+    return AdvisorOpportunitiesResponse(items=build_crypto_risk_cards(symbol))

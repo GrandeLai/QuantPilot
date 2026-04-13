@@ -123,6 +123,9 @@ def create_app() -> FastAPI:
     from quantpilot.api.screener import router as screener_router
     include_with_api_alias(screener_router)
 
+    from quantpilot.api.crypto_research import router as crypto_research_router
+    include_with_api_alias(crypto_research_router)
+
     from quantpilot.api.ws import router as ws_router
     app.include_router(ws_router)
 
