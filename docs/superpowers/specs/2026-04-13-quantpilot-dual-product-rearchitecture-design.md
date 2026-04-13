@@ -1,281 +1,282 @@
-# QuantPilot Dual-Product Re-Architecture Design
+# QuantPilot 双产品重构设计
 
-> Date: 2026-04-13  
-> Scope: Product-level redesign for splitting the current system into a shared platform, a primary quantitative trading workbench, and a separate personal investment assistant.
+> 日期：2026-04-13  
+> 范围：将当前系统重构为“共享底层平台 + 主产品 QuantPilot 量化交易工作台 + 独立个人投资助理”的产品级设计方案。
 
-## 1. Context
+## 1. 背景
 
-QuantPilot has accumulated capabilities across multiple product intentions:
+当前 QuantPilot 已经同时承载了多种产品意图：
 
-1. a quantitative research and execution workbench,
-2. a personal investment assistant,
-3. a plugin/ecosystem platform.
+1. 量化研究与执行工作台；
+2. 个人投资助理；
+3. 平台/生态型扩展系统。
 
-These intentions are all individually reasonable, but they optimize for different user outcomes and different product centerlines. The current system therefore risks becoming a feature collection rather than a coherent money-making product.
+这些方向单独看都成立，但它们追求的用户结果不同、信息架构不同、主线工作流也不同。继续把它们放在一个同等优先级的产品里，会让系统越来越像“功能集合”，而不是一个围绕赚钱目标收敛的产品。
 
-The desired future state is:
+期望的未来状态是：
 
-- keep **QuantPilot** as the primary **quantitative trading workbench**,
-- build a separate **personal investment assistant** as an independent product,
-- move shared facts and shared capabilities into a **common platform layer**,
-- keep **LLM/agent capability** in the shared platform rather than as a standalone feature island,
-- ensure that both products remain aligned around a single purpose: helping the user make and keep money.
+- 保留 **QuantPilot**，并将其收紧为主产品 **量化交易工作台**；
+- 新建一个独立的 **个人投资助理** 产品；
+- 将共享事实与共享能力下沉到 **统一平台层**；
+- 将 **LLM/Agent 能力** 从页面功能改为共享底层能力；
+- 让两个产品始终围绕同一宗旨：**帮助用户赚钱，并帮助用户少亏钱。**
 
-## 2. Problem Statement
+## 2. 问题定义
 
-The current product shape has five structural problems.
+当前系统存在五个结构性问题。
 
-### 2.1 Product identity drift
+### 2.1 产品身份漂移
 
-The system currently mixes workbench flows, assistant flows, and platform/ecosystem ambitions into one surface. This weakens product clarity and causes top-level navigation to represent "what features exist" instead of "how the user makes money."
+系统同时混合了工作台流、助理流和平台生态流，导致产品很难一句话说清楚。顶层导航表达的是“系统里有什么功能”，而不是“用户如何通过它赚钱”。
 
-### 2.2 Workflow dilution
+### 2.2 主线工作流被稀释
 
-The workbench's real value should come from a clear closed loop:
+量化工作台真正应该围绕的闭环是：
 
-`research -> strategy -> validation -> run -> risk -> review`
+`研究 -> 策略 -> 验证 -> 运行 -> 风险 -> 复盘`
 
-Instead, specialized or adjacent features such as plugin management, social trading, isolated sentiment surfaces, standalone options tooling, and other topic pages compete with the core loop for first-class attention.
+但现在很多专题页、边缘能力和扩展方向占据了一等心智，使主线看起来不再是赚钱闭环，而像一个量化能力展厅。
 
-### 2.3 LLM role ambiguity
+### 2.3 LLM 角色模糊
 
-LLM currently behaves like a mix of chat assistant, code generator, explainer, and analyst. This is too loose. The correct long-term position is a shared **agent domain** that consumes platform facts and produces structured suggestions for either product.
+当前 LLM 同时像聊天助手、代码生成器、解释器和分析器。这样会让它变成“哪里都能插一点”的功能，而不是有明确职责的能力层。长期正确位置应是共享 **Agent Domain**：消费平台事实，输出结构化建议，服务两个上层产品。
 
-### 2.4 Fact fragmentation risk
+### 2.4 事实来源分裂风险
 
-Without a single source of truth for market data, portfolios, validation state, risk state, and strategy state, the future workbench and assistant could easily produce contradictory outputs.
+如果市场数据、持仓状态、验证状态、风险状态、策略状态不能统一，未来工作台与投资助理很容易给出相互矛盾的结果，直接损害产品可信度。
 
-### 2.5 Roadmap sprawl
+### 2.5 Roadmap 发散
 
-When every adjacent capability feels potentially useful, the roadmap drifts toward breadth. This makes the product look sophisticated while weakening the thing users actually pay attention to: whether it helps them generate returns and control downside.
+当每一个相邻功能看起来都“可能有价值”时，路线图就会向广度扩张。结果是产品越来越复杂，但真正帮助用户赚钱和控制风险的主线反而更模糊。
 
-## 3. Product Decision
+## 3. 已确认的产品决策
 
-The approved product direction is:
+本次重构方向已经明确如下：
 
-1. **QuantPilot remains the main product and becomes a tighter quant trading workbench.**
-2. **A new independent personal investment assistant product is created.**
-3. **Both products share one underlying platform.**
-4. **The investment assistant only gives advice and does not directly execute trades in phase one.**
-5. **The investment assistant must be able to work independently, even if the user has no self-built strategy stack in QuantPilot.**
+1. **QuantPilot 保留为主产品，并收紧为量化交易工作台。**
+2. **新建一个独立的个人投资助理产品。**
+3. **两个产品共享同一个底层平台。**
+4. **个人投资助理在第一阶段只做建议，不直接执行交易。**
+5. **个人投资助理必须能够独立工作，即使用户没有在 QuantPilot 中维护自建策略。**
 
-## 4. Design Goals
+## 4. 设计目标
 
-### 4.1 Primary goals
+### 4.1 主要目标
 
-- Restore a single clear product story for QuantPilot.
-- Separate "professional quant operations" from "investment decision support."
-- Prevent duplicated data, duplicated logic, and duplicated AI reasoning across products.
-- Move LLM into a shared, evidence-driven agent layer.
-- Rebuild the roadmap around direct profit generation and risk control.
+- 恢复 QuantPilot 清晰、单一的产品定位；
+- 将“专业量化操作”和“投资决策辅助”彻底分层；
+- 避免两个产品重复建设数据、逻辑和 AI 能力；
+- 将 LLM 下沉为共享、证据驱动的 Agent 层；
+- 让路线图重新围绕“提高赚钱能力”和“降低亏钱风险”排序。
 
-### 4.2 Non-goals
+### 4.2 非目标
 
-This redesign does not aim to:
+本次设计不追求：
 
-- split into two fully independent repositories immediately,
-- remove all advanced capabilities from the codebase,
-- turn the assistant into an execution product in phase one,
-- preserve every current top-level page as first-class UX.
+- 立刻拆成两个完全独立仓库；
+- 把所有高级能力从代码里删掉；
+- 让投资助理在第一阶段就直接执行交易；
+- 保留现有所有顶层页面为一等入口。
 
-## 5. Recommended Architecture
+## 5. 推荐总体架构
 
-The recommended architecture is:
+推荐架构如下：
 
 ```mermaid
 flowchart TD
-    A["Shared Platform"]
-    A --> B["Market Data Domain"]
-    A --> C["Portfolio & Account Domain"]
-    A --> D["Strategy & Validation Domain"]
-    A --> E["Risk Domain"]
-    A --> F["Execution Domain"]
-    A --> G["Agent Domain"]
+    A["共享平台层"]
+    A --> B["市场数据域"]
+    A --> C["账户与组合域"]
+    A --> D["策略与验证域"]
+    A --> E["风险域"]
+    A --> F["执行域"]
+    A --> G["Agent 域"]
 
-    H["QuantPilot Workbench"] --> A
-    I["Investment Assistant"] --> A
+    H["QuantPilot 工作台"] --> A
+    I["个人投资助理"] --> A
 ```
 
-This is intentionally not "two apps sharing random utilities." It is a platform-first domain split with two different product layers.
+这不是“两个应用共用一些工具函数”，而是一个明确的 **平台优先、产品分层** 架构。
 
-## 6. Shared Platform Domains
+## 6. 共享平台域设计
 
-The shared platform should own facts and reusable capabilities, not user-facing product identity.
+共享平台只负责事实与能力，不负责产品叙事。
 
-### 6.1 Market Data Domain
+### 6.1 市场数据域（Market Data Domain）
 
-Responsibilities:
+职责包括：
 
-- market data ingestion,
-- historical warehouse,
-- standardized symbol/timeframe handling,
-- optional alternative data pipelines,
-- freshness and provenance tracking.
+- 行情采集；
+- 历史仓库；
+- symbol / timeframe 标准化；
+- 另类数据接入能力；
+- 数据新鲜度与来源追踪。
 
-This domain exists so that both products reason over the same market reality.
+这个域的意义在于：两个产品必须基于同一套市场事实做判断。
 
-### 6.2 Portfolio & Account Domain
+### 6.2 账户与组合域（Portfolio & Account Domain）
 
-Responsibilities:
+职责包括：
 
-- account balances,
-- positions,
-- orders,
-- fills,
-- cash flow,
-- exposure state,
-- portfolio snapshots.
+- 账户余额；
+- 持仓；
+- 订单；
+- 成交；
+- 现金流；
+- 风险敞口；
+- 组合快照。
 
-This must become the authoritative truth for both products. The assistant must not invent its own portfolio model, and the workbench must not let UI state become account truth.
+这一层必须成为绝对权威来源。投资助理不能自己再造一套持仓模型，工作台也不能把前端状态当作账户事实。
 
-### 6.3 Strategy & Validation Domain
+### 6.3 策略与验证域（Strategy & Validation Domain）
 
-Responsibilities:
+职责包括：
 
-- strategy definitions,
-- strategy versions and metadata,
-- templates,
-- parameter sets,
-- backtest runs,
-- walk-forward runs,
-- validation reports,
-- promotion state.
+- 策略定义；
+- 策略版本与元数据；
+- 模板；
+- 参数集；
+- 回测记录；
+- Walk-Forward 记录；
+- 验证报告；
+- 晋升/降级/退役状态。
 
-This domain supports the workbench primarily, but the assistant can consume validated strategy outputs as one input into advice.
+这个域主要支撑工作台，但投资助理可以在有相关数据时消费验证结果，作为建议输入之一。
 
-### 6.4 Risk Domain
+### 6.4 风险域（Risk Domain）
 
-Responsibilities:
+职责包括：
 
-- single-position risk rules,
-- portfolio risk rules,
-- drawdown state,
-- exposure concentration,
-- risk alerts,
-- strategy promotion/degradation/retirement state.
+- 单笔风险规则；
+- 组合层风险规则；
+- 回撤状态；
+- 集中度状态；
+- 风险告警；
+- 策略熔断、晋升、降权、退役规则状态。
 
-The key requirement is that risk is modeled once and exposed everywhere.
+关键原则是：**风险只建模一次，到处复用。**
 
-### 6.5 Execution Domain
+### 6.5 执行域（Execution Domain）
 
-Responsibilities:
+职责包括：
 
-- paper trading,
-- live trading adapters,
-- OMS,
-- broker/exchange integrations,
-- status reconciliation.
+- 模拟盘；
+- 实盘适配器；
+- OMS；
+- 券商/交易所适配；
+- 状态同步与对账。
 
-This is consumed primarily by QuantPilot Workbench. The investment assistant may observe execution facts but should not trigger execution in phase one.
+这一层主要由 QuantPilot 工作台消费。投资助理可以观察执行事实，但在第一阶段不能触发执行。
 
-### 6.6 Agent Domain
+### 6.6 Agent 域（Agent Domain）
 
-Responsibilities:
+职责包括：
 
-- LLM gateway,
-- tool orchestration,
-- context assembly,
-- evidence retrieval,
-- suggestion object generation,
-- audit logging for AI outputs.
+- LLM Gateway；
+- 工具编排；
+- 上下文拼装；
+- 证据检索；
+- 建议对象生成；
+- AI 输出审计日志。
 
-This replaces the idea of "chat page as product center." The agent domain is a capability layer used by both products.
+这会替代“聊天页就是 AI 产品中心”的做法。Agent 域是一层共享能力，不是一个孤立页面。
 
-## 7. QuantPilot Workbench Product Definition
+## 7. QuantPilot 工作台定义
 
-QuantPilot should become a focused professional workbench with one central outcome:
+QuantPilot 应该收紧为一个专业工作台，其唯一核心目标是：
 
-> help the user design, validate, operate, and review profitable quantitative strategies.
+> 帮助用户更高效地设计、验证、运行和复盘能赚钱的量化策略。
 
-### 7.1 Core workflow
+### 7.1 核心工作流
 
-The workbench should organize around:
+工作台主线固定为：
 
-`research -> strategy -> validation -> run -> risk/review`
+`研究 -> 策略 -> 验证 -> 运行 -> 风险/复盘`
 
-### 7.2 Recommended top-level information architecture
+### 7.2 推荐顶层信息架构
 
-1. **Research**
-2. **Strategy Library**
-3. **Validation Center**
-4. **Run Center**
-5. **Risk & Review**
+1. **研究中心**
+2. **策略库**
+3. **验证中心**
+4. **运行中心**
+5. **风险与复盘**
 
-### 7.3 First-class workbench capabilities
+### 7.3 应保留为一等能力的内容
 
-- market research and candidate discovery,
-- strategy authoring and versioning,
-- validation and backtesting,
-- parameter experiments,
-- paper/live operations,
-- portfolio and execution monitoring,
-- risk controls and post-run review,
-- AI-assisted research and diagnosis.
+- 市场研究与候选标的发现；
+- 策略编写、管理、版本控制；
+- 回测、样本外验证、参数实验；
+- 模拟盘与实盘运行；
+- 订单、持仓、执行质量与组合监控；
+- 风控、熔断、复盘；
+- AI/Agent 驱动的研究辅助与策略诊断。
 
-### 7.4 Capabilities that should stop being first-class navigation
+### 7.4 不应继续作为一等导航的能力
 
-These may still exist, but not as primary product identity:
+以下内容可以保留，但不应再成为主产品身份的一部分：
 
-- plugin marketplace,
-- social trading,
-- standalone generic AI chat,
-- isolated sentiment page,
-- isolated ML page,
-- isolated chain analytics page,
-- standalone options specialty area,
-- feature surfaces that do not clearly fit the profit workflow.
+- 插件市场；
+- 社交跟单；
+- 独立通用 AI 聊天页；
+- 独立情绪页；
+- 独立 ML 页；
+- 独立链上专题页；
+- 独立期权专业工具区；
+- 与赚钱闭环关联不清晰的专题能力。
 
-### 7.5 Product rule
+### 7.5 产品准入规则
 
-Any feature that cannot clearly strengthen one of the five workbench steps should not receive first-class placement.
+以后任何新功能，如果不能直接增强工作台五步主线中的某一步，就不应进入一等入口。
 
-## 8. Investment Assistant Product Definition
+## 8. 个人投资助理定义
 
-The new assistant should be a separate product with one central outcome:
+个人投资助理应当是一个独立产品，其唯一核心目标是：
 
-> help the user make better investment decisions, improve expected returns, and reduce avoidable risk.
+> 帮助用户做出更好的投资决策，提高预期收益，并降低可避免的风险。
 
-### 8.1 Core workflow
+### 8.1 核心决策流
 
-The assistant should organize around:
+投资助理主线固定为：
 
-`overview -> opportunities -> rebalance suggestions -> risk radar -> review and ask`
+`总览 -> 机会池 -> 调仓建议 -> 风险雷达 -> 复盘与问答`
 
-### 8.2 Recommended top-level information architecture
+### 8.2 推荐顶层信息架构
 
-1. **Portfolio Overview**
-2. **Opportunity Pool**
-3. **Rebalance Suggestions**
-4. **Risk Radar**
-5. **Review & Ask**
+1. **资产总览**
+2. **机会池**
+3. **调仓建议**
+4. **风险雷达**
+5. **复盘与问答**
 
-### 8.3 Phase-one principles
+### 8.3 第一阶段原则
 
-- It must work even for users who do not have custom strategies in QuantPilot.
-- It may consume strategy and validation facts from the shared platform when available.
-- It gives recommendations only and does not directly execute trades.
-- It must produce structured advice, not only natural-language explanation.
+- 即使用户没有在 QuantPilot 中维护任何策略，也必须能提供价值；
+- 如果用户接入了工作台中的策略与组合数据，建议质量应进一步提升；
+- 只做建议，不做直接下单；
+- 必须输出结构化建议，而不是只有自然语言解释。
 
-### 8.4 What the assistant should not become
+### 8.4 不应变成什么
 
-- a second quant workbench,
-- a thin wrapper over generic LLM chat,
-- an execution surface,
-- a container for every finance-related feature that does not fit the workbench.
+个人投资助理不应该变成：
 
-## 9. Agent Design Principle
+- 第二个量化工作台；
+- 一个泛聊天机器人；
+- 一个执行面板；
+- 一个承接所有边缘金融功能的收纳箱。
 
-LLM should no longer be treated as an isolated page or one-off utility.
+## 9. Agent 设计原则
 
-The agent domain should do exactly three things:
+LLM 不应再被视为某个单独页面，而应成为底层 Agent 能力。
 
-1. understand user intent,
-2. retrieve facts and invoke platform tools,
-3. produce structured, evidence-backed suggestions.
+Agent 域只做三件事：
 
-### 9.1 Structured suggestion model
+1. 理解用户意图；
+2. 拉取事实、调用平台工具；
+3. 生成结构化、带证据的建议。
 
-All AI recommendations should resolve to explicit typed objects such as:
+### 9.1 建议对象必须结构化
+
+所有 AI 建议都应落成明确类型，例如：
 
 - `opportunity`
 - `rebalance_recommendation`
@@ -283,7 +284,7 @@ All AI recommendations should resolve to explicit typed objects such as:
 - `strategy_diagnosis`
 - `portfolio_review`
 
-Each suggestion should include:
+每条建议至少应包含：
 
 - `type`
 - `subject`
@@ -294,159 +295,161 @@ Each suggestion should include:
 - `generated_at`
 - `freshness`
 
-### 9.2 Rule of evidence
+### 9.2 证据优先原则
 
-If the agent cannot access sufficient underlying facts, it must degrade to uncertainty rather than fabricate confidence. This is especially important once the assistant becomes a real decision layer.
+如果 Agent 无法拿到足够事实，就必须降级为“不确定”或“无法判断”，而不是继续装作很有把握。这对投资助理尤其重要。
 
-## 10. Migration of Current Capability Areas
+## 10. 现有能力的归位建议
 
-The current system already contains many useful capabilities. The redesign should re-home them rather than treat all of them equally.
+当前仓库里已有很多能力，不应一刀切删除，而应重新归位。
 
-### 10.1 Keep first-class in QuantPilot
+### 10.1 保留为 QuantPilot 一等能力
 
-- market analysis surfaces that directly feed research,
-- strategy authoring,
-- validation and testing,
-- paper/live run management,
-- portfolio and risk controls,
-- AI strategy diagnosis and research support.
+- 直接服务研究的市场分析能力；
+- 策略编写与策略资产管理；
+- 回测、验证、实验；
+- 模拟盘、实盘、组合运行；
+- 风控与复盘；
+- AI 驱动的研究与诊断。
 
-### 10.2 Move into shared platform capability
+### 10.2 下沉为共享平台能力
 
-- LLM chat infrastructure,
-- strategy generation engine,
-- optimization engine,
-- alert engine,
-- search and retrieval,
-- structured reporting,
-- signal and explanation generation.
+- LLM 聊天基础设施；
+- 策略生成；
+- 参数优化；
+- 告警引擎；
+- 搜索与检索；
+- 报告生成；
+- 信号生成与解释能力。
 
-### 10.3 Move to the assistant layer
+### 10.3 上移到投资助理层
 
-- opportunity discovery,
-- portfolio explanation,
-- allocation and rebalance suggestions,
-- market narrative with evidence,
-- review summaries and investor-facing Q&A.
+- 机会发现；
+- 持仓解释；
+- 资产配置建议；
+- 调仓建议；
+- 风险提示；
+- 周/月复盘；
+- 面向投资者的问答与解释。
 
-### 10.4 Freeze or downgrade
+### 10.4 冻结或降级
 
-- plugin ecosystem as a product story,
-- social/copy-trading,
-- knowledge graph as a front-and-center product surface,
-- isolated options specialty tool area,
-- isolated chain analytics area,
-- isolated sentiment/ML topic pages.
+- 插件生态作为产品主线；
+- 社交/跟单；
+- 知识图谱作为核心展示能力；
+- 独立期权工具区；
+- 独立链上专题页；
+- 独立情绪 / ML 专题页。
 
-These are not necessarily bad capabilities. They are simply not allowed to define the primary product centerline right now.
+这些能力不一定没有价值，但当前阶段不应再定义产品主线。
 
-## 11. Recommended Execution Phases
+## 11. 推荐实施阶段
 
-This redesign is too large for one implementation plan. It should be decomposed into three workstreams with a strict order.
+这次重构过大，不能写成一份“一口吃完”的实现计划。应拆成三个 workstream，且有明确顺序。
 
-### 11.1 Workstream A: Shared Platform Extraction
+### 11.1 Workstream A：共享平台抽取
 
-Goal:
+目标：
 
-- formalize domain boundaries,
-- establish single-source-of-truth models,
-- create shared contracts for data, risk, validation, execution, and agent outputs.
+- 明确 domain 边界；
+- 建立统一事实模型；
+- 为数据、风险、验证、执行、Agent 输出定义共享契约。
 
-Success criteria:
+成功标准：
 
-- both future products can consume the same facts,
-- AI outputs are evidence-backed,
-- UI state no longer acts as domain truth.
+- 两个上层产品可以消费同一套事实；
+- AI 输出都能追溯证据；
+- UI 状态不再充当系统真相。
 
-### 11.2 Workstream B: QuantPilot Workbench Tightening
+### 11.2 Workstream B：QuantPilot 工作台收紧
 
-Goal:
+目标：
 
-- reduce QuantPilot to a clear quant trading workbench,
-- rebuild information architecture around profit workflow,
-- demote or absorb scattered specialty pages.
+- 将 QuantPilot 收紧为“量化交易工作台”；
+- 按赚钱工作流重做信息架构；
+- 将主题页、专题页、边缘功能降级或吸收。
 
-Success criteria:
+成功标准：
 
-- a first-time user can immediately understand QuantPilot's purpose,
-- the primary workflow is visibly strategy-centric,
-- the product stops feeling like a finance feature gallery.
+- 新用户一打开就能理解 QuantPilot 是做什么的；
+- 主流程明显以策略研发、验证、运行为中心；
+- 产品不再像金融功能大杂烩。
 
-### 11.3 Workstream C: Independent Investment Assistant MVP
+### 11.3 Workstream C：独立投资助理 MVP
 
-Goal:
+目标：
 
-- create an independent advice product,
-- provide useful opportunity, risk, allocation, and review guidance even without custom strategies,
-- consume shared platform facts when available.
+- 新建独立投资助理产品；
+- 即使用户没有自建策略，也能给出机会、配置、风险和复盘建议；
+- 在有共享平台事实时，建议能进一步增强。
 
-Success criteria:
+成功标准：
 
-- assistant advice is structured and evidence-backed,
-- assistant value does not depend on direct trade execution,
-- assistant meaningfully improves decision clarity.
+- 助理建议结构化、可解释、可追溯；
+- 不依赖直接交易执行也能体现价值；
+- 明显提升决策清晰度。
 
-## 12. Immediate Prioritization
+## 12. 近期优先级顺序
 
-The near-term roadmap should be:
+近期路线建议固定为：
 
-1. freeze further product sprawl,
-2. extract and define shared domains,
-3. tighten QuantPilot into the workbench,
-4. build the investment assistant MVP,
-5. only then reconsider advanced expansions.
+1. 冻结继续发散的新功能；
+2. 抽共享平台域；
+3. 收紧 QuantPilot 工作台；
+4. 搭建独立投资助理 MVP；
+5. 最后再评估高级扩展能力是否值得回归。
 
-This ordering follows the current codebase's natural gravity, because the existing system already leans much closer to a workbench than to a polished assistant.
+这个顺序是顺着现有代码重心走的，因为当前系统天然更接近工作台，而不是一个成熟的投资助理。
 
-## 13. Success Metrics
+## 13. 成功衡量标准
 
-The redesign should be evaluated using the following outcomes:
+本次重构应通过以下结果判断是否成功：
 
-1. **Product clarity**  
-   Users can explain the purpose of each product in one sentence.
+1. **产品定位清晰**  
+   用户能用一句话说清 QuantPilot 是什么、投资助理是什么。
 
-2. **Profit workflow integrity**  
-   QuantPilot clearly supports research-to-operation-to-review without major side-track surfaces competing for center stage.
+2. **赚钱主线完整**  
+   QuantPilot 清晰支撑“研究 -> 策略 -> 验证 -> 运行 -> 风险/复盘”，且不被边缘页面打断。
 
-3. **Fact consistency**  
-   Workbench and assistant do not contradict each other on portfolio, strategy, risk, or validation state.
+3. **事实一致**  
+   工作台与投资助理不会在持仓、风险、验证状态、策略状态上互相矛盾。
 
-4. **AI credibility**  
-   Agent outputs are structured, evidence-backed, and auditable.
+4. **AI 可信**  
+   Agent 输出结构化、带证据、可审计。
 
-5. **Assistant independence**  
-   The investment assistant remains useful even for users without custom strategy infrastructure.
+5. **助理可独立成立**  
+   即使用户没有自建策略，也能从投资助理获得明确价值。
 
-## 14. Key Risks
+## 14. 主要风险
 
-### 14.1 Cosmetic split without true separation
+### 14.1 只拆名字，不拆产品灵魂
 
-If the products receive different branding but still share muddled product logic, the redesign fails.
+如果最后只是做了两个名字不同的壳，但产品逻辑仍旧混在一起，那么这次重构就是失败的。
 
-### 14.2 Domain boundaries left vague
+### 14.2 平台域边界没有真正抽清
 
-If the shared platform is not truly authoritative, contradictions and duplication will reappear.
+如果共享平台不是权威事实来源，两个产品很快又会出现重复建设和互相打架。
 
-### 14.3 Assistant degenerates into generic chat
+### 14.3 投资助理退化成泛聊天
 
-If recommendations are not structured and evidence-backed, the assistant becomes a talking interface rather than a money-focused tool.
+如果没有结构化建议和证据绑定，助理会沦为“很会说话但不真正赚钱”的 AI 包装层。
 
-### 14.4 Workbench re-expands through convenience exceptions
+### 14.4 工作台重新膨胀
 
-If every interesting capability gets first-class placement again, the current drift will return.
+如果后续又继续把所有“看起来有点用”的能力塞回一等导航，产品漂移会再次出现。
 
-### 14.5 Re-architecture becomes endless
+### 14.5 重构周期失控
 
-If the team platformizes everything before tightening the workbench, delivery slows and product value gets delayed.
+如果一开始就试图完成彻底平台化，容易陷入长期重构而没有用户价值交付。
 
-## 15. Final Recommendation
+## 15. 最终建议
 
-Proceed with:
+建议坚定执行以下方向：
 
-- **one shared platform**,  
-- **QuantPilot as the primary quant workbench**,  
-- **one separate personal investment assistant**,  
-- **LLM as a shared agent layer**,  
-- **a roadmap governed only by profit generation, loss reduction, or the platform capabilities required to support those two goals**.
+- **一个共享底层平台**；
+- **QuantPilot 作为主产品量化工作台**；
+- **一个独立的个人投资助理产品**；
+- **LLM 作为共享 Agent 层**；
+- **未来所有路线图，只允许围绕“提升赚钱能力”“降低亏钱风险”或“支撑这两者的底层能力”来排序。**
 
-This is the cleanest path to restoring product focus without discarding valuable existing work.
+这是在不浪费现有成果的前提下，让产品重新聚焦、重新变得可信、也重新回到赚钱主线的最干净路径。
