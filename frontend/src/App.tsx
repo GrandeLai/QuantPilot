@@ -397,7 +397,7 @@ export default function App() {
               </div>
             }
           >
-            <WorkbenchShell activeTab={activeTab} />
+            <WorkbenchShell activeTab={activeTab} onNavigate={navigate} />
           </Suspense>
         </main>
 

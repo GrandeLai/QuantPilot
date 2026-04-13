@@ -14,4 +14,5 @@ test("topic-only tabs are removed from first-class workbench sections", () => {
 
   assert.equal(WORKBENCH_SECTIONS.research.includes("options"), false);
   assert.equal(WORKBENCH_SECTIONS.research.includes("plugins"), false);
+  assert.deepEqual(WORKBENCH_SECTIONS.risk_review, ["portfolio", "backtest"]);
 });
