@@ -25,6 +25,7 @@ frontend/.vite/
 assistant_frontend/node_modules/
 assistant_frontend/dist/
 assistant_frontend/.vite/
+assistant_frontend/tsconfig.tsbuildinfo
 
 # Data
 data/*.duckdb
