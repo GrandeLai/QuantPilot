@@ -4,68 +4,26 @@
  */
 import {
   Suspense,
-  lazy,
   useEffect,
   useRef,
   useState,
-  type ComponentType,
 } from "react";
 import {
-  LayoutDashboard,
   LineChart,
-  ArrowLeftRight,
-  History,
-  ShieldCheck,
-  Layers,
-  BrainCircuit,
-  Settings,
   Bell,
   Search,
   Zap,
   X,
   AlertTriangle,
   Info,
-  Filter,
 } from "lucide-react";
 import { cn } from "./lib/utils";
 import { useStrategyStore } from "./store/strategyStore";
-
-const MarketPanel = lazy(() => import("./components/MarketPanel"));
-const StrategyWorkshop = lazy(() => import("./components/StrategyWorkshop"));
-const TradingPanel = lazy(() => import("./components/TradingPanel"));
-const BacktestPanel = lazy(() => import("./components/BacktestPanel"));
-const OptionsGreeksPanel = lazy(() => import("./components/OptionsGreeksPanel"));
-const PortfolioPanel = lazy(() => import("./components/PortfolioPanel"));
-const AIPanel = lazy(() => import("./components/AIPanel"));
-const SystemPanel = lazy(() => import("./components/SystemPanel"));
-const ScreenerPanel = lazy(() => import("./components/ScreenerPanel"));
-
-type Tab =
-  | "market"
-  | "strategy"
-  | "trading"
-  | "backtest"
-  | "options"
-  | "portfolio"
-  | "ai"
-  | "system"
-  | "screener";
-
-const TABS: {
-  key: Tab;
-  label: string;
-  icon: ComponentType<{ size?: number }>;
-}[] = [
-  { key: "market",    label: "看盘",  icon: LayoutDashboard },
-  { key: "strategy",  label: "策略",  icon: LineChart },
-  { key: "trading",   label: "交易",  icon: ArrowLeftRight },
-  { key: "backtest",  label: "回测",  icon: History },
-  { key: "options",   label: "期权",  icon: ShieldCheck },
-  { key: "portfolio", label: "组合",  icon: Layers },
-  { key: "ai",        label: "AI",    icon: BrainCircuit },
-  { key: "system",    label: "系统",  icon: Settings },
-  { key: "screener",  label: "选股",  icon: Filter },
-];
+import WorkbenchShell from "./components/workbench/WorkbenchShell";
+import {
+  WORKBENCH_TABS,
+  type WorkbenchTab,
+} from "./workbench/navigation";
 
 // ── 告警事件类型 ──────────────────────────────────────────────────────────────
 
@@ -87,7 +45,7 @@ function GlobalSearch({
 }: {
   open: boolean;
   onClose: () => void;
-  onNavigate: (tab: Tab) => void;
+  onNavigate: (tab: WorkbenchTab) => void;
 }) {
   const { strategies } = useStrategyStore();
   const [q, setQ] = useState("");
@@ -222,7 +180,7 @@ function NotificationDropdown({
           <div className="px-4 py-8 text-center">
             <Bell size={24} className="mx-auto text-[#434651] mb-2" />
             <p className="text-sm text-[#8b949e]">暂无告警通知</p>
-            <p className="text-[10px] text-[#434651] mt-1">在「系统 → 价格告警」设置规则</p>
+            <p className="text-[10px] text-[#434651] mt-1">暂无未读通知</p>
           </div>
         ) : (
           events.map((ev) => (
@@ -293,7 +251,7 @@ function UserMenu({ onClose }: { onClose: () => void }) {
 // ── 主应用 ────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<Tab>("market");
+  const [activeTab, setActiveTab] = useState<WorkbenchTab>("research");
   const [searchOpen, setSearchOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -339,32 +297,7 @@ export default function App() {
     setNotifOpen(false);
   };
 
-  const navigate = (tab: Tab) => setActiveTab(tab);
-
-  const ActivePanel = (() => {
-    switch (activeTab) {
-      case "market":
-        return <MarketPanel />;
-      case "strategy":
-        return <StrategyWorkshop onNavigate={navigate} />;
-      case "trading":
-        return <TradingPanel />;
-      case "backtest":
-        return <BacktestPanel />;
-      case "options":
-        return <OptionsGreeksPanel />;
-      case "portfolio":
-        return <PortfolioPanel />;
-      case "ai":
-        return <AIPanel />;
-      case "system":
-        return <SystemPanel />;
-      case "screener":
-        return <ScreenerPanel />;
-      default:
-        return null;
-    }
-  })();
+  const navigate = (tab: WorkbenchTab) => setActiveTab(tab);
 
   return (
     <>
@@ -385,7 +318,7 @@ export default function App() {
 
             {/* Tab 导航 */}
             <nav className="flex items-center gap-1">
-              {TABS.map((tab) => (
+              {WORKBENCH_TABS.map((tab) => (
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
@@ -459,12 +392,12 @@ export default function App() {
             fallback={
               <div className="flex min-h-[420px] items-center justify-center">
                 <div className="rounded-2xl border border-[#2A2D35] bg-[#151619] px-5 py-4 text-sm text-[#8E9299]">
-                  正在加载 {TABS.find((tab) => tab.key === activeTab)?.label ?? "模块"}…
+                  正在加载 {WORKBENCH_TABS.find((tab) => tab.key === activeTab)?.label ?? "模块"}…
                 </div>
               </div>
             }
           >
-            {ActivePanel}
+            <WorkbenchShell activeTab={activeTab} />
           </Suspense>
         </main>
 
