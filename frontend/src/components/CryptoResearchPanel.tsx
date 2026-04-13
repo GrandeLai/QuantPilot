@@ -5,6 +5,7 @@ import {
   fetchCryptoResearchSummary,
   type CryptoResearchSummary,
 } from "../api/client";
+import { buildCryptoResearchViewModel } from "./cryptoResearchViewModel";
 
 export default function CryptoResearchPanel() {
   const [summaries, setSummaries] = useState<CryptoResearchSummary[]>([]);
@@ -42,7 +43,9 @@ export default function CryptoResearchPanel() {
       {error ? <div className="text-sm text-red-400">{error}</div> : null}
       {!loading && !error ? (
         <div className="grid gap-4 md:grid-cols-2">
-          {summaries.map((summary) => (
+          {summaries.map((summary) => {
+            const view = buildCryptoResearchViewModel(summary);
+            return (
             <div key={summary.symbol} className="rounded-lg border border-[#2a2e39] bg-[#161b22] p-4 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-medium text-white">{summary.symbol}</span>
@@ -56,18 +59,16 @@ export default function CryptoResearchPanel() {
                   summary.latest_class_probabilities["0"] ?? 0
                 ) * 100).toFixed(1)}% / 多 {((summary.latest_class_probabilities["1"] ?? 0) * 100).toFixed(1)}%
               </div>
+              <div className="text-xs text-[#8b949e]">当前方向解释：{view.directionLabel}</div>
               <div className="text-xs text-[#8b949e]">反转概率：{(summary.reversal_probability * 100).toFixed(1)}% · 信号 {summary.reversal_signal}</div>
               <div className="text-xs text-[#8b949e]">关键证据：{summary.reversal_evidence.join(" / ") || "—"}</div>
               <div className="pt-2 border-t border-[#2a2e39]">
                 <div className="text-xs font-medium text-white mb-2">Top 因子重要性</div>
                 <ul className="space-y-1 text-xs text-[#8b949e]">
-                  {Object.entries(summary.feature_importance)
-                    .sort((a, b) => b[1] - a[1])
-                    .slice(0, 5)
-                    .map(([name, value]) => (
-                      <li key={name} className="flex items-center justify-between gap-2">
-                        <span className="truncate">{name}</span>
-                        <span className="font-mono text-white">{(value * 100).toFixed(1)}%</span>
+                  {view.topFactors.map((item) => (
+                      <li key={item.name} className="flex items-center justify-between gap-2">
+                        <span className="truncate">{item.name}</span>
+                        <span className="font-mono text-white">{item.valuePct}</span>
                       </li>
                     ))}
                 </ul>
@@ -75,18 +76,19 @@ export default function CryptoResearchPanel() {
               <div className="pt-2 border-t border-[#2a2e39]">
                 <div className="text-xs font-medium text-white mb-2">窗口表现</div>
                 <ul className="space-y-1 text-xs text-[#8b949e]">
-                  {summary.window_metrics.slice(0, 3).map((window, index) => (
-                    <li key={`${summary.symbol}-${index}`} className="flex items-center justify-between gap-2">
-                      <span>窗口 {index + 1}</span>
+                  {view.windowRows.map((row) => (
+                    <li key={`${summary.symbol}-${row.label}`} className="flex items-center justify-between gap-2">
+                      <span>{row.label}</span>
                       <span className="font-mono">
-                        准确率 {(window.accuracy * 100).toFixed(1)}% / 收益 {(window.strategy_return * 100).toFixed(2)}%
+                        准确率 {row.accuracyPct} / 收益 {row.returnPct}
                       </span>
                     </li>
                   ))}
                 </ul>
               </div>
             </div>
-          ))}
+          );
+          })}
         </div>
       ) : null}
     </section>
