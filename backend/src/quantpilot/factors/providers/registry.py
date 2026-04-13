@@ -22,3 +22,16 @@ class FactorProviderRegistry:
         if not outputs:
             return pd.DataFrame(index=frame.index)
         return pd.concat(outputs, axis=1)
+
+    def provider_names(self) -> list[str]:
+        """返回已注册 provider 名称."""
+        return [provider.name for provider in self._providers]
+
+    def available_provider_names(self) -> list[str]:
+        """返回当前可用 provider 名称."""
+        names: list[str] = []
+        for provider in self._providers:
+            available = getattr(provider, "available", True)
+            if available:
+                names.append(provider.name)
+        return names

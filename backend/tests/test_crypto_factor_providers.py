@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import sys
 from datetime import UTC, datetime, timedelta
+from types import ModuleType
 
 import pandas as pd
 
 from quantpilot.factors.providers.core_crypto import CoreCryptoFactorProvider
+from quantpilot.factors.providers.external_crypto import ExternalCryptoFactorProvider
 from quantpilot.factors.providers.registry import FactorProviderRegistry
 
 
@@ -56,3 +59,47 @@ def test_factor_provider_registry_merges_provider_outputs() -> None:
     assert "ema_20" in features.columns
     assert "macd_hist" in features.columns
     assert not features.empty
+
+
+def test_external_provider_gracefully_noops_when_dependency_missing() -> None:
+    provider = ExternalCryptoFactorProvider(module_name="definitely_missing_crypto_factor_lib")
+    features = provider.compute(_frame())
+
+    assert features.empty
+    assert list(features.index) == list(_frame().index)
+
+
+def test_external_provider_can_adapt_third_party_module() -> None:
+    module_name = "fake_crypto_factor_lib"
+    fake_module = ModuleType(module_name)
+
+    def build_features(frame: pd.DataFrame) -> pd.DataFrame:
+        return pd.DataFrame(
+            {
+                "external_alpha": frame["close_15m"].pct_change().fillna(0.0),
+                "external_beta": frame["volume_15m"].rolling(5, min_periods=1).mean(),
+            },
+            index=frame.index,
+        )
+
+    fake_module.build_features = build_features  # type: ignore[attr-defined]
+    sys.modules[module_name] = fake_module
+    try:
+        provider = ExternalCryptoFactorProvider(module_name=module_name)
+        features = provider.compute(_frame())
+    finally:
+        sys.modules.pop(module_name, None)
+
+    assert {"external_alpha", "external_beta"} <= set(features.columns)
+
+
+def test_factor_provider_registry_reports_available_provider_names() -> None:
+    registry = FactorProviderRegistry(
+        providers=[
+            CoreCryptoFactorProvider(),
+            ExternalCryptoFactorProvider(module_name="definitely_missing_crypto_factor_lib"),
+        ]
+    )
+
+    assert registry.provider_names() == ["core_crypto", "external_crypto"]
+    assert registry.available_provider_names() == ["core_crypto"]
