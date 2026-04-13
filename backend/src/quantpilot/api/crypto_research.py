@@ -125,3 +125,22 @@ def optimize_strategy(
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/optimize/latest", response_model=CryptoResearchOptimizationSummary)
+def get_latest_optimization_result(
+    symbol: str,
+    strategy_id: str,
+    storage: StorageDep,
+    base_timeframe: str = "15m",
+) -> CryptoResearchOptimizationSummary:
+    """读取最近一次缓存的优化摘要."""
+    service = CryptoResearchService(storage)
+    latest = service.get_latest_optimization(
+        symbol=symbol,
+        base_timeframe=base_timeframe,
+        strategy_id=strategy_id,
+    )
+    if latest is None:
+        raise HTTPException(status_code=404, detail="暂无缓存优化结果")
+    return latest

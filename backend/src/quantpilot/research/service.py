@@ -197,7 +197,7 @@ class CryptoResearchService:
             for window, result in zip(windows, results[: min(len(windows), len(results))], strict=False)
         ]
         best = results[0]
-        return CryptoResearchOptimizationSummary(
+        summary = CryptoResearchOptimizationSummary(
             symbol=symbol,
             strategy_id="vwap_ema_trend",
             base_timeframe=base_timeframe,
@@ -209,6 +209,8 @@ class CryptoResearchService:
             max_drawdown=best.max_drawdown,
             window_metrics=window_metrics,
         )
+        self._results.save_latest_optimization(summary)
+        return summary
 
     def _feature_columns(self, features: pd.DataFrame) -> list[str]:
         excluded = {"target_class", "target_reversal", "forward_return_1d"}
@@ -278,3 +280,17 @@ class CryptoResearchService:
         if latest["atr_14"] > features["atr_14"].quantile(0.75):
             return "high_volatility"
         return "range"
+
+    def get_latest_optimization(
+        self,
+        *,
+        symbol: str,
+        base_timeframe: str,
+        strategy_id: str,
+    ) -> CryptoResearchOptimizationSummary | None:
+        """读取最新缓存的优化结果."""
+        return self._results.load_latest_optimization(
+            symbol=symbol,
+            base_timeframe=base_timeframe,
+            strategy_id=strategy_id,
+        )

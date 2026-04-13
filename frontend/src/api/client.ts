@@ -252,3 +252,14 @@ export async function fetchCryptoResearchOptimization(
   if (!res.ok) throw new Error(`获取加密参数优化失败 (${res.status}): ${await res.text()}`);
   return (await res.json()) as CryptoResearchOptimizationSummary;
 }
+
+export async function fetchCryptoResearchLatestOptimization(
+  symbol: string,
+  strategyId: string,
+): Promise<CryptoResearchOptimizationSummary> {
+  const res = await fetch(
+    `${BASE}/crypto/research/optimize/latest?symbol=${encodeURIComponent(symbol)}&base_timeframe=15m&strategy_id=${encodeURIComponent(strategyId)}`,
+  );
+  if (!res.ok) throw new Error(`获取加密最新优化结果失败 (${res.status}): ${await res.text()}`);
+  return (await res.json()) as CryptoResearchOptimizationSummary;
+}

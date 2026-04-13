@@ -7,7 +7,7 @@ import threading
 from pathlib import Path
 
 from quantpilot.config import get_settings
-from quantpilot.research.models import CryptoResearchTrainSummary
+from quantpilot.research.models import CryptoResearchOptimizationSummary, CryptoResearchTrainSummary
 
 
 def _default_db_path() -> Path:
@@ -28,13 +28,21 @@ class CryptoResearchStorage:
 
     def _init_schema(self) -> None:
         with self._lock:
-            self._conn.execute(
+            self._conn.executescript(
                 """
                 CREATE TABLE IF NOT EXISTS crypto_research_results (
                     symbol TEXT NOT NULL,
                     base_timeframe TEXT NOT NULL,
                     payload TEXT NOT NULL,
                     PRIMARY KEY (symbol, base_timeframe)
+                )
+                ;
+                CREATE TABLE IF NOT EXISTS crypto_research_optimizations (
+                    symbol TEXT NOT NULL,
+                    base_timeframe TEXT NOT NULL,
+                    strategy_id TEXT NOT NULL,
+                    payload TEXT NOT NULL,
+                    PRIMARY KEY (symbol, base_timeframe, strategy_id)
                 )
                 """
             )
@@ -66,3 +74,41 @@ class CryptoResearchStorage:
         if row is None:
             return None
         return CryptoResearchTrainSummary.model_validate_json(row[0])
+
+    def save_latest_optimization(self, summary: CryptoResearchOptimizationSummary) -> None:
+        """保存最新优化结果摘要."""
+        with self._lock:
+            self._conn.execute(
+                """
+                INSERT OR REPLACE INTO crypto_research_optimizations (symbol, base_timeframe, strategy_id, payload)
+                VALUES (?, ?, ?, ?)
+                """,
+                (
+                    summary.symbol,
+                    summary.base_timeframe,
+                    summary.strategy_id,
+                    summary.model_dump_json(),
+                ),
+            )
+            self._conn.commit()
+
+    def load_latest_optimization(
+        self,
+        *,
+        symbol: str,
+        base_timeframe: str,
+        strategy_id: str,
+    ) -> CryptoResearchOptimizationSummary | None:
+        """读取指定标的/周期/策略的最新优化结果."""
+        with self._lock:
+            row = self._conn.execute(
+                """
+                SELECT payload
+                FROM crypto_research_optimizations
+                WHERE symbol = ? AND base_timeframe = ? AND strategy_id = ?
+                """,
+                (symbol, base_timeframe, strategy_id),
+            ).fetchone()
+        if row is None:
+            return None
+        return CryptoResearchOptimizationSummary.model_validate_json(row[0])

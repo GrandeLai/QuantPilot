@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import {
+  fetchCryptoResearchLatestOptimization,
   fetchCryptoResearchLatestSummary,
   fetchCryptoResearchOptimization,
   fetchCryptoResearchSummary,
@@ -31,9 +32,13 @@ export default function CryptoResearchPanel() {
         const optimizationEntries = await Promise.all(
           ["BTC-USDT", "ETH-USDT"].map(async (symbol) => {
             try {
-              return [symbol, await fetchCryptoResearchOptimization(symbol)] as const;
+              return [symbol, await fetchCryptoResearchLatestOptimization(symbol, "vwap_ema_trend")] as const;
             } catch {
-              return [symbol, null] as const;
+              try {
+                return [symbol, await fetchCryptoResearchOptimization(symbol)] as const;
+              } catch {
+                return [symbol, null] as const;
+              }
             }
           })
         );
