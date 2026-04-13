@@ -82,3 +82,17 @@ def run_training(
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/latest", response_model=CryptoResearchTrainSummary)
+def get_latest_training_result(
+    symbol: str,
+    storage: StorageDep,
+    base_timeframe: str = "15m",
+) -> CryptoResearchTrainSummary:
+    """读取最近一次缓存的训练摘要."""
+    service = CryptoResearchService(storage)
+    latest = service.get_latest(symbol=symbol, base_timeframe=base_timeframe)
+    if latest is None:
+        raise HTTPException(status_code=404, detail="暂无缓存研究结果")
+    return latest

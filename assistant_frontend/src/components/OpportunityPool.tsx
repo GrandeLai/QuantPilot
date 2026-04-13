@@ -13,8 +13,11 @@ export function OpportunityPool() {
   useEffect(() => {
     void (async () => {
       try {
-        const result = await fetchCryptoOpportunities<{ items: AdvisorCard[] }>("BTC-USDT");
-        setItems(result.items);
+        const [btc, eth] = await Promise.all([
+          fetchCryptoOpportunities<{ items: AdvisorCard[] }>("BTC-USDT"),
+          fetchCryptoOpportunities<{ items: AdvisorCard[] }>("ETH-USDT"),
+        ]);
+        setItems([...btc.items, ...eth.items]);
       } catch (err) {
         setError(String(err));
       } finally {
@@ -26,7 +29,7 @@ export function OpportunityPool() {
   return (
     <section aria-labelledby="opportunity-pool-title">
       <h2 id="opportunity-pool-title">机会池</h2>
-      <p>集中浏览 BTC/ETH 等加密资产的多周期机会卡片。</p>
+      <p>集中浏览 BTC / ETH 的多周期机会卡片。</p>
       {loading ? <p>加载中…</p> : null}
       {error ? <p>{error}</p> : null}
       {!loading && !error ? (

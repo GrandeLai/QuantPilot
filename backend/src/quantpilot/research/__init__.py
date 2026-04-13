@@ -7,6 +7,7 @@ from quantpilot.research.models import (
     WalkForwardWindowMetric,
 )
 from quantpilot.research.service import CryptoResearchRequest, CryptoResearchService
+from quantpilot.research.storage import CryptoResearchStorage
 from quantpilot.research.validation import (
     TimeSeriesValidationConfig,
     ValidationWindow,
@@ -21,6 +22,7 @@ __all__ = [
     "WalkForwardWindowMetric",
     "CryptoResearchRequest",
     "CryptoResearchService",
+    "CryptoResearchStorage",
     "TimeSeriesValidationConfig",
     "ValidationWindow",
     "build_walk_forward_windows",

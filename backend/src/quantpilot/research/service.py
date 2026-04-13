@@ -16,6 +16,7 @@ from quantpilot.research.models import (
     CryptoResearchTrainSummary,
     WalkForwardWindowMetric,
 )
+from quantpilot.research.storage import CryptoResearchStorage
 from quantpilot.research.validation import TimeSeriesValidationConfig, build_walk_forward_windows
 
 
@@ -37,6 +38,7 @@ class CryptoResearchService:
         self._storage = storage
         self._builder = MultiTimeframeDatasetBuilder(storage)
         self._pipeline = CryptoFeaturePipeline()
+        self._results = CryptoResearchStorage()
 
     def build_dataset_summary(
         self,
@@ -107,7 +109,7 @@ class CryptoResearchService:
         importances = self._feature_importance(final_multiclass, feature_columns)
         evidence = [name for name, _ in sorted(importances.items(), key=lambda item: item[1], reverse=True)[:3]]
 
-        return CryptoResearchTrainSummary(
+        summary = CryptoResearchTrainSummary(
             symbol=request.symbol,
             base_timeframe=request.base_timeframe,
             higher_timeframes=request.higher_timeframes,
@@ -126,6 +128,12 @@ class CryptoResearchService:
             reversal_signal="watch_reversal" if reversal_probability >= 0.5 else "none",
             reversal_evidence=evidence,
         )
+        self._results.save_latest(summary)
+        return summary
+
+    def get_latest(self, *, symbol: str, base_timeframe: str) -> CryptoResearchTrainSummary | None:
+        """读取最新缓存结果."""
+        return self._results.load_latest(symbol=symbol, base_timeframe=base_timeframe)
 
     def _feature_columns(self, features: pd.DataFrame) -> list[str]:
         excluded = {"target_class", "target_reversal", "forward_return_1d"}

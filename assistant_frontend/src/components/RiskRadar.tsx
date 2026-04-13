@@ -13,8 +13,11 @@ export function RiskRadar() {
   useEffect(() => {
     void (async () => {
       try {
-        const result = await fetchCryptoRisks<{ items: AdvisorCard[] }>("BTC-USDT");
-        setItems(result.items);
+        const [btc, eth] = await Promise.all([
+          fetchCryptoRisks<{ items: AdvisorCard[] }>("BTC-USDT"),
+          fetchCryptoRisks<{ items: AdvisorCard[] }>("ETH-USDT"),
+        ]);
+        setItems([...btc.items, ...eth.items]);
       } catch (err) {
         setError(String(err));
       } finally {
@@ -26,7 +29,7 @@ export function RiskRadar() {
   return (
     <section aria-labelledby="risk-radar-title">
       <h2 id="risk-radar-title">风险雷达</h2>
-      <p>聚合多周期趋势衰竭、反转概率与持仓分歧风险。</p>
+      <p>聚合 BTC / ETH 的多周期趋势衰竭、反转概率与持仓分歧风险。</p>
       {loading ? <p>加载中…</p> : null}
       {error ? <p>{error}</p> : null}
       {!loading && !error ? (

@@ -47,7 +47,8 @@ def build_opportunity_cards() -> list[AdviceCard]:
 def build_crypto_opportunity_cards(symbol: str = "BTC-USDT") -> list[AdviceCard]:
     """Build crypto opportunity cards from the research stack."""
     storage = get_storage()
-    summary = CryptoResearchService(storage).train_and_validate(
+    service = CryptoResearchService(storage)
+    summary = service.get_latest(symbol=symbol, base_timeframe="15m") or service.train_and_validate(
         CryptoResearchRequest(
             symbol=symbol,
             base_timeframe="15m",
@@ -92,7 +93,8 @@ def build_crypto_opportunity_cards(symbol: str = "BTC-USDT") -> list[AdviceCard]
 def build_crypto_risk_cards(symbol: str = "BTC-USDT") -> list[AdviceCard]:
     """Build crypto risk alert cards from the research stack."""
     storage = get_storage()
-    summary = CryptoResearchService(storage).train_and_validate(
+    service = CryptoResearchService(storage)
+    summary = service.get_latest(symbol=symbol, base_timeframe="15m") or service.train_and_validate(
         CryptoResearchRequest(
             symbol=symbol,
             base_timeframe="15m",

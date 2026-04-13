@@ -21,14 +21,16 @@ export function ReviewAsk() {
   useEffect(() => {
     void (async () => {
       try {
-        const [overviewData, opportunityData, riskData] = await Promise.all([
+        const [overviewData, btcOpportunities, btcRisks, ethOpportunities, ethRisks] = await Promise.all([
           fetchOverview<AdvisorOverviewPayload>(),
           fetchCryptoOpportunities<{ items: AdvisorCard[] }>("BTC-USDT"),
           fetchCryptoRisks<{ items: AdvisorCard[] }>("BTC-USDT"),
+          fetchCryptoOpportunities<{ items: AdvisorCard[] }>("ETH-USDT"),
+          fetchCryptoRisks<{ items: AdvisorCard[] }>("ETH-USDT"),
         ]);
         setOverview(overviewData);
-        setOpportunities(opportunityData.items);
-        setRisks(riskData.items);
+        setOpportunities([...btcOpportunities.items, ...ethOpportunities.items]);
+        setRisks([...btcRisks.items, ...ethRisks.items]);
       } catch (err) {
         setError(String(err));
       } finally {

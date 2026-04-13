@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import {
+  fetchCryptoResearchLatestSummary,
   fetchCryptoResearchSummary,
   type CryptoResearchSummary,
 } from "../api/client";
@@ -13,10 +14,15 @@ export default function CryptoResearchPanel() {
   useEffect(() => {
     void (async () => {
       try {
-        const result = await Promise.all([
-          fetchCryptoResearchSummary("BTC-USDT"),
-          fetchCryptoResearchSummary("ETH-USDT"),
-        ]);
+        const result = await Promise.all(
+          ["BTC-USDT", "ETH-USDT"].map(async (symbol) => {
+            try {
+              return await fetchCryptoResearchLatestSummary(symbol);
+            } catch {
+              return fetchCryptoResearchSummary(symbol);
+            }
+          })
+        );
         setSummaries(result);
       } catch (err) {
         setError(String(err));

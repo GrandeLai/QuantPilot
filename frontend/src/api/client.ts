@@ -203,3 +203,11 @@ export async function fetchCryptoResearchSummary(symbol: string): Promise<Crypto
   if (!res.ok) throw new Error(`获取加密研究摘要失败 (${res.status}): ${await res.text()}`);
   return (await res.json()) as CryptoResearchSummary;
 }
+
+export async function fetchCryptoResearchLatestSummary(symbol: string): Promise<CryptoResearchSummary> {
+  const res = await fetch(
+    `${BASE}/crypto/research/latest?symbol=${encodeURIComponent(symbol)}&base_timeframe=15m`
+  );
+  if (!res.ok) throw new Error(`获取加密最新研究摘要失败 (${res.status}): ${await res.text()}`);
+  return (await res.json()) as CryptoResearchSummary;
+}

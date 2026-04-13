@@ -13,11 +13,18 @@ export function RebalanceSuggestions() {
   useEffect(() => {
     void (async () => {
       try {
-        const [opportunities, risks] = await Promise.all([
+        const [btcOpportunities, btcRisks, ethOpportunities, ethRisks] = await Promise.all([
           fetchCryptoOpportunities<{ items: AdvisorCard[] }>("BTC-USDT"),
           fetchCryptoRisks<{ items: AdvisorCard[] }>("BTC-USDT"),
+          fetchCryptoOpportunities<{ items: AdvisorCard[] }>("ETH-USDT"),
+          fetchCryptoRisks<{ items: AdvisorCard[] }>("ETH-USDT"),
         ]);
-        setSuggestions([...opportunities.items, ...risks.items]);
+        setSuggestions([
+          ...btcOpportunities.items,
+          ...btcRisks.items,
+          ...ethOpportunities.items,
+          ...ethRisks.items,
+        ]);
       } catch (err) {
         setError(String(err));
       } finally {
@@ -29,7 +36,7 @@ export function RebalanceSuggestions() {
   return (
     <section aria-labelledby="rebalance-suggestions-title">
       <h2 id="rebalance-suggestions-title">调仓建议</h2>
-      <p>基于 BTC/ETH 研究结果生成最小可执行的观察/降风险建议。</p>
+      <p>基于 BTC / ETH 研究结果生成最小可执行的观察/降风险建议。</p>
       {loading ? <p>加载中…</p> : null}
       {error ? <p>{error}</p> : null}
       {!loading && !error ? (
