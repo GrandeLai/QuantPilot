@@ -103,6 +103,9 @@ def create_app() -> FastAPI:
     from quantpilot.api.plugins import router as plugins_router
     include_with_api_alias(plugins_router)
 
+    from quantpilot.api.platform import router as platform_router
+    include_with_api_alias(platform_router)
+
     from quantpilot.api.sentiment import router as sentiment_router
     include_with_api_alias(sentiment_router)
 
