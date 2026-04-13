@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { fetchCryptoResearchLatestSummary, fetchCryptoResearchSummary } from "./client.ts";
+import {
+  fetchCryptoResearchLatestSummary,
+  fetchCryptoResearchOptimization,
+  fetchCryptoResearchSummary,
+} from "./client.ts";
 
 test("fetchCryptoResearchSummary posts the expected research payload", async () => {
   let capturedUrl = "";
@@ -78,6 +82,42 @@ test("fetchCryptoResearchLatestSummary reads the cached latest endpoint", async 
     const result = await fetchCryptoResearchLatestSummary("BTC-USDT");
     assert.equal(capturedUrl, "/api/crypto/research/latest?symbol=BTC-USDT&base_timeframe=15m");
     assert.equal(result.dataset_version, "cached");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("fetchCryptoResearchOptimization posts the expected optimization payload", async () => {
+  let capturedUrl = "";
+  let capturedInit: RequestInit | undefined;
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    capturedUrl = String(input);
+    capturedInit = init;
+    return new Response(
+      JSON.stringify({
+        symbol: "BTC-USDT",
+        strategy_id: "vwap_ema_trend",
+        base_timeframe: "15m",
+        higher_timeframes: ["1h", "4h", "1d", "1w"],
+        best_params: { fast_period: 5 },
+        window_count: 4,
+        mean_accuracy: 0.0,
+        mean_strategy_return: 0.12,
+        max_drawdown: 0.08,
+        window_metrics: [],
+      }),
+      { status: 200 },
+    );
+  }) as typeof fetch;
+
+  try {
+    const result = await fetchCryptoResearchOptimization("BTC-USDT");
+    assert.equal(capturedUrl, "/api/crypto/research/optimize");
+    assert.equal(capturedInit?.method, "POST");
+    assert.ok(String(capturedInit?.body).includes('"strategy_id":"vwap_ema_trend"') === false);
+    assert.ok(String(capturedInit?.body).includes('"symbol":"BTC-USDT"'));
+    assert.equal(result.strategy_id, "vwap_ema_trend");
   } finally {
     globalThis.fetch = originalFetch;
   }

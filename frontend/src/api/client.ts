@@ -78,6 +78,23 @@ export interface CryptoResearchSummary {
   reversal_probability: number;
   reversal_signal: string;
   reversal_evidence: string[];
+  market_regime: string;
+  recommended_strategy_ids: string[];
+  recommended_timeframes: string[];
+  parameter_search_ready: boolean;
+}
+
+export interface CryptoResearchOptimizationSummary {
+  symbol: string;
+  strategy_id: string;
+  base_timeframe: string;
+  higher_timeframes: string[];
+  best_params: Record<string, number>;
+  window_count: number;
+  mean_accuracy: number;
+  mean_strategy_return: number;
+  max_drawdown: number;
+  window_metrics: CryptoResearchWindowMetric[];
 }
 
 // ── 数据接口 ─────────────────────────────────────────────────────────────────
@@ -210,4 +227,28 @@ export async function fetchCryptoResearchLatestSummary(symbol: string): Promise<
   );
   if (!res.ok) throw new Error(`获取加密最新研究摘要失败 (${res.status}): ${await res.text()}`);
   return (await res.json()) as CryptoResearchSummary;
+}
+
+export async function fetchCryptoResearchOptimization(
+  symbol: string,
+): Promise<CryptoResearchOptimizationSummary> {
+  const res = await fetch(`${BASE}/crypto/research/optimize`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      symbol,
+      base_timeframe: "15m",
+      higher_timeframes: ["1h", "4h", "1d", "1w"],
+      limit: 180,
+      param_grid: {
+        fast_period: [5, 8],
+        slow_period: [20, 30],
+        vwap_window: [10, 20],
+        trailing_stop_pct: [0.02, 0.03],
+        max_hold_bars: [24, 48],
+      },
+    }),
+  });
+  if (!res.ok) throw new Error(`获取加密参数优化失败 (${res.status}): ${await res.text()}`);
+  return (await res.json()) as CryptoResearchOptimizationSummary;
 }
