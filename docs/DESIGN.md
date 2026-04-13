@@ -948,6 +948,8 @@ volumes:
 - `VWAP + EMA` 加密趋势策略模板（动态止损 + 超时离场）
 - 基于现有 Optuna 引擎的加密参数搜索摘要
 - 研究结果同时暴露给 QuantPilot 工作台验证中心与 Investment Assistant
+- 加密回测入口优先推荐 `VWAP_EMA_Trend`，默认按 `1h` 周期开始验证
+- Investment Assistant 优先读取缓存的研究 / 优化摘要，并展示市场状态、推荐策略、推荐周期和最优参数
 
 ---
 

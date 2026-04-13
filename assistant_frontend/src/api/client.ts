@@ -108,3 +108,12 @@ export async function fetchCryptoResearchOptimization<T>(symbol: string): Promis
     }),
   });
 }
+
+/**
+ * Fetches the latest cached crypto optimization summary for a specific symbol.
+ */
+export async function fetchCryptoResearchLatestOptimization<T>(symbol: string, strategyId: string): Promise<T> {
+  return getJson<T>(
+    `/api/crypto/research/optimize/latest?symbol=${encodeURIComponent(symbol)}&base_timeframe=15m&strategy_id=${encodeURIComponent(strategyId)}`,
+  );
+}

@@ -97,6 +97,8 @@ def test_advisor_crypto_opportunities_return_crypto_cards(client: TestClient, mo
     assert first.subject == "BTC-USDT"
     assert first.type == "opportunity"
     assert first.evidence
+    assert any("市场状态" in item.summary for item in first.evidence)
+    assert any("vwap_ema_trend" in note for note in first.risk_notes)
 
 
 def test_advisor_crypto_risks_return_risk_alerts(client: TestClient, monkeypatch) -> None:
@@ -114,3 +116,5 @@ def test_advisor_crypto_risks_return_risk_alerts(client: TestClient, monkeypatch
     risks = AdvisorOpportunitiesResponse.model_validate(body)
     assert risks.items
     assert all(item.type == "risk_alert" for item in risks.items)
+    assert any("市场状态" in item.summary for item in risks.items[0].evidence)
+    assert any("推荐策略" in note for note in risks.items[0].risk_notes)

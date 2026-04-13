@@ -123,6 +123,9 @@ npm run type-check               # TypeScript 类型检查
 - `POST /api/crypto/research/train` 多周期研究摘要
 - `GET /api/crypto/research/latest` 最近一次缓存研究结果
 - `POST /api/crypto/research/optimize` 基于现有 Optuna 引擎的参数搜索
+- `GET /api/crypto/research/optimize/latest` 最近一次缓存优化结果
+
+当前主工作台的加密回测会优先推荐 `VWAP_EMA_Trend`，默认按 `1h` 周期进入验证；Investment Assistant 也会复用同一份最新研究与优化摘要来展示市场状态、推荐策略和最优参数。
 
 ## 项目结构
 

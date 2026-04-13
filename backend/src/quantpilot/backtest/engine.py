@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from loguru import logger
@@ -51,8 +51,8 @@ class BacktestResult:
     metrics: BacktestMetrics
     trades: list[TradeRecord]
     bars_processed: int
-    start_time: datetime = field(default_factory=datetime.utcnow)
-    end_time: datetime = field(default_factory=datetime.utcnow)
+    start_time: datetime = field(default_factory=lambda: datetime.now(UTC))
+    end_time: datetime = field(default_factory=lambda: datetime.now(UTC))
 
     @property
     def duration_seconds(self) -> float:
@@ -84,7 +84,7 @@ class BacktestEngine:
         Returns:
             BacktestResult 包含绩效指标和交易记录
         """
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         cfg = self._config
 
         # 初始化上下文
@@ -166,7 +166,7 @@ class BacktestEngine:
             metrics.start_date = bars_sorted[0].timestamp.isoformat()
             metrics.end_date = bars_sorted[-1].timestamp.isoformat()
 
-        end_time = datetime.utcnow()
+        end_time = datetime.now(UTC)
         logger.info(
             f"[Backtest] {cfg.symbol} {cfg.timeframe} 完成，"
             f"{len(bars_sorted)} 根 K 线，{len(completed_trades)} 笔交易，"

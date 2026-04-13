@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import {
   fetchCryptoOpportunities,
   fetchCryptoResearchLatest,
+  fetchCryptoResearchLatestOptimization,
   fetchCryptoResearchOptimization,
   fetchCryptoRisks,
   fetchOverview,
@@ -45,8 +46,12 @@ export function ReviewAsk() {
           fetchCryptoRisks<{ items: AdvisorCard[] }>("ETH-USDT"),
           fetchCryptoResearchLatest<AdvisorCryptoResearchSummary>("BTC-USDT"),
           fetchCryptoResearchLatest<AdvisorCryptoResearchSummary>("ETH-USDT"),
-          fetchCryptoResearchOptimization<AdvisorCryptoOptimizationSummary>("BTC-USDT"),
-          fetchCryptoResearchOptimization<AdvisorCryptoOptimizationSummary>("ETH-USDT"),
+          fetchCryptoResearchLatestOptimization<AdvisorCryptoOptimizationSummary>("BTC-USDT", "vwap_ema_trend").catch(() =>
+            fetchCryptoResearchOptimization<AdvisorCryptoOptimizationSummary>("BTC-USDT"),
+          ),
+          fetchCryptoResearchLatestOptimization<AdvisorCryptoOptimizationSummary>("ETH-USDT", "vwap_ema_trend").catch(() =>
+            fetchCryptoResearchOptimization<AdvisorCryptoOptimizationSummary>("ETH-USDT"),
+          ),
         ]);
         setOverview(overviewData);
         setOpportunities([...btcOpportunities.items, ...ethOpportunities.items]);

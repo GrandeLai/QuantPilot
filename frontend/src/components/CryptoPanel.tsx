@@ -46,6 +46,11 @@ import {
   type SwapTicker,
 } from "../api/crypto";
 import { useCryptoStore, type CryptoActiveTab } from "../store/cryptoStore";
+import {
+  defaultCryptoBacktestStrategy,
+  prioritizeCryptoStrategies,
+  recommendedCryptoBacktestTimeframe,
+} from "./cryptoBacktestConfig";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -596,7 +601,7 @@ interface BacktestResult {
 function CryptoBacktestTab({ selectedSymbol }: { selectedSymbol: string }) {
   const [strategies, setStrategies] = useState<AvailableStrategy[]>([]);
   const [strategyId, setStrategyId] = useState("");
-  const [timeframe, setTimeframe] = useState("1d");
+  const [timeframe, setTimeframe] = useState("1h");
   const [startDate, setStartDate] = useState("2023-01-01");
   const [endDate, setEndDate] = useState(new Date().toISOString().slice(0, 10));
   const [initialCash, setInitialCash] = useState("10000");
@@ -610,12 +615,24 @@ function CryptoBacktestTab({ selectedSymbol }: { selectedSymbol: string }) {
     fetch("/api/portfolio/available-strategies")
       .then((r) => r.json() as Promise<{ strategies: AvailableStrategy[] }>)
       .then((d) => {
-        setStrategies(d.strategies ?? []);
-        if (d.strategies?.length > 0 && !strategyId) setStrategyId(d.strategies[0].id);
+        const ordered = prioritizeCryptoStrategies(d.strategies ?? []);
+        setStrategies(ordered);
+        if (ordered.length > 0 && !strategyId) {
+          const defaultStrategy = defaultCryptoBacktestStrategy(ordered);
+          setStrategyId(defaultStrategy);
+          setTimeframe(recommendedCryptoBacktestTimeframe(defaultStrategy));
+        }
       })
       .catch(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!strategyId) {
+      return;
+    }
+    setTimeframe((current) => (current === "1d" ? recommendedCryptoBacktestTimeframe(strategyId) : current));
+  }, [strategyId]);
 
   async function handleRun() {
     if (!strategyId) { setBtError("请选择策略"); return; }
@@ -691,6 +708,13 @@ function CryptoBacktestTab({ selectedSymbol }: { selectedSymbol: string }) {
             {strategies.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
+        {strategyId === "vwap_ema_trend" ? (
+          <div className="rounded-lg border border-[#2962ff]/30 bg-[#2962ff]/10 p-3 text-xs text-[#c9d1d9] space-y-1">
+            <div className="font-medium text-white">默认研究策略</div>
+            <div>推荐周期：15m / 1h</div>
+            <div>参数关注：fast_period / slow_period / vwap_window / trailing_stop_pct / max_hold_bars</div>
+          </div>
+        ) : null}
 
         <div className="space-y-1">
           <label className="text-xs text-[#8b949e]">K 线周期</label>
