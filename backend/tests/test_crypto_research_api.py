@@ -106,6 +106,10 @@ def test_crypto_research_training_summary(client: TestClient, monkeypatch) -> No
     assert body["validation_windows"] > 0
     assert set(body["latest_class_probabilities"].keys()) == {"-1", "0", "1"}
     assert "reversal_probability" in body
+    assert body["market_regime"] in {"trend", "range", "high_volatility"}
+    assert body["recommended_strategy_ids"]
+    assert body["recommended_timeframes"]
+    assert body["parameter_search_ready"] is True
 
 
 def test_crypto_research_latest_returns_cached_summary(client: TestClient, monkeypatch) -> None:
@@ -138,3 +142,36 @@ def test_crypto_research_latest_returns_cached_summary(client: TestClient, monke
     assert latest["symbol"] == "BTC-USDT"
     assert latest["base_timeframe"] == "15m"
     assert latest["feature_count"] > 0
+    assert latest["market_regime"] in {"trend", "range", "high_volatility"}
+
+
+def test_crypto_research_optimize_returns_best_params(client: TestClient, monkeypatch) -> None:
+    from quantpilot.api import data as data_api
+
+    storage = MarketDataStorage(db_path=":memory:")
+    _seed(storage)
+    monkeypatch.setattr(data_api, "_storage", storage)
+
+    response = client.post(
+        "/api/crypto/research/optimize",
+        json={
+            "symbol": "BTC-USDT",
+            "base_timeframe": "15m",
+            "higher_timeframes": ["1h", "4h", "1d", "1w"],
+            "limit": 180,
+            "param_grid": {
+                "fast_period": [5, 8],
+                "slow_period": [20, 30],
+                "vwap_window": [10, 20],
+                "trailing_stop_pct": [0.02, 0.03],
+                "max_hold_bars": [24, 48],
+            },
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["strategy_id"] == "vwap_ema_trend"
+    assert body["best_params"]
+    assert body["window_count"] > 0
+    assert "mean_strategy_return" in body

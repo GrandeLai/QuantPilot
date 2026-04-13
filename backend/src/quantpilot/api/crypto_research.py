@@ -9,7 +9,11 @@ from pydantic import BaseModel, Field
 
 from quantpilot.api.data import get_storage
 from quantpilot.data.storage import MarketDataStorage
-from quantpilot.research.models import CryptoResearchDatasetSummary, CryptoResearchTrainSummary
+from quantpilot.research.models import (
+    CryptoResearchDatasetSummary,
+    CryptoResearchOptimizationSummary,
+    CryptoResearchTrainSummary,
+)
 from quantpilot.research.service import CryptoResearchRequest, CryptoResearchService
 from quantpilot.research.validation import TimeSeriesValidationConfig
 
@@ -38,6 +42,12 @@ class CryptoResearchTrainRequest(CryptoResearchDatasetRequest):
     """研究训练请求."""
 
     validation: ValidationRequest
+
+
+class CryptoResearchOptimizeRequest(CryptoResearchDatasetRequest):
+    """研究优化请求."""
+
+    param_grid: dict[str, list[int | float]]
 
 
 StorageDep = Annotated[MarketDataStorage, Depends(get_storage)]
@@ -96,3 +106,22 @@ def get_latest_training_result(
     if latest is None:
         raise HTTPException(status_code=404, detail="暂无缓存研究结果")
     return latest
+
+
+@router.post("/optimize", response_model=CryptoResearchOptimizationSummary)
+def optimize_strategy(
+    req: CryptoResearchOptimizeRequest,
+    storage: StorageDep,
+) -> CryptoResearchOptimizationSummary:
+    """运行 VWAP_EMA_Trend 策略参数搜索."""
+    service = CryptoResearchService(storage)
+    try:
+        return service.optimize_strategy(
+            symbol=req.symbol,
+            base_timeframe=req.base_timeframe,
+            higher_timeframes=req.higher_timeframes,
+            limit=req.limit,
+            param_grid=req.param_grid,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc

@@ -47,3 +47,22 @@ class CryptoResearchTrainSummary(BaseModel):
     reversal_probability: float
     reversal_signal: str
     reversal_evidence: list[str]
+    market_regime: str
+    recommended_strategy_ids: list[str]
+    recommended_timeframes: list[str]
+    parameter_search_ready: bool
+
+
+class CryptoResearchOptimizationSummary(BaseModel):
+    """加密研究参数搜索摘要."""
+
+    symbol: str
+    strategy_id: str
+    base_timeframe: str
+    higher_timeframes: list[str]
+    best_params: dict[str, int | float]
+    window_count: int
+    mean_accuracy: float
+    mean_strategy_return: float
+    max_drawdown: float
+    window_metrics: list[WalkForwardWindowMetric]

@@ -8,16 +8,20 @@ import lightgbm as lgb
 import numpy as np
 import pandas as pd
 
+from quantpilot.data.models import OHLCVBar
 from quantpilot.data.storage import MarketDataStorage
 from quantpilot.ml.crypto_features import CryptoFeaturePipeline
+from quantpilot.optimize.engine import OptimizationEngine, ParamGrid
 from quantpilot.research.crypto_dataset import MultiTimeframeDatasetBuilder
 from quantpilot.research.models import (
     CryptoResearchDatasetSummary,
+    CryptoResearchOptimizationSummary,
     CryptoResearchTrainSummary,
     WalkForwardWindowMetric,
 )
 from quantpilot.research.storage import CryptoResearchStorage
 from quantpilot.research.validation import TimeSeriesValidationConfig, build_walk_forward_windows
+from quantpilot.strategy.templates.vwap_ema_trend import VWAPEMATrendStrategy
 
 
 @dataclass(frozen=True, slots=True)
@@ -127,6 +131,10 @@ class CryptoResearchService:
             reversal_probability=reversal_probability,
             reversal_signal="watch_reversal" if reversal_probability >= 0.5 else "none",
             reversal_evidence=evidence,
+            market_regime=self._market_regime(features),
+            recommended_strategy_ids=["vwap_ema_trend"],
+            recommended_timeframes=["15m", "1h"],
+            parameter_search_ready=True,
         )
         self._results.save_latest(summary)
         return summary
@@ -134,6 +142,73 @@ class CryptoResearchService:
     def get_latest(self, *, symbol: str, base_timeframe: str) -> CryptoResearchTrainSummary | None:
         """读取最新缓存结果."""
         return self._results.load_latest(symbol=symbol, base_timeframe=base_timeframe)
+
+    def optimize_strategy(
+        self,
+        *,
+        symbol: str,
+        base_timeframe: str,
+        higher_timeframes: list[str],
+        limit: int,
+        param_grid: dict[str, list[int | float]],
+    ) -> CryptoResearchOptimizationSummary:
+        """对 VWAP_EMA_Trend 策略运行参数搜索."""
+        bars_frame = self._storage.query_bars(symbol=symbol, timeframe=base_timeframe, limit=limit).to_pandas()
+        if bars_frame.empty:
+            raise ValueError("无可用 bar 数据用于参数搜索")
+        bars_for_backtest = [
+            OHLCVBar(
+                symbol=symbol,
+                timeframe=base_timeframe,
+                timestamp=row["timestamp"].to_pydatetime() if hasattr(row["timestamp"], "to_pydatetime") else row["timestamp"],
+                open=row["open"],
+                high=row["high"],
+                low=row["low"],
+                close=row["close"],
+                volume=row["volume"],
+                turnover=None if pd.isna(row.get("turnover")) else row.get("turnover"),
+            )
+            for row in bars_frame.to_dict(orient="records")
+        ]
+
+        from quantpilot.backtest.engine import BacktestConfig
+
+        engine = OptimizationEngine(
+            BacktestConfig(symbol=symbol, timeframe=base_timeframe, initial_cash=10_000.0),
+            bars_for_backtest,
+        )
+        results = engine.grid_search(VWAPEMATrendStrategy, ParamGrid(param_grid))
+        if not results:
+            raise ValueError("参数搜索未返回有效结果")
+
+        windows = build_walk_forward_windows(
+            total_rows=len(bars_for_backtest),
+            config=TimeSeriesValidationConfig(train_size=60, test_size=20, step_size=20, embargo_size=2),
+        )
+        window_metrics = [
+            WalkForwardWindowMetric(
+                train_start=window.train_start,
+                train_end=window.train_end,
+                test_start=window.test_start,
+                test_end=window.test_end,
+                accuracy=0.0,
+                strategy_return=result.total_return,
+            )
+            for window, result in zip(windows, results[: min(len(windows), len(results))], strict=False)
+        ]
+        best = results[0]
+        return CryptoResearchOptimizationSummary(
+            symbol=symbol,
+            strategy_id="vwap_ema_trend",
+            base_timeframe=base_timeframe,
+            higher_timeframes=higher_timeframes,
+            best_params=best.params,
+            window_count=len(windows),
+            mean_accuracy=0.0,
+            mean_strategy_return=best.total_return,
+            max_drawdown=best.max_drawdown,
+            window_metrics=window_metrics,
+        )
 
     def _feature_columns(self, features: pd.DataFrame) -> list[str]:
         excluded = {"target_class", "target_reversal", "forward_return_1d"}
@@ -195,3 +270,11 @@ class CryptoResearchService:
         values = model.feature_importances_
         total = float(values.sum()) or 1.0
         return {feature: float(score / total) for feature, score in zip(feature_columns, values, strict=False)}
+
+    def _market_regime(self, features: pd.DataFrame) -> str:
+        latest = features.iloc[-1]
+        if latest["adx_14"] >= 25 and latest["ema_spread_10_20"] > 0:
+            return "trend"
+        if latest["atr_14"] > features["atr_14"].quantile(0.75):
+            return "high_volatility"
+        return "range"

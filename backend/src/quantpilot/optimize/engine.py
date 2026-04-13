@@ -52,7 +52,11 @@ class OptimizationEngine:
     ) -> OptimizeResult:
         """运行单次回测，返回优化结果."""
         try:
-            strategy = strategy_class(**params)
+            try:
+                strategy = strategy_class(**params)
+            except TypeError:
+                strategy = strategy_class()
+                strategy.default_params = {**getattr(strategy, "default_params", {}), **params}
             engine = BacktestEngine(self._config)
             result = engine.run(strategy, self._bars)
             return OptimizeResult(
