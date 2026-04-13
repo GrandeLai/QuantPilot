@@ -7,6 +7,16 @@
 
 ---
 
+## 主工作台结构（新版）
+
+- 研究中心：看盘、选股/选币、候选池研究
+- 策略库：策略编写、版本、模板、策略资产管理
+- 验证中心：回测、样本外验证、参数实验、晋升判断
+- 运行中心：模拟盘、实盘、订单、执行状态
+- 风险与复盘：组合风险、回撤、熔断、复盘结论
+
+---
+
 ## 目录
 
 - [看盘 — 价格走势图](#看盘--价格走势图)
@@ -70,20 +80,26 @@
 
 ### 功能概述
 
-创建虚拟交易账户（使用模拟资金，不涉及真实金钱），用真实历史价格数据模拟买卖操作，查看账户的盈亏和持仓情况。
+使用 **Longbridge 官方模拟账户** 进行模拟交易，查看账户资产、持仓、委托、成交和资金流水。
 
 > **持仓**：指当前持有的股票数量和成本价。例如"持有 100 股苹果，均价 150 美元"。
 
 ### 数据来源
 
-- **会话（session）列表和详情**：`GET /api/paper/sessions`、`GET /api/paper/sessions/{id}`，数据保存在本地内存（服务重启后清空）。
-- **订单队列（可选，需 Redis）**：`POST /api/paper/sessions/{id}/orders/enqueue` 将订单写入 Redis Streams，实现可靠的订单排队。
-- 前端组件：`frontend/src/components/PaperTradingPanel.tsx`  
-- 后端模块：`backend/src/quantpilot/paper/`、`backend/src/quantpilot/api/paper.py`
+- **统一交易接口**：`/api/trading/*`
+- **Provider 目标**：优先接入 `Longbridge` 官方模拟账户；若当前环境没有可用凭证，则自动回退到结构一致的 mock provider。
+- **资产总览**：`GET /api/trading/account`
+- **持仓**：`GET /api/trading/positions`
+- **委托**：`GET /api/trading/orders/today`、`GET /api/trading/orders/history`
+- **成交**：`GET /api/trading/executions/today`、`GET /api/trading/executions/history`
+- **资金流水**：`GET /api/trading/cash-flows`
+- **下单 / 撤单**：`POST /api/trading/orders`、`DELETE /api/trading/orders/{order_id}`
+- 前端组件：`frontend/src/components/PaperTradingPanel.tsx`
+- 后端模块：`backend/src/quantpilot/api/trading.py`、`backend/src/quantpilot/broker/`
 
 ### 使用目的
 
-在投入真实资金之前，用模拟账户验证策略是否可行。用户可以设置初始资金金额、手续费（交易成本）和滑点（买卖价格与预期价格的微小偏差），观察策略在历史行情下的表现，确认盈亏合理后再考虑实盘。
+在投入真实资金之前，用官方模拟账户验证交易链路、委托状态、成交反馈、持仓变化和资产联动是否符合预期。当前实现严格遵守 Longbridge 模拟账户边界：支持港美股票 / ETF、港股轮证；不支持 OTC、盘前盘后和期权交易。
 
 ---
 
