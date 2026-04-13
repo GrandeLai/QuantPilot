@@ -22,9 +22,16 @@ QuantPilot 是一款面向个人量化交易者的本地优先平台，兼具专
 
 ```
 frontend/        React 18 + TypeScript + Vite 8 + TradingView Lightweight Charts
+assistant_frontend/ React 19 + TypeScript + Vite 8 + Zustand
 backend/         Python 3.12 + FastAPI + DuckDB + LiteLLM
 rust_core/       Rust + PyO3（高性能回测引擎核心）
 ```
+
+### 产品结构说明
+
+- `frontend/`：QuantPilot 主工作台，承载研究、策略、验证、运行等量化工作流
+- `assistant_frontend/`：Investment Assistant 前端，承载资产总览、机会池、调仓建议、风险雷达、复盘与问答
+- `backend/`：共享后端与平台层，同时服务主工作台与投资助理
 
 ## 快速开始
 
@@ -105,6 +112,55 @@ npm run build                    # 生产构建
 npm run type-check               # TypeScript 类型检查
 ```
 
+## Longbridge 模拟交易配置
+
+当前项目的“模拟交易”模块以 **Longbridge 官方模拟账户** 为第一目标。
+
+### 推荐配置方式
+
+在本地环境中设置以下变量后，交易页会优先接入 Longbridge：
+
+```bash
+export QUANTPILOT_TRADING_PROVIDER=auto
+export QUANTPILOT_LONGBRIDGE_APP_KEY="your_app_key"
+export QUANTPILOT_LONGBRIDGE_APP_SECRET="your_app_secret"
+export QUANTPILOT_LONGBRIDGE_ACCESS_TOKEN="your_access_token"
+```
+
+也支持使用 Longbridge 官方环境变量命名：
+
+```bash
+export LONGBRIDGE_APP_KEY="your_app_key"
+export LONGBRIDGE_APP_SECRET="your_app_secret"
+export LONGBRIDGE_ACCESS_TOKEN="your_access_token"
+```
+
+### 无凭证时的本地验证
+
+如果没有可用的 Longbridge 凭证，系统会自动回退到 mock provider：
+
+- 后端统一走 `/api/trading/*` 交易接口
+- 前端界面、状态管理、下单链路不依赖 mock 私有字段
+- 只要补齐 Longbridge 配置，即可平滑切换到官方模拟账户
+
+也可以显式强制使用 mock：
+
+```bash
+export QUANTPILOT_TRADING_PROVIDER=mock
+```
+
+### 当前模拟交易能力边界
+
+实现严格遵守 Longbridge 官方模拟账户当前边界：
+
+- 支持：港股 / 美股股票、ETF、港股轮证
+- 支持：美股股票做空能力已在官方侧支持，但当前项目 UI 暂未开放独立做空流程
+- 不支持：美股 OTC
+- 不支持：盘前盘后交易
+- 不支持：期权交易
+
+前端会对上述不支持范围做显式禁用或提示，不伪装支持。
+
 ## 项目结构
 
 ```
@@ -125,6 +181,11 @@ QuantPilot/
 │   │   ├── App.tsx             # 根组件
 │   │   └── components/
 │   │       └── CandlestickChart.tsx  # TradingView K 线图组件
+│   └── package.json
+├── assistant_frontend/         # Investment Assistant React 前端
+│   ├── src/
+│   │   ├── App.tsx             # 投资助理壳层
+│   │   └── components/         # 助理核心视图组件
 │   └── package.json
 ├── docs/
 │   └── DESIGN.md               # 完整设计文档（必读）
@@ -148,6 +209,21 @@ QuantPilot/
 - **Phase 4**：生态版 — 插件系统、ML 策略、社交跟单
 
 详见 [docs/DESIGN.md](docs/DESIGN.md)。
+
+## 当前推进重点
+
+2026-04 这一轮迭代将围绕“私人量化投资助理”的落地能力展开，优先级不是继续扩张页面数量，而是先把策略闭环真正打通：
+
+- **第一优先级：前后端契约修复**
+ 统一 `/api` 前缀、修复失效接口、补齐真实数据链路，保证现有主工作台在本地开发环境稳定可用。
+- **第二优先级：统一策略注册中心**
+ 让模板策略与用户自定义策略进入同一可运行目录，打通 `策略编辑 -> 回测验证 -> 模拟盘 -> 组合管理`。
+- **第三优先级：策略验证与晋升机制**
+ 从单次回测升级为验证工作台，逐步建立 `draft -> backtest_passed -> paper_running -> live_candidate -> live_running` 的策略生命周期。
+- **第四优先级：AI 策略评审与组合建议**
+ 让 AI 从聊天助手升级为基于真实回测、模拟盘、组合数据输出解释和建议的“策略评审官”。
+
+设计与执行细节见 [docs/DESIGN.md](docs/DESIGN.md) 中新增的“前端增强与策略晋升执行计划（2026-04 Review）”章节。
 
 ## 许可证
 
