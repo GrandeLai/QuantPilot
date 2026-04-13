@@ -52,6 +52,33 @@ export default function CryptoResearchPanel() {
               </div>
               <div className="text-xs text-[#8b949e]">反转概率：{(summary.reversal_probability * 100).toFixed(1)}% · 信号 {summary.reversal_signal}</div>
               <div className="text-xs text-[#8b949e]">关键证据：{summary.reversal_evidence.join(" / ") || "—"}</div>
+              <div className="pt-2 border-t border-[#2a2e39]">
+                <div className="text-xs font-medium text-white mb-2">Top 因子重要性</div>
+                <ul className="space-y-1 text-xs text-[#8b949e]">
+                  {Object.entries(summary.feature_importance)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5)
+                    .map(([name, value]) => (
+                      <li key={name} className="flex items-center justify-between gap-2">
+                        <span className="truncate">{name}</span>
+                        <span className="font-mono text-white">{(value * 100).toFixed(1)}%</span>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+              <div className="pt-2 border-t border-[#2a2e39]">
+                <div className="text-xs font-medium text-white mb-2">窗口表现</div>
+                <ul className="space-y-1 text-xs text-[#8b949e]">
+                  {summary.window_metrics.slice(0, 3).map((window, index) => (
+                    <li key={`${summary.symbol}-${index}`} className="flex items-center justify-between gap-2">
+                      <span>窗口 {index + 1}</span>
+                      <span className="font-mono">
+                        准确率 {(window.accuracy * 100).toFixed(1)}% / 收益 {(window.strategy_return * 100).toFixed(2)}%
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           ))}
         </div>

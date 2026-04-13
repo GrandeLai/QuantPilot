@@ -1,21 +1,12 @@
 import { useEffect, useState } from "react";
 
-import { fetchCryptoOpportunities, fetchCryptoRisks } from "../api/client";
-
-interface AdviceCard {
-  type: string;
-  subject: string;
-  recommendation: string;
-  confidence: number;
-  evidence: Array<{ summary: string }>;
-  risk_notes: string[];
-}
+import { fetchCryptoOpportunities, fetchCryptoRisks, type AdvisorCard } from "../api/client";
 
 /**
  * Minimal rebalance suggestion view composed from advisor cards.
  */
 export function RebalanceSuggestions() {
-  const [suggestions, setSuggestions] = useState<AdviceCard[]>([]);
+  const [suggestions, setSuggestions] = useState<AdvisorCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,8 +14,8 @@ export function RebalanceSuggestions() {
     void (async () => {
       try {
         const [opportunities, risks] = await Promise.all([
-          fetchCryptoOpportunities<{ items: AdviceCard[] }>("BTC-USDT"),
-          fetchCryptoRisks<{ items: AdviceCard[] }>("BTC-USDT"),
+          fetchCryptoOpportunities<{ items: AdvisorCard[] }>("BTC-USDT"),
+          fetchCryptoRisks<{ items: AdvisorCard[] }>("BTC-USDT"),
         ]);
         setSuggestions([...opportunities.items, ...risks.items]);
       } catch (err) {
@@ -44,9 +35,11 @@ export function RebalanceSuggestions() {
       {!loading && !error ? (
         <ul>
           {suggestions.map((item, index) => (
-            <li key={`${item.type}-${item.subject}-${index}`}>
-              <strong>{item.subject}</strong> · {item.recommendation} · {(item.confidence * 100).toFixed(1)}%
-              <div>{item.evidence[0]?.summary}</div>
+            <li key={`${item.type}-${item.subject}-${index}`} className="rounded-lg border border-[#d1d5db] p-4 mb-3">
+              <div className="font-semibold">{item.subject}</div>
+              <div>{item.recommendation} · {(item.confidence * 100).toFixed(1)}%</div>
+              <div className="text-sm text-slate-600">{item.evidence[0]?.summary}</div>
+              <div className="text-xs text-slate-500 mt-1">{item.risk_notes[0] ?? "—"}</div>
             </li>
           ))}
         </ul>

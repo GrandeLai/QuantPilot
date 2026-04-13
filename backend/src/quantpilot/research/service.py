@@ -138,6 +138,7 @@ class CryptoResearchService:
             n_estimators=60,
             learning_rate=0.05,
             num_leaves=31,
+            n_jobs=1,
             random_state=42,
             verbosity=-1,
         )
@@ -150,6 +151,7 @@ class CryptoResearchService:
             n_estimators=40,
             learning_rate=0.05,
             num_leaves=15,
+            n_jobs=1,
             random_state=42,
             verbosity=-1,
         )

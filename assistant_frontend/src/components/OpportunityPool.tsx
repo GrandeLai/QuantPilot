@@ -1,34 +1,19 @@
 import { useEffect, useState } from "react";
 
-import { fetchCryptoOpportunities } from "../api/client";
-
-interface AdviceEvidence {
-  source: string;
-  summary: string;
-  observed_at: string;
-}
-
-interface AdviceCard {
-  type: string;
-  subject: string;
-  recommendation: string;
-  confidence: number;
-  evidence: AdviceEvidence[];
-  risk_notes: string[];
-}
+import { fetchCryptoOpportunities, type AdvisorCard } from "../api/client";
 
 /**
  * Crypto opportunity pool view backed by advisor cards.
  */
 export function OpportunityPool() {
-  const [items, setItems] = useState<AdviceCard[]>([]);
+  const [items, setItems] = useState<AdvisorCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     void (async () => {
       try {
-        const result = await fetchCryptoOpportunities<{ items: AdviceCard[] }>("BTC-USDT");
+        const result = await fetchCryptoOpportunities<{ items: AdvisorCard[] }>("BTC-USDT");
         setItems(result.items);
       } catch (err) {
         setError(String(err));
@@ -47,9 +32,11 @@ export function OpportunityPool() {
       {!loading && !error ? (
         <ul>
           {items.map((item) => (
-            <li key={`${item.type}-${item.subject}`}>
-              <strong>{item.subject}</strong> · {item.recommendation} · 置信度 {(item.confidence * 100).toFixed(1)}%
-              <div>{item.evidence[0]?.summary}</div>
+            <li key={`${item.type}-${item.subject}`} className="rounded-lg border border-[#d1d5db] p-4 mb-3">
+              <div className="font-semibold">{item.subject}</div>
+              <div>{item.recommendation} · 置信度 {(item.confidence * 100).toFixed(1)}%</div>
+              <div className="text-sm text-slate-600">{item.evidence[0]?.summary}</div>
+              <div className="text-xs text-slate-500 mt-1">{item.risk_notes[0] ?? "—"}</div>
             </li>
           ))}
         </ul>

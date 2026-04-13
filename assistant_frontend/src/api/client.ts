@@ -1,6 +1,29 @@
 /**
  * Minimal advisor API client helpers.
  */
+export interface AdvisorOverviewPayload {
+  net_worth: number;
+  cash_ratio: number;
+  positions: Array<Record<string, unknown>>;
+  generated_at: string;
+}
+
+export interface AdvisorEvidence {
+  source: string;
+  summary: string;
+  observed_at: string;
+}
+
+export interface AdvisorCard {
+  type: string;
+  subject: string;
+  recommendation: string;
+  confidence: number;
+  evidence: AdvisorEvidence[];
+  risk_notes: string[];
+  freshness?: string;
+}
+
 async function getJson<T>(input: RequestInfo | URL, init?: RequestInit): Promise<T> {
   const response = await fetch(input, init);
 

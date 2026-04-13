@@ -1,27 +1,20 @@
 import { useEffect, useState } from "react";
 
-import { fetchCryptoOpportunities, fetchCryptoRisks, fetchOverview } from "../api/client";
-
-interface AdvisorOverview {
-  net_worth: number;
-  cash_ratio: number;
-  positions: Array<Record<string, unknown>>;
-}
-
-interface AdviceCard {
-  type: string;
-  subject: string;
-  recommendation: string;
-  confidence: number;
-}
+import {
+  fetchCryptoOpportunities,
+  fetchCryptoRisks,
+  fetchOverview,
+  type AdvisorCard,
+  type AdvisorOverviewPayload,
+} from "../api/client";
 
 /**
  * Minimal review view backed by current overview and advisor card summaries.
  */
 export function ReviewAsk() {
-  const [overview, setOverview] = useState<AdvisorOverview | null>(null);
-  const [opportunities, setOpportunities] = useState<AdviceCard[]>([]);
-  const [risks, setRisks] = useState<AdviceCard[]>([]);
+  const [overview, setOverview] = useState<AdvisorOverviewPayload | null>(null);
+  const [opportunities, setOpportunities] = useState<AdvisorCard[]>([]);
+  const [risks, setRisks] = useState<AdvisorCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,9 +22,9 @@ export function ReviewAsk() {
     void (async () => {
       try {
         const [overviewData, opportunityData, riskData] = await Promise.all([
-          fetchOverview<AdvisorOverview>(),
-          fetchCryptoOpportunities<{ items: AdviceCard[] }>("BTC-USDT"),
-          fetchCryptoRisks<{ items: AdviceCard[] }>("BTC-USDT"),
+          fetchOverview<AdvisorOverviewPayload>(),
+          fetchCryptoOpportunities<{ items: AdvisorCard[] }>("BTC-USDT"),
+          fetchCryptoRisks<{ items: AdvisorCard[] }>("BTC-USDT"),
         ]);
         setOverview(overviewData);
         setOpportunities(opportunityData.items);
@@ -56,6 +49,8 @@ export function ReviewAsk() {
           <p>当前现金占比：{(overview.cash_ratio * 100).toFixed(1)}%</p>
           <p>高优先机会数：{opportunities.length}</p>
           <p>高优先风险数：{risks.length}</p>
+          <p>高优先机会：{opportunities[0]?.subject ?? "—"}</p>
+          <p>高优先风险：{risks[0]?.subject ?? "—"}</p>
           <p>
             当前复盘结论：
             {risks.length > 0

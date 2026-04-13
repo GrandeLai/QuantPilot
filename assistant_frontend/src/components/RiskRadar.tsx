@@ -1,34 +1,19 @@
 import { useEffect, useState } from "react";
 
-import { fetchCryptoRisks } from "../api/client";
-
-interface AdviceEvidence {
-  source: string;
-  summary: string;
-  observed_at: string;
-}
-
-interface AdviceCard {
-  type: string;
-  subject: string;
-  recommendation: string;
-  confidence: number;
-  evidence: AdviceEvidence[];
-  risk_notes: string[];
-}
+import { fetchCryptoRisks, type AdvisorCard } from "../api/client";
 
 /**
  * Crypto risk radar view backed by advisor risk cards.
  */
 export function RiskRadar() {
-  const [items, setItems] = useState<AdviceCard[]>([]);
+  const [items, setItems] = useState<AdvisorCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     void (async () => {
       try {
-        const result = await fetchCryptoRisks<{ items: AdviceCard[] }>("BTC-USDT");
+        const result = await fetchCryptoRisks<{ items: AdvisorCard[] }>("BTC-USDT");
         setItems(result.items);
       } catch (err) {
         setError(String(err));
@@ -47,9 +32,11 @@ export function RiskRadar() {
       {!loading && !error ? (
         <ul>
           {items.map((item) => (
-            <li key={`${item.type}-${item.subject}`}>
-              <strong>{item.subject}</strong> · {item.recommendation} · 风险置信度 {(item.confidence * 100).toFixed(1)}%
-              <div>{item.evidence[0]?.summary}</div>
+            <li key={`${item.type}-${item.subject}`} className="rounded-lg border border-[#d1d5db] p-4 mb-3">
+              <div className="font-semibold">{item.subject}</div>
+              <div>{item.recommendation} · 风险置信度 {(item.confidence * 100).toFixed(1)}%</div>
+              <div className="text-sm text-slate-600">{item.evidence[0]?.summary}</div>
+              <div className="text-xs text-slate-500 mt-1">{item.risk_notes[0] ?? "—"}</div>
             </li>
           ))}
         </ul>
