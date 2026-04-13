@@ -2,6 +2,8 @@
 
 from fastapi.testclient import TestClient
 
+from quantpilot.api.advisor import AdvisorOpportunitiesResponse, AdvisorOverviewResponse
+
 
 def test_advisor_overview_returns_structured_snapshot(client: TestClient) -> None:
     """Overview endpoint should return the expected structured snapshot."""
@@ -9,7 +11,10 @@ def test_advisor_overview_returns_structured_snapshot(client: TestClient) -> Non
     assert response.status_code == 200
 
     body = response.json()
+    overview = AdvisorOverviewResponse.model_validate(body)
     assert {"net_worth", "cash_ratio", "positions", "generated_at"} <= body.keys()
+    assert overview.net_worth == 100000.0
+    assert overview.cash_ratio == 0.35
 
 
 def test_advisor_opportunities_return_advice_cards(client: TestClient) -> None:
@@ -18,13 +23,12 @@ def test_advisor_opportunities_return_advice_cards(client: TestClient) -> None:
     assert response.status_code == 200
 
     body = response.json()
+    opportunities = AdvisorOpportunitiesResponse.model_validate(body)
     assert isinstance(body["items"], list)
-    if body["items"]:
-        first = body["items"][0]
-        assert {
-            "type",
-            "subject",
-            "recommendation",
-            "confidence",
-            "evidence",
-        } <= first.keys()
+    if opportunities.items:
+        first = opportunities.items[0]
+        assert first.type == "opportunity"
+        assert first.subject == "AAPL"
+        assert first.freshness == "fresh"
+        assert first.risk_notes
+        assert first.evidence
