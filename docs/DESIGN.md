@@ -897,8 +897,8 @@ volumes:
 ### Phase 2：可用版（P1 功能，8 周）
 
 - [x] **模拟盘**：实时行情驱动的 Paper Trading
-- [ ] **券商接入**：富途 + 长桥 + Binance API 适配器（需外部 SDK）
-- [ ] **实盘交易**：完整订单管理 + 实盘风控（依赖券商接入）
+- [ ] **券商接入**：富途待接入；长桥股票交易 provider、OKX 加密 provider 与 mock fallback 已收编
+- [ ] **实盘交易**：统一 `/api/trading/*` 主线、订单生命周期与运行中心接线已完成；完整 OMS 与实盘风控仍待补齐
 - [x] **告警系统**：价格/信号/风控告警 + 飞书/Telegram 推送
 - [x] **技术指标全量**：41 指标覆盖（pandas-ta）
 - [x] **Markdown 复盘**：自动生成复盘报告
@@ -1033,7 +1033,7 @@ volumes:
 
 - [富途 OpenAPI](https://openapi.futunn.com/)
 - [长桥 OpenAPI](https://open.longportapp.com/)
-- [Binance API](https://binance-docs.github.io/apidocs/)
+- [OKX API Docs](https://www.okx.com/docs-v5/en/)
 - [Interactive Brokers TWS API](https://interactivebrokers.github.io/tws-api/)
 - [飞书 Open API](https://open.feishu.cn/)
 - [LiteLLM](https://docs.litellm.ai/)

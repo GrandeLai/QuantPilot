@@ -1,0 +1,125 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import {
+  estimateTradingOrder,
+  fetchTradingStatus,
+  searchTradingSecurities,
+  submitTradingOrder,
+} from "./trading.ts";
+
+test("fetchTradingStatus calls the unified trading status endpoint", async () => {
+  let capturedUrl = "";
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    capturedUrl = String(input);
+    return new Response(
+      JSON.stringify({
+        provider: "mock",
+        mode: "paper",
+        configured: true,
+        using_mock_fallback: false,
+        capabilities: {
+          supported_markets: ["US"],
+          supported_asset_types: ["stock"],
+          supported_order_types: ["market"],
+          supports_us_short_selling: true,
+          supports_otc: false,
+          supports_us_prepost: false,
+          supports_options: false,
+          notes: [],
+        },
+      }),
+      { status: 200 },
+    );
+  }) as typeof fetch;
+
+  try {
+    const result = await fetchTradingStatus();
+    assert.equal(capturedUrl, "/api/trading/status");
+    assert.equal(result.provider, "mock");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("searchTradingSecurities uses the code-or-name search endpoint", async () => {
+  let capturedUrl = "";
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    capturedUrl = String(input);
+    return new Response(JSON.stringify({ items: [{ symbol: "AAPL.US", name: "Apple Inc." }] }), { status: 200 });
+  }) as typeof fetch;
+
+  try {
+    const result = await searchTradingSecurities("AAPL");
+    assert.equal(capturedUrl, "/api/trading/securities/search?q=AAPL");
+    assert.equal(result[0]?.symbol, "AAPL.US");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("estimateTradingOrder posts to the estimate endpoint", async () => {
+  let capturedUrl = "";
+  let capturedInit: RequestInit | undefined;
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    capturedUrl = String(input);
+    capturedInit = init;
+    return new Response(
+      JSON.stringify({
+        symbol: "AAPL.US",
+        side: "buy",
+        order_type: "market",
+        reference_price: 100,
+        cash_max_qty: 10,
+        sell_max_qty: 0,
+      }),
+      { status: 200 },
+    );
+  }) as typeof fetch;
+
+  try {
+    const result = await estimateTradingOrder({ symbol: "AAPL.US", side: "buy", order_type: "market" });
+    assert.equal(capturedUrl, "/api/trading/orders/estimate");
+    assert.equal(capturedInit?.method, "POST");
+    assert.equal(result.cash_max_qty, 10);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("submitTradingOrder posts the unified order payload", async () => {
+  let capturedUrl = "";
+  let capturedInit: RequestInit | undefined;
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    capturedUrl = String(input);
+    capturedInit = init;
+    return new Response(
+      JSON.stringify({
+        provider: "mock",
+        order_id: "MOCK-000001",
+        status: "filled",
+        message: "accepted",
+      }),
+      { status: 200 },
+    );
+  }) as typeof fetch;
+
+  try {
+    const result = await submitTradingOrder({
+      symbol: "AAPL.US",
+      side: "buy",
+      order_type: "market",
+      quantity: 10,
+    });
+    assert.equal(capturedUrl, "/api/trading/orders");
+    assert.equal(capturedInit?.method, "POST");
+    assert.ok(String(capturedInit?.body).includes('"symbol":"AAPL.US"'));
+    assert.equal(result.order_id, "MOCK-000001");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

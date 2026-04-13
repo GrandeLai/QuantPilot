@@ -171,6 +171,13 @@ QuantPilot/
 - **Phase 0**（已完成）：技术验证 — 脚手架、DuckDB、Rust PyO3、TradingView、LiteLLM
 - **Phase 1**（进行中）：MVP — 数据模块、K 线可视化、策略编辑器、基础回测
 - **Phase 2**：可用版 — 模拟盘、券商接入、实盘交易、告警系统
+
+当前交易执行层的实际状态是：
+
+- 股票/通用交易已经统一到 `/api/trading/*`
+- `Longbridge` 为正式股票交易 provider
+- `mock provider` 为本地兜底与测试闭环
+- 加密货币继续通过 `OKX` 专用链路执行
 - **Phase 3**：好用版 — LLM 深度集成、因子研究、期权模块
 - **Phase 4**：生态版 — 插件系统、ML 策略、社交跟单
 
