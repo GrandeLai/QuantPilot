@@ -945,6 +945,8 @@ volumes:
 - 核心加密因子 provider 与可扩展 provider 注册表
 - BTC/ETH walk-forward 验证摘要与类别概率输出
 - BTC 反转概率与证据特征
+- `VWAP + EMA` 加密趋势策略模板（动态止损 + 超时离场）
+- 基于现有 Optuna 引擎的加密参数搜索摘要
 - 研究结果同时暴露给 QuantPilot 工作台验证中心与 Investment Assistant
 
 ---

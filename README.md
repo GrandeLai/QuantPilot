@@ -18,6 +18,7 @@ QuantPilot 是一款面向个人量化交易者的本地优先平台，兼具专
 - **LLM 深度集成**：AI 贯穿策略生成、风险分析、复盘解读全链路
 - **本地优先**：数据和策略默认本地加密存储，隐私安全
 - **OKX 加密研究链路**：已补齐 BTC/ETH 多时间维度研究数据集、核心因子 provider、walk-forward 验证、反转概率输出，并同时接入主工作台与投资助理
+- **趋势策略模板**：已内置 `VWAP + 双 EMA` 的加密趋势策略模板，支持动态止损、超时离场和后续参数搜索
 
 ## 技术架构
 
@@ -112,6 +113,16 @@ npm run dev                      # 启动开发服务器（热更新）
 npm run build                    # 生产构建
 npm run type-check               # TypeScript 类型检查
 ```
+
+### 加密研究与优化
+
+当前加密研究链路基于 OKX 数据，已支持：
+
+- BTC / ETH 的 `15m / 1h / 4h / 1d / 1w` 多时间维度研究数据集
+- `VWAP_EMA_Trend` 趋势策略模板
+- `POST /api/crypto/research/train` 多周期研究摘要
+- `GET /api/crypto/research/latest` 最近一次缓存研究结果
+- `POST /api/crypto/research/optimize` 基于现有 Optuna 引擎的参数搜索
 
 ## 项目结构
 
