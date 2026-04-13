@@ -106,3 +106,35 @@ def test_crypto_research_training_summary(client: TestClient, monkeypatch) -> No
     assert body["validation_windows"] > 0
     assert set(body["latest_class_probabilities"].keys()) == {"-1", "0", "1"}
     assert "reversal_probability" in body
+
+
+def test_crypto_research_latest_returns_cached_summary(client: TestClient, monkeypatch) -> None:
+    from quantpilot.api import data as data_api
+
+    storage = MarketDataStorage(db_path=":memory:")
+    _seed(storage)
+    monkeypatch.setattr(data_api, "_storage", storage)
+
+    train_response = client.post(
+        "/api/crypto/research/train",
+        json={
+            "symbol": "BTC-USDT",
+            "base_timeframe": "15m",
+            "higher_timeframes": ["1h", "4h", "1d", "1w"],
+            "limit": 180,
+            "validation": {
+                "train_size": 60,
+                "test_size": 20,
+                "step_size": 20,
+                "embargo_size": 2,
+            },
+        },
+    )
+    assert train_response.status_code == 200
+
+    latest_response = client.get("/api/crypto/research/latest?symbol=BTC-USDT&base_timeframe=15m")
+    assert latest_response.status_code == 200
+    latest = latest_response.json()
+    assert latest["symbol"] == "BTC-USDT"
+    assert latest["base_timeframe"] == "15m"
+    assert latest["feature_count"] > 0

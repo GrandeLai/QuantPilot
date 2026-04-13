@@ -32,6 +32,7 @@ data/*.duckdb
 data/*.sqlite
 data/*.parquet
 data/strategies/
+backend/data/crypto_research.sqlite
 
 # Logs
 logs/
