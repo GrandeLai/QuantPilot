@@ -243,11 +243,16 @@ function ProviderBanner({ status }: { status: TradingProviderStatus | null }) {
   if (!status) return null;
 
   const isMock = status.provider === "mock";
+  const isFutu = status.provider === "futu";
   return (
     <Card
       className={cn(
         "border backdrop-blur-sm",
-        isMock ? "border-amber-500/20 bg-amber-500/10" : "border-emerald-500/20 bg-emerald-500/10",
+        isMock
+          ? "border-amber-500/20 bg-amber-500/10"
+          : isFutu
+            ? "border-sky-500/20 bg-sky-500/10"
+            : "border-emerald-500/20 bg-emerald-500/10",
       )}
     >
       <CardContent className="flex flex-col gap-3 p-5">
@@ -255,12 +260,18 @@ function ProviderBanner({ status }: { status: TradingProviderStatus | null }) {
           <div className="flex items-center gap-3">
             {isMock ? (
               <ShieldAlert className="h-5 w-5 text-amber-400" />
+            ) : isFutu ? (
+              <ShieldAlert className="h-5 w-5 text-sky-400" />
             ) : (
               <ShieldCheck className="h-5 w-5 text-emerald-400" />
             )}
             <div>
               <div className="text-sm font-semibold text-foreground">
-                {isMock ? "当前使用 Mock Fallback" : "当前接入 Longbridge 模拟账户"}
+                {isMock
+                  ? "当前使用 Mock Fallback"
+                  : isFutu
+                    ? "当前接入 Futu Provider"
+                    : "当前接入 Longbridge 模拟账户"}
               </div>
               <div className="text-xs text-muted-foreground">
                 {status.reason ?? "交易、资产、持仓、委托、成交均通过统一交易 provider 链路提供。"}
@@ -271,7 +282,7 @@ function ProviderBanner({ status }: { status: TradingProviderStatus | null }) {
             variant="outline"
             className={cn(
               "border-current/20 px-2 py-1 uppercase",
-              isMock ? "text-amber-300" : "text-emerald-300",
+              isMock ? "text-amber-300" : isFutu ? "text-sky-300" : "text-emerald-300",
             )}
           >
             {status.provider} · {status.mode}
@@ -281,12 +292,20 @@ function ProviderBanner({ status }: { status: TradingProviderStatus | null }) {
           <Badge variant="outline" className="border-border/60 bg-background/40">
             支持港股 / 美股股票 / ETF / 港股轮证
           </Badge>
-          <Badge variant="outline" className="border-border/60 bg-background/40">
-            美股做空官方支持，当前 UI 暂未开放
-          </Badge>
-          <Badge variant="outline" className="border-red-500/20 bg-red-500/10 text-red-300">
-            不支持 OTC / 盘前盘后 / 期权
-          </Badge>
+          {isFutu ? (
+            <Badge variant="outline" className="border-sky-500/20 bg-sky-500/10 text-sky-300">
+              当前阶段先完成 Futu provider 接入与状态暴露，完整交易能力后续补齐
+            </Badge>
+          ) : (
+            <>
+              <Badge variant="outline" className="border-border/60 bg-background/40">
+                美股做空官方支持，当前 UI 暂未开放
+              </Badge>
+              <Badge variant="outline" className="border-red-500/20 bg-red-500/10 text-red-300">
+                不支持 OTC / 盘前盘后 / 期权
+              </Badge>
+            </>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -312,7 +331,7 @@ function SearchDropdown({
           <div className="px-4 py-5 text-sm text-muted-foreground">搜索中…</div>
         ) : items.length === 0 ? (
           <div className="px-4 py-5 text-sm text-muted-foreground">
-            没有找到匹配标的。当前优先支持 Longbridge 模拟账户范围内的港美股票 / ETF。
+            没有找到匹配标的。当前优先支持已接入 unified trading provider 的港美股票 / ETF。
           </div>
         ) : (
           items.map((item) => (
@@ -389,7 +408,7 @@ function ConfirmDialog({
         <div className="border-b border-border px-6 py-4">
           <div className="text-lg font-semibold text-foreground">确认下单</div>
           <div className="mt-1 text-sm text-muted-foreground">
-            请再次确认订单信息。当前版本仅开放 Longbridge 模拟账户支持范围内的标准市价 / 限价单。
+            请再次确认订单信息。当前版本仅开放已完成接线的标准市价 / 限价单。
           </div>
         </div>
         <div className="px-6 py-5">{summary}</div>

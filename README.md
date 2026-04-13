@@ -175,6 +175,7 @@ QuantPilot/
 当前交易执行层的实际状态是：
 
 - 股票/通用交易已经统一到 `/api/trading/*`
+- `Futu provider` 已接入 unified trading 主线，并显式暴露配置 / SDK / OpenD 可用性
 - `Longbridge` 为正式股票交易 provider
 - `mock provider` 为本地兜底与测试闭环
 - 加密货币继续通过 `OKX` 专用链路执行

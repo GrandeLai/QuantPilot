@@ -31,6 +31,18 @@ class Settings(BaseSettings):
     host: str = "127.0.0.1"
     port: int = 8000
 
+    # 交易 provider 配置
+    trading_provider: str = "auto"
+    trading_mock_force_session: str = "regular"
+    futu_host: str = ""
+    futu_port: int = 0
+    futu_market: str = "US"
+    futu_unlock_password: str = ""
+    longbridge_app_key: str = ""
+    longbridge_app_secret: str = ""
+    longbridge_access_token: str = ""
+    longbridge_region: str = ""
+
     # 数据目录
     data_dir: Path = Path("data")
     strategy_dir: Path = Path("data/strategies")
@@ -43,6 +55,12 @@ class Settings(BaseSettings):
     # 日志配置
     log_level: str = "INFO"
     log_dir: Path = Path("logs")
+
+    # OKX 加密货币交易配置
+    okx_api_key: str = Field(default="", description="OKX API Key")
+    okx_api_secret: str = Field(default="", description="OKX API Secret")
+    okx_passphrase: str = Field(default="", description="OKX API Passphrase（创建 API Key 时设定）")
+    okx_demo: bool = Field(default=True, description="使用模拟盘（True = x-simulated-trading:1）")
 
 
 def get_settings() -> Settings:

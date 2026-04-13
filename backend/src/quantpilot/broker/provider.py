@@ -5,6 +5,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Protocol
 
+from quantpilot.broker.futu import FutuTradingProvider
 from quantpilot.broker.mock import MockTradingProvider
 from quantpilot.broker.types import (
     TradingAccountOverview,
@@ -61,6 +62,7 @@ def get_trading_provider() -> TradingProvider:
     """返回当前交易 provider 单例.
 
     选择策略：
+    - `QUANTPILOT_TRADING_PROVIDER=futu` 时使用 Futu provider
     - `QUANTPILOT_TRADING_PROVIDER=longbridge` 时优先尝试 Longbridge
     - `...=mock` 时强制 mock
     - `...=auto` 时优先 Longbridge，失败则回退到 mock
@@ -70,6 +72,9 @@ def get_trading_provider() -> TradingProvider:
 
     if provider_name == "mock":
         return MockTradingProvider()
+
+    if provider_name == "futu":
+        return FutuTradingProvider()
 
     from quantpilot.broker.longbridge import LongbridgeTradingProvider
 

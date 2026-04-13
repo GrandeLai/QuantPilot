@@ -897,7 +897,7 @@ volumes:
 ### Phase 2：可用版（P1 功能，8 周）
 
 - [x] **模拟盘**：实时行情驱动的 Paper Trading
-- [ ] **券商接入**：富途待接入；长桥股票交易 provider、OKX 加密 provider 与 mock fallback 已收编
+- [ ] **券商接入**：富途 provider 已接入 unified trading 主线并暴露状态；长桥股票交易 provider、OKX 加密 provider 与 mock fallback 已收编；富途完整交易能力仍待补齐
 - [ ] **实盘交易**：统一 `/api/trading/*` 主线、订单生命周期与运行中心接线已完成；完整 OMS 与实盘风控仍待补齐
 - [x] **告警系统**：价格/信号/风控告警 + 飞书/Telegram 推送
 - [x] **技术指标全量**：41 指标覆盖（pandas-ta）

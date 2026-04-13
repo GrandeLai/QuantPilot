@@ -43,6 +43,40 @@ test("fetchTradingStatus calls the unified trading status endpoint", async () =>
   }
 });
 
+test("fetchTradingStatus accepts futu provider status payloads", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => {
+    return new Response(
+      JSON.stringify({
+        provider: "futu",
+        mode: "paper",
+        configured: false,
+        using_mock_fallback: false,
+        reason: "Futu provider unavailable",
+        capabilities: {
+          supported_markets: ["US", "HK"],
+          supported_asset_types: ["stock", "etf"],
+          supported_order_types: [],
+          supports_us_short_selling: false,
+          supports_otc: false,
+          supports_us_prepost: false,
+          supports_options: true,
+          notes: [],
+        },
+      }),
+      { status: 200 },
+    );
+  }) as typeof fetch;
+
+  try {
+    const result = await fetchTradingStatus();
+    assert.equal(result.provider, "futu");
+    assert.equal(result.configured, false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("searchTradingSecurities uses the code-or-name search endpoint", async () => {
   let capturedUrl = "";
   const originalFetch = globalThis.fetch;

@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 class TradingProviderKind(StrEnum):
     """交易 provider 类型."""
 
+    FUTU = "futu"
     LONGBRIDGE = "longbridge"
     MOCK = "mock"
     OKX = "okx"

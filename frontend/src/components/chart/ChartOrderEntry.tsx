@@ -1,6 +1,6 @@
 /**
  * 图表快捷下单面板.
- * 统一走 /api/trading 链路，底层目标为 Longbridge 官方模拟账户。
+ * 统一走 /api/trading 链路，由当前 provider 状态决定实际执行能力。
  */
 import { useEffect, useState } from "react";
 import { ChevronDown, LoaderCircle, MoreHorizontal, RefreshCw } from "lucide-react";
@@ -85,7 +85,7 @@ export default function ChartOrderEntry() {
       return;
     }
     if (quote.restrictions.length > 0 || !quote.tradeable || quote.trade_session !== "regular") {
-      setMessage(quote.restrictions[0] ?? "当前不在 Longbridge 模拟账户支持的常规交易时段。");
+      setMessage(quote.restrictions[0] ?? "当前不在 provider 支持的常规交易时段。");
       return;
     }
     if (!Number.isFinite(qty) || qty <= 0) {
@@ -129,7 +129,15 @@ export default function ChartOrderEntry() {
     }
   };
 
-  const providerReady = providerStatus?.provider === "longbridge" || providerStatus?.provider === "mock";
+  const providerReady = Boolean(providerStatus);
+  const providerTone =
+    providerStatus?.provider === "mock" ? "amber" : providerStatus?.provider === "futu" ? "sky" : "green";
+  const providerTitle =
+    providerStatus?.provider === "mock"
+      ? "Mock fallback"
+      : providerStatus?.provider === "futu"
+        ? "Futu provider"
+        : "Longbridge 模拟账户已连接";
 
   return (
     <div className="relative flex h-1/2 flex-col bg-[#131722] p-4 text-xs">
@@ -142,9 +150,9 @@ export default function ChartOrderEntry() {
             <div
               className={cn(
                 "h-1.5 w-1.5 rounded-full",
-                providerStatus?.provider === "longbridge" ? "bg-green-500" : "bg-amber-400",
+                providerTone === "green" ? "bg-green-500" : providerTone === "sky" ? "bg-sky-400" : "bg-amber-400",
               )}
-              title={providerStatus?.provider === "longbridge" ? "Longbridge 模拟账户已连接" : "Mock fallback"}
+              title={providerTitle}
             />
           ) : (
             <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-yellow-500" title="初始化中…" />
@@ -235,6 +243,10 @@ export default function ChartOrderEntry() {
             {providerStatus?.provider === "mock" ? (
               <div className="rounded border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-[10px] text-amber-300">
                 当前为 mock fallback。填入 Longbridge 配置后，主交易页与快捷下单会自动切换到官方模拟账户。
+              </div>
+            ) : providerStatus?.provider === "futu" ? (
+              <div className="rounded border border-sky-500/20 bg-sky-500/10 px-3 py-2 text-[10px] text-sky-300">
+                当前为 Futu provider。若 SDK / OpenD / 配置未就绪，接口会返回结构化不可用错误。
               </div>
             ) : null}
 

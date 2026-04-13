@@ -5,7 +5,7 @@
 
 const BASE = "/api/trading";
 
-export type TradingProviderKind = "longbridge" | "mock";
+export type TradingProviderKind = "futu" | "longbridge" | "mock";
 export type TradingMode = "paper";
 export type TradingMarket = "US" | "HK" | "UNKNOWN" | "CRYPTO";
 export type TradingAssetType = "stock" | "etf" | "warrant" | "option" | "otc" | "unknown";
