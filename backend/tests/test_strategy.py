@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from quantpilot.data.models import OHLCVBar
-from quantpilot.strategy.base import BaseStrategy, StrategyContext
+from quantpilot.strategy.base import BaseStrategy, Position, StrategyContext
 from quantpilot.strategy.storage import StrategyMeta, StrategyRecord, StrategyStorage
 from quantpilot.strategy.templates import TEMPLATE_STRATEGIES
 from quantpilot.strategy.templates.bollinger_breakout import BollingerBreakoutStrategy
@@ -15,6 +15,7 @@ from quantpilot.strategy.templates.grid_trading import GridTradingStrategy
 from quantpilot.strategy.templates.ma_crossover import MACrossoverStrategy
 from quantpilot.strategy.templates.momentum import MomentumStrategy
 from quantpilot.strategy.templates.rsi_mean_reversion import RSIMeanReversionStrategy
+from quantpilot.strategy.templates.vwap_ema_trend import VWAPEMATrendStrategy
 
 
 def _make_bars(n: int = 100, start_price: float = 100.0, trend: float = 0.001) -> list[OHLCVBar]:
@@ -63,8 +64,8 @@ class TestBaseStrategy:
 
 
 class TestTemplateStrategies:
-    def test_five_templates_registered(self) -> None:
-        assert len(TEMPLATE_STRATEGIES) == 5
+    def test_six_templates_registered(self) -> None:
+        assert len(TEMPLATE_STRATEGIES) == 6
 
     def test_all_templates_inherit_base(self) -> None:
         for name, cls in TEMPLATE_STRATEGIES.items():
@@ -157,6 +158,53 @@ class TestGridTradingStrategy:
         bars = _make_bars(30, start_price=105.0, trend=0.0)
         for bar in bars:
             strategy.on_bar(bar, ctx)
+
+
+class TestVWAPEMATrendStrategy:
+    def test_runs_without_error(self) -> None:
+        strategy = VWAPEMATrendStrategy()
+        ctx = _make_context()
+        strategy.on_init(ctx)
+        for bar in _make_bars(60, trend=0.002):
+            strategy.on_bar(bar, ctx)
+
+    def test_generates_entry_order_on_trending_volume_supported_market(self) -> None:
+        strategy = VWAPEMATrendStrategy()
+        ctx = _make_context()
+        ctx.params = {
+            "fast_period": 5,
+            "slow_period": 10,
+            "vwap_window": 10,
+            "trade_size": 0.5,
+            "max_hold_bars": 50,
+        }
+        strategy.on_init(ctx)
+
+        bars = _make_bars(40, start_price=100.0, trend=0.004)
+        for idx, bar in enumerate(bars):
+            bar.volume = 1_000_000 + idx * 20_000
+            strategy.on_bar(bar, ctx)
+
+        assert any(order.side.value == "buy" for order in ctx.orders)
+
+    def test_timeout_exit_places_sell_order_for_existing_position(self) -> None:
+        strategy = VWAPEMATrendStrategy()
+        ctx = _make_context()
+        ctx.params = {
+            "fast_period": 3,
+            "slow_period": 5,
+            "vwap_window": 5,
+            "trade_size": 0.5,
+            "max_hold_bars": 3,
+        }
+        strategy.on_init(ctx)
+        ctx.positions["TEST"] = Position(symbol="TEST", quantity=10.0, avg_price=100.0)
+
+        bars = _make_bars(8, start_price=100.0, trend=0.0)
+        for bar in bars:
+            strategy.on_bar(bar, ctx)
+
+        assert any(order.side.value == "sell" for order in ctx.orders)
 
 
 class TestStrategyStorage:
