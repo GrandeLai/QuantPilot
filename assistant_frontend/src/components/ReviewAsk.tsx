@@ -2,9 +2,13 @@ import { useEffect, useState } from "react";
 
 import {
   fetchCryptoOpportunities,
+  fetchCryptoResearchLatest,
+  fetchCryptoResearchOptimization,
   fetchCryptoRisks,
   fetchOverview,
   type AdvisorCard,
+  type AdvisorCryptoOptimizationSummary,
+  type AdvisorCryptoResearchSummary,
   type AdvisorOverviewPayload,
 } from "../api/client";
 
@@ -15,22 +19,46 @@ export function ReviewAsk() {
   const [overview, setOverview] = useState<AdvisorOverviewPayload | null>(null);
   const [opportunities, setOpportunities] = useState<AdvisorCard[]>([]);
   const [risks, setRisks] = useState<AdvisorCard[]>([]);
+  const [research, setResearch] = useState<Record<string, AdvisorCryptoResearchSummary>>({});
+  const [optimizations, setOptimizations] = useState<Record<string, AdvisorCryptoOptimizationSummary>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     void (async () => {
       try {
-        const [overviewData, btcOpportunities, btcRisks, ethOpportunities, ethRisks] = await Promise.all([
+        const [
+          overviewData,
+          btcOpportunities,
+          btcRisks,
+          ethOpportunities,
+          ethRisks,
+          btcResearch,
+          ethResearch,
+          btcOptimization,
+          ethOptimization,
+        ] = await Promise.all([
           fetchOverview<AdvisorOverviewPayload>(),
           fetchCryptoOpportunities<{ items: AdvisorCard[] }>("BTC-USDT"),
           fetchCryptoRisks<{ items: AdvisorCard[] }>("BTC-USDT"),
           fetchCryptoOpportunities<{ items: AdvisorCard[] }>("ETH-USDT"),
           fetchCryptoRisks<{ items: AdvisorCard[] }>("ETH-USDT"),
+          fetchCryptoResearchLatest<AdvisorCryptoResearchSummary>("BTC-USDT"),
+          fetchCryptoResearchLatest<AdvisorCryptoResearchSummary>("ETH-USDT"),
+          fetchCryptoResearchOptimization<AdvisorCryptoOptimizationSummary>("BTC-USDT"),
+          fetchCryptoResearchOptimization<AdvisorCryptoOptimizationSummary>("ETH-USDT"),
         ]);
         setOverview(overviewData);
         setOpportunities([...btcOpportunities.items, ...ethOpportunities.items]);
         setRisks([...btcRisks.items, ...ethRisks.items]);
+        setResearch({
+          "BTC-USDT": btcResearch,
+          "ETH-USDT": ethResearch,
+        });
+        setOptimizations({
+          "BTC-USDT": btcOptimization,
+          "ETH-USDT": ethOptimization,
+        });
       } catch (err) {
         setError(String(err));
       } finally {
@@ -53,6 +81,13 @@ export function ReviewAsk() {
           <p>高优先风险数：{risks.length}</p>
           <p>高优先机会：{opportunities[0]?.subject ?? "—"}</p>
           <p>高优先风险：{risks[0]?.subject ?? "—"}</p>
+          <p>BTC 状态：{research["BTC-USDT"]?.market_regime ?? "—"} / 推荐策略：{research["BTC-USDT"]?.recommended_strategy_ids.join(" / ") ?? "—"}</p>
+          <p>ETH 状态：{research["ETH-USDT"]?.market_regime ?? "—"} / 推荐策略：{research["ETH-USDT"]?.recommended_strategy_ids.join(" / ") ?? "—"}</p>
+          <p>BTC 最优参数：{
+            optimizations["BTC-USDT"]
+              ? Object.entries(optimizations["BTC-USDT"].best_params).map(([key, value]) => `${key}=${value}`).join(", ")
+              : "—"
+          }</p>
           <p>
             当前复盘结论：
             {risks.length > 0

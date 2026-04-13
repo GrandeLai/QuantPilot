@@ -1,23 +1,46 @@
 import { useEffect, useState } from "react";
 
-import { fetchCryptoOpportunities, fetchCryptoRisks, type AdvisorCard } from "../api/client";
+import {
+  fetchCryptoOpportunities,
+  fetchCryptoResearchLatest,
+  fetchCryptoResearchOptimization,
+  fetchCryptoRisks,
+  type AdvisorCard,
+  type AdvisorCryptoOptimizationSummary,
+  type AdvisorCryptoResearchSummary,
+} from "../api/client";
 
 /**
  * Minimal rebalance suggestion view composed from advisor cards.
  */
 export function RebalanceSuggestions() {
   const [suggestions, setSuggestions] = useState<AdvisorCard[]>([]);
+  const [research, setResearch] = useState<Record<string, AdvisorCryptoResearchSummary>>({});
+  const [optimizations, setOptimizations] = useState<Record<string, AdvisorCryptoOptimizationSummary>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     void (async () => {
       try {
-        const [btcOpportunities, btcRisks, ethOpportunities, ethRisks] = await Promise.all([
+        const [
+          btcOpportunities,
+          btcRisks,
+          ethOpportunities,
+          ethRisks,
+          btcResearch,
+          ethResearch,
+          btcOptimization,
+          ethOptimization,
+        ] = await Promise.all([
           fetchCryptoOpportunities<{ items: AdvisorCard[] }>("BTC-USDT"),
           fetchCryptoRisks<{ items: AdvisorCard[] }>("BTC-USDT"),
           fetchCryptoOpportunities<{ items: AdvisorCard[] }>("ETH-USDT"),
           fetchCryptoRisks<{ items: AdvisorCard[] }>("ETH-USDT"),
+          fetchCryptoResearchLatest<AdvisorCryptoResearchSummary>("BTC-USDT"),
+          fetchCryptoResearchLatest<AdvisorCryptoResearchSummary>("ETH-USDT"),
+          fetchCryptoResearchOptimization<AdvisorCryptoOptimizationSummary>("BTC-USDT"),
+          fetchCryptoResearchOptimization<AdvisorCryptoOptimizationSummary>("ETH-USDT"),
         ]);
         setSuggestions([
           ...btcOpportunities.items,
@@ -25,6 +48,14 @@ export function RebalanceSuggestions() {
           ...ethOpportunities.items,
           ...ethRisks.items,
         ]);
+        setResearch({
+          "BTC-USDT": btcResearch,
+          "ETH-USDT": ethResearch,
+        });
+        setOptimizations({
+          "BTC-USDT": btcOptimization,
+          "ETH-USDT": ethOptimization,
+        });
       } catch (err) {
         setError(String(err));
       } finally {
@@ -47,6 +78,18 @@ export function RebalanceSuggestions() {
               <div>{item.recommendation} · {(item.confidence * 100).toFixed(1)}%</div>
               <div className="text-sm text-slate-600">{item.evidence[0]?.summary}</div>
               <div className="text-xs text-slate-500 mt-1">{item.risk_notes[0] ?? "—"}</div>
+              <div className="text-xs text-slate-500 mt-1">
+                状态：{research[item.subject]?.market_regime ?? "—"} · 推荐策略：{research[item.subject]?.recommended_strategy_ids.join(" / ") ?? "—"}
+              </div>
+              <div className="text-xs text-slate-500 mt-1">
+                推荐周期：{research[item.subject]?.recommended_timeframes.join(" / ") ?? "—"} · 最优参数：{
+                  optimizations[item.subject]
+                    ? Object.entries(optimizations[item.subject].best_params)
+                        .map(([key, value]) => `${key}=${value}`)
+                        .join(", ")
+                    : "—"
+                }
+              </div>
             </li>
           ))}
         </ul>
