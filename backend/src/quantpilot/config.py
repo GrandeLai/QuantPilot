@@ -34,6 +34,11 @@ class Settings(BaseSettings):
     # 交易 provider 配置
     trading_provider: str = "auto"
     trading_mock_force_session: str = "regular"
+    trading_risk_enabled: bool = True
+    trading_risk_max_position_count: int = 10
+    trading_risk_max_single_position_pct: float = 0.30
+    trading_risk_daily_loss_limit_pct: float = 0.05
+    trading_risk_max_order_value: float = 0.0
     futu_host: str = ""
     futu_port: int = 0
     futu_market: str = "US"

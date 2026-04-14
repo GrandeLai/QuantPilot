@@ -118,3 +118,63 @@ def test_limit_order_can_be_canceled_in_mock_provider(mock_trading_provider: Tes
     detail_resp = mock_trading_provider.get(f"/api/trading/orders/{order_id}")
     assert detail_resp.status_code == 200
     assert detail_resp.json()["status"] == "canceled"
+
+
+def test_order_rejected_when_max_order_value_exceeded(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    """统一 trading 主线应在提交前执行最大单笔金额风控."""
+    monkeypatch.setenv("QUANTPILOT_TRADING_PROVIDER", "mock")
+    monkeypatch.setenv("QUANTPILOT_TRADING_RISK_MAX_ORDER_VALUE", "1000")
+
+    from quantpilot.broker.provider import get_trading_provider
+
+    get_trading_provider.cache_clear()
+
+    response = client.post(
+        "/api/trading/orders",
+        json={
+            "symbol": "AAPL.US",
+            "side": "buy",
+            "order_type": "market",
+            "quantity": 10,
+        },
+    )
+
+    assert response.status_code == 409
+    body = response.json()
+    assert body["detail"]["code"] == "risk_rejected"
+    assert "单笔交易金额" in body["detail"]["message"]
+
+
+def test_order_rejected_when_daily_loss_limit_exceeded(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    """账户当日亏损超过阈值时应前置熔断，拒绝新买单."""
+    monkeypatch.setenv("QUANTPILOT_TRADING_PROVIDER", "mock")
+    monkeypatch.setenv("QUANTPILOT_TRADING_RISK_DAILY_LOSS_LIMIT_PCT", "0.05")
+
+    from quantpilot.broker.mock import MockTradingProvider
+    from quantpilot.broker.provider import get_trading_provider
+
+    original_get_account = MockTradingProvider.get_account_overview
+
+    def _patched_get_account(self: MockTradingProvider):  # type: ignore[override]
+        overview = original_get_account(self)
+        overview.today_pnl_pct = -0.06
+        overview.today_pnl = -6000.0
+        return overview
+
+    monkeypatch.setattr(MockTradingProvider, "get_account_overview", _patched_get_account)
+    get_trading_provider.cache_clear()
+
+    response = client.post(
+        "/api/trading/orders",
+        json={
+            "symbol": "AAPL.US",
+            "side": "buy",
+            "order_type": "market",
+            "quantity": 1,
+        },
+    )
+
+    assert response.status_code == 409
+    body = response.json()
+    assert body["detail"]["code"] == "risk_rejected"
+    assert "日内亏损" in body["detail"]["message"]

@@ -15,6 +15,8 @@ from quantpilot.broker.types import (
     TradingOrderRequest,
     TradingProviderError,
 )
+from quantpilot.config import get_settings
+from quantpilot.risk.manager import RiskConfig, RiskManager
 
 router = APIRouter(prefix="/trading", tags=["交易"])
 
@@ -36,6 +38,72 @@ def _slice_items(items: list[Any], *, page: int, page_size: int) -> dict[str, An
 
 def _translate_error(exc: TradingProviderError) -> HTTPException:
     return HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message})
+
+
+def _build_risk_manager() -> RiskManager | None:
+    settings = get_settings()
+    if not settings.trading_risk_enabled:
+        return None
+    config = RiskConfig(
+        max_position_count=settings.trading_risk_max_position_count,
+        max_single_position_pct=settings.trading_risk_max_single_position_pct,
+        daily_loss_limit_pct=settings.trading_risk_daily_loss_limit_pct or None,
+        max_order_value=settings.trading_risk_max_order_value or None,
+    )
+    return RiskManager(config)
+
+
+def _enforce_pretrade_risk(req: TradingOrderRequest) -> None:
+    manager = _build_risk_manager()
+    if manager is None:
+        return
+
+    provider = _provider()
+    try:
+        account = provider.get_account_overview()
+        positions = provider.get_positions()
+        if (
+            manager._config.daily_loss_limit_pct is not None
+            and account.today_pnl_pct <= -manager._config.daily_loss_limit_pct
+        ):
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "code": "risk_rejected",
+                    "message": (
+                        f"日内亏损 {abs(account.today_pnl_pct):.2%} 超过上限 "
+                        f"{manager._config.daily_loss_limit_pct:.2%}，交易已暂停"
+                    ),
+                },
+            )
+
+        price = req.submitted_price
+        if price is None:
+            quotes = provider.get_quotes([req.symbol])
+            if not quotes:
+                raise HTTPException(
+                    status_code=502,
+                    detail={"code": "quote_unavailable", "message": "无法获取风控校验所需行情"},
+                )
+            price = quotes[0].last_price
+
+        manager.reset_daily(account.total_assets)
+        current_positions = {item.symbol: item for item in positions if item.quantity > 0}
+        check = manager.check_order(
+            symbol=req.symbol,
+            side=req.side.value,
+            quantity=req.quantity,
+            price=price,
+            portfolio_value=account.total_assets,
+            current_positions=current_positions,
+        )
+        if not check.allowed:
+            raise HTTPException(
+                status_code=409,
+                detail={"code": "risk_rejected", "message": check.reason},
+            )
+    except TradingProviderError as exc:
+        raise _translate_error(exc) from exc
 
 
 @router.get("/status")
@@ -137,6 +205,7 @@ def estimate_order(req: TradingOrderEstimateRequest) -> dict[str, Any]:
 @router.post("/orders")
 def submit_order(req: TradingOrderRequest) -> dict[str, Any]:
     """提交交易订单."""
+    _enforce_pretrade_risk(req)
     try:
         result = _provider().submit_order(req)
     except TradingProviderError as exc:

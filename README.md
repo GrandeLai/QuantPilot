@@ -179,6 +179,7 @@ QuantPilot/
 - `Longbridge` 为正式股票交易 provider
 - `mock provider` 为本地兜底与测试闭环
 - 加密货币继续通过 `OKX` 专用链路执行
+- `/api/trading/orders` 现在会在提交前执行基础风控检查，并对超限订单返回结构化 `risk_rejected` 错误
 - **Phase 3**：好用版 — LLM 深度集成、因子研究、期权模块
 - **Phase 4**：生态版 — 插件系统、ML 策略、社交跟单
 
