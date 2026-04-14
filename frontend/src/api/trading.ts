@@ -182,6 +182,17 @@ export interface TradingExecutionReport {
   slippage_bps?: number | null;
 }
 
+export interface TradingRiskStatus {
+  enabled: boolean;
+  halted: boolean;
+  max_position_count: number;
+  max_single_position_pct: number;
+  daily_loss_limit_pct?: number | null;
+  max_order_value?: number | null;
+  current_today_pnl_pct: number;
+  warnings: string[];
+}
+
 export interface TradingCashFlow {
   cash_flow_id: string;
   currency: string;
@@ -269,6 +280,10 @@ export async function fetchTradingQuotes(symbols: string[]): Promise<TradingQuot
 
 export async function fetchTradingAccount(): Promise<TradingAccountOverview> {
   return request<TradingAccountOverview>(`${BASE}/account`);
+}
+
+export async function fetchTradingRiskStatus(): Promise<TradingRiskStatus> {
+  return request<TradingRiskStatus>(`${BASE}/risk`);
 }
 
 export async function fetchTradingPositions(): Promise<TradingPosition[]> {

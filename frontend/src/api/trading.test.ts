@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   fetchOrderReport,
+  fetchTradingRiskStatus,
   estimateTradingOrder,
   fetchOrderEvents,
   fetchTradingStatus,
@@ -216,6 +217,35 @@ test("fetchOrderReport reads the execution report endpoint", async () => {
     const result = await fetchOrderReport("MOCK-000001");
     assert.equal(capturedUrl, "/api/trading/orders/MOCK-000001/report");
     assert.equal(result.fill_ratio, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("fetchTradingRiskStatus reads the trading risk status endpoint", async () => {
+  let capturedUrl = "";
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    capturedUrl = String(input);
+    return new Response(
+      JSON.stringify({
+        enabled: true,
+        halted: false,
+        max_position_count: 10,
+        max_single_position_pct: 0.3,
+        daily_loss_limit_pct: 0.05,
+        max_order_value: 5000,
+        current_today_pnl_pct: -0.01,
+        warnings: [],
+      }),
+      { status: 200 },
+    );
+  }) as typeof fetch;
+
+  try {
+    const result = await fetchTradingRiskStatus();
+    assert.equal(capturedUrl, "/api/trading/risk");
+    assert.equal(result.max_order_value, 5000);
   } finally {
     globalThis.fetch = originalFetch;
   }

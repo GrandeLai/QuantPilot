@@ -265,6 +265,19 @@ class TradingExecutionReport(BaseModel):
     slippage_bps: float | None = None
 
 
+class TradingRiskStatus(BaseModel):
+    """交易风控状态摘要."""
+
+    enabled: bool
+    halted: bool
+    max_position_count: int
+    max_single_position_pct: float
+    daily_loss_limit_pct: float | None = None
+    max_order_value: float | None = None
+    current_today_pnl_pct: float = 0.0
+    warnings: list[str] = Field(default_factory=list)
+
+
 class TradingCashFlow(BaseModel):
     """资金流水条目."""
 

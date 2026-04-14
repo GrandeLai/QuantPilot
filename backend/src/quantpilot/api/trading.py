@@ -22,6 +22,7 @@ from quantpilot.broker.types import (
     TradingOrderSide,
     TradingOrderStatus,
     TradingProviderError,
+    TradingRiskStatus,
 )
 from quantpilot.config import get_settings
 from quantpilot.risk.manager import RiskConfig, RiskManager
@@ -158,11 +159,50 @@ def _enforce_pretrade_risk(req: TradingOrderRequest) -> None:
         raise _translate_error(exc) from exc
 
 
+def _current_risk_status() -> TradingRiskStatus:
+    settings = get_settings()
+    enabled = settings.trading_risk_enabled
+    daily_limit = settings.trading_risk_daily_loss_limit_pct or None
+    max_order_value = settings.trading_risk_max_order_value or None
+    warnings: list[str] = []
+    current_today_pnl_pct = 0.0
+    halted = False
+
+    if enabled:
+        try:
+            account = _provider().get_account_overview()
+            current_today_pnl_pct = account.today_pnl_pct
+            if daily_limit is not None and current_today_pnl_pct <= -daily_limit:
+                halted = True
+                warnings.append(
+                    f"日内亏损 {abs(current_today_pnl_pct):.2%} 已超过上限 {daily_limit:.2%}"
+                )
+        except TradingProviderError as exc:
+            warnings.append(exc.message)
+
+    return TradingRiskStatus(
+        enabled=enabled,
+        halted=halted,
+        max_position_count=settings.trading_risk_max_position_count,
+        max_single_position_pct=settings.trading_risk_max_single_position_pct,
+        daily_loss_limit_pct=daily_limit,
+        max_order_value=max_order_value,
+        current_today_pnl_pct=current_today_pnl_pct,
+        warnings=warnings,
+    )
+
+
 @router.get("/status")
 def get_status() -> dict[str, Any]:
     """返回当前交易 provider 状态与能力边界."""
     status = _provider().get_status()
     return status.model_dump()
+
+
+@router.get("/risk", response_model=TradingRiskStatus)
+def get_risk_status() -> TradingRiskStatus:
+    """返回当前交易风控配置与状态."""
+    return _current_risk_status()
 
 
 @router.get("/securities/search")

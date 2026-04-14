@@ -55,6 +55,7 @@ import {
   fetchOrderDetail,
   fetchOrderEvents,
   fetchOrderReport,
+  fetchTradingRiskStatus,
   fetchTodayExecutions,
   fetchTodayOrders,
   fetchTradingAccount,
@@ -77,6 +78,7 @@ import {
   type TradingPosition,
   type TradingProviderStatus,
   type TradingQuote,
+  type TradingRiskStatus,
   type TradingSecurity,
   type TradingSubmitResult,
 } from "@/api/trading";
@@ -465,6 +467,7 @@ export default function PaperTradingPanel() {
   const deferredQuery = useDeferredValue(query);
 
   const [status, setStatus] = useState<TradingProviderStatus | null>(null);
+  const [riskStatus, setRiskStatus] = useState<TradingRiskStatus | null>(null);
   const [account, setAccount] = useState<TradingAccountOverview | null>(null);
   const [positions, setPositions] = useState<TradingPosition[]>([]);
   const [todayOrders, setTodayOrders] = useState<PagedResponse<TradingOrder> | null>(null);
@@ -567,12 +570,14 @@ export default function PaperTradingPanel() {
   const refreshDashboard = async () => {
     setLoadingDashboard(true);
     try {
-      const [providerStatus, accountOverview, positionItems] = await Promise.all([
+      const [providerStatus, nextRiskStatus, accountOverview, positionItems] = await Promise.all([
         fetchTradingStatus(),
+        fetchTradingRiskStatus(),
         fetchTradingAccount(),
         fetchTradingPositions(),
       ]);
       setStatus(providerStatus);
+      setRiskStatus(nextRiskStatus);
       setAccount(accountOverview);
       setPositions(positionItems);
       setSectionError((prev) => ({ ...prev, dashboard: null }));
@@ -918,6 +923,47 @@ export default function PaperTradingPanel() {
               icon={BadgeDollarSign}
             />
           </div>
+
+          {riskStatus ? (
+            <Card className={cn("border", riskStatus.halted ? "border-red-500/20 bg-red-500/10" : "border-border bg-card/40")}>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg font-semibold">交易风控</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                <SummaryItem label="状态" value={riskStatus.halted ? "已熔断" : "正常"} />
+                <SummaryItem label="最大持仓数" value={`${riskStatus.max_position_count}`} mono />
+                <SummaryItem
+                  label="单标的上限"
+                  value={`${(riskStatus.max_single_position_pct * 100).toFixed(1)}%`}
+                  mono
+                />
+                <SummaryItem
+                  label="日内亏损阈值"
+                  value={
+                    riskStatus.daily_loss_limit_pct != null
+                      ? `${(riskStatus.daily_loss_limit_pct * 100).toFixed(1)}%`
+                      : "—"
+                  }
+                  mono
+                />
+                <SummaryItem
+                  label="单笔金额上限"
+                  value={riskStatus.max_order_value != null ? `${riskStatus.max_order_value.toFixed(0)}` : "—"}
+                  mono
+                />
+                <SummaryItem
+                  label="当前日内盈亏"
+                  value={`${(riskStatus.current_today_pnl_pct * 100).toFixed(2)}%`}
+                  mono
+                  valueClass={riskStatus.current_today_pnl_pct >= 0 ? "text-emerald-400" : "text-red-400"}
+                />
+                <SummaryItem
+                  label="风险提示"
+                  value={riskStatus.warnings[0] ?? "当前未触发额外风险提示"}
+                />
+              </CardContent>
+            </Card>
+          ) : null}
 
           <div className="grid gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
             <Card className="border-border bg-card/40">

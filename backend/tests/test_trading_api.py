@@ -299,3 +299,36 @@ def test_order_execution_report_summarizes_fill_ratio_and_lifecycle(
     assert report["event_count"] >= 1
     assert report["lifecycle_seconds"] >= 0.0
     assert report["submitted_quantity"] == 10
+
+
+def test_trading_risk_status_exposes_thresholds_and_halt_state(
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """交易风控状态接口应返回当前阈值与是否已触发熔断."""
+    monkeypatch.setenv("QUANTPILOT_TRADING_PROVIDER", "mock")
+    monkeypatch.setenv("QUANTPILOT_TRADING_RISK_MAX_ORDER_VALUE", "5000")
+    monkeypatch.setenv("QUANTPILOT_TRADING_RISK_DAILY_LOSS_LIMIT_PCT", "0.05")
+
+    from quantpilot.broker.mock import MockTradingProvider
+    from quantpilot.broker.provider import get_trading_provider
+
+    original_get_account = MockTradingProvider.get_account_overview
+
+    def _patched_get_account(self: MockTradingProvider):  # type: ignore[override]
+        overview = original_get_account(self)
+        overview.today_pnl_pct = -0.06
+        overview.today_pnl = -6000.0
+        return overview
+
+    monkeypatch.setattr(MockTradingProvider, "get_account_overview", _patched_get_account)
+    get_trading_provider.cache_clear()
+
+    response = client.get("/api/trading/risk")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["enabled"] is True
+    assert body["halted"] is True
+    assert body["max_order_value"] == 5000.0
+    assert body["daily_loss_limit_pct"] == 0.05
+    assert body["current_today_pnl_pct"] == -0.06
