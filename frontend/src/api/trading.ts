@@ -20,6 +20,13 @@ export type TradingOrderStatus =
   | "rejected"
   | "expired"
   | "unknown";
+export type TradingOrderEventType =
+  | "submitted"
+  | "filled"
+  | "canceled"
+  | "rejected"
+  | "risk_rejected"
+  | "updated";
 export type TradingSessionStatus =
   | "regular"
   | "pre_market"
@@ -153,6 +160,15 @@ export interface TradingExecution {
   executed_at: string;
 }
 
+export interface TradingOrderEvent {
+  event_id: string;
+  order_id: string;
+  event_type: TradingOrderEventType;
+  status: TradingOrderStatus;
+  message: string;
+  occurred_at: string;
+}
+
 export interface TradingCashFlow {
   cash_flow_id: string;
   currency: string;
@@ -257,6 +273,11 @@ export async function fetchHistoryOrders(page = 1, pageSize = 10): Promise<Paged
 
 export async function fetchOrderDetail(orderId: string): Promise<TradingOrder> {
   return request<TradingOrder>(`${BASE}/orders/${encodeURIComponent(orderId)}`);
+}
+
+export async function fetchOrderEvents(orderId: string): Promise<TradingOrderEvent[]> {
+  const json = await request<{ items: TradingOrderEvent[] }>(`${BASE}/orders/${encodeURIComponent(orderId)}/events`);
+  return json.items;
 }
 
 export async function estimateTradingOrder(payload: {

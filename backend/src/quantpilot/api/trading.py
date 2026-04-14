@@ -12,11 +12,14 @@ from fastapi import APIRouter, HTTPException, Query
 from quantpilot.broker.provider import get_trading_provider
 from quantpilot.broker.types import (
     TradingOrderEstimateRequest,
+    TradingOrderEventType,
     TradingOrderRequest,
+    TradingOrderStatus,
     TradingProviderError,
 )
 from quantpilot.config import get_settings
 from quantpilot.risk.manager import RiskConfig, RiskManager
+from quantpilot.trading.oms import get_order_event_store
 
 router = APIRouter(prefix="/trading", tags=["交易"])
 
@@ -192,6 +195,13 @@ def get_order_detail(order_id: str) -> dict[str, Any]:
     return detail.model_dump()
 
 
+@router.get("/orders/{order_id}/events")
+def get_order_events(order_id: str) -> dict[str, Any]:
+    """查询订单事件时间线."""
+    items = get_order_event_store().list_events(order_id)
+    return {"items": [item.model_dump() for item in items], "count": len(items)}
+
+
 @router.post("/orders/estimate")
 def estimate_order(req: TradingOrderEstimateRequest) -> dict[str, Any]:
     """下单前估算最大可买 / 可卖数量."""
@@ -207,7 +217,17 @@ def submit_order(req: TradingOrderRequest) -> dict[str, Any]:
     """提交交易订单."""
     _enforce_pretrade_risk(req)
     try:
-        result = _provider().submit_order(req)
+        provider = _provider()
+        result = provider.submit_order(req)
+        detail = provider.get_order_detail(result.order_id)
+        store = get_order_event_store()
+        store.record_order_snapshot(
+            detail.model_copy(update={"status": detail.status}),
+            event_type=TradingOrderEventType.SUBMITTED,
+            message=result.message,
+        )
+        if detail.status not in {TradingOrderStatus.SUBMITTED, TradingOrderStatus.PENDING_SUBMIT}:
+            store.record_order_snapshot(detail)
     except TradingProviderError as exc:
         raise _translate_error(exc) from exc
     return result.model_dump()
@@ -217,7 +237,14 @@ def submit_order(req: TradingOrderRequest) -> dict[str, Any]:
 def cancel_order(order_id: str) -> dict[str, Any]:
     """撤销订单."""
     try:
-        result = _provider().cancel_order(order_id)
+        provider = _provider()
+        result = provider.cancel_order(order_id)
+        detail = provider.get_order_detail(order_id)
+        get_order_event_store().record_order_snapshot(
+            detail,
+            event_type=TradingOrderEventType.CANCELED,
+            message=result.message,
+        )
     except TradingProviderError as exc:
         raise _translate_error(exc) from exc
     return result.model_dump()

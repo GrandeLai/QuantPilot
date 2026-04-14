@@ -74,6 +74,17 @@ class TradingOrderStatus(StrEnum):
     UNKNOWN = "unknown"
 
 
+class TradingOrderEventType(StrEnum):
+    """订单事件类型."""
+
+    SUBMITTED = "submitted"
+    FILLED = "filled"
+    CANCELED = "canceled"
+    REJECTED = "rejected"
+    RISK_REJECTED = "risk_rejected"
+    UPDATED = "updated"
+
+
 class TradingSessionStatus(StrEnum):
     """交易时段状态."""
 
@@ -226,6 +237,17 @@ class TradingExecution(BaseModel):
     price: float
     quantity: int
     executed_at: str
+
+
+class TradingOrderEvent(BaseModel):
+    """订单事件时间线条目."""
+
+    event_id: str
+    order_id: str
+    event_type: TradingOrderEventType
+    status: TradingOrderStatus
+    message: str
+    occurred_at: str
 
 
 class TradingCashFlow(BaseModel):

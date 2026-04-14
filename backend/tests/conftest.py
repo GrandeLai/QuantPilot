@@ -19,9 +19,11 @@ def client(tmp_path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
 
     from quantpilot.api import data as data_api
     from quantpilot.broker.provider import get_trading_provider
+    from quantpilot.trading.oms import get_order_event_store
 
     data_api._storage = None
     get_trading_provider.cache_clear()
+    get_order_event_store().reset()
     client = TestClient(app)
     try:
         yield client
@@ -29,3 +31,4 @@ def client(tmp_path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
         client.close()
         data_api._storage = None
         get_trading_provider.cache_clear()
+        get_order_event_store().reset()

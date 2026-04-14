@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   estimateTradingOrder,
+  fetchOrderEvents,
   fetchTradingStatus,
   searchTradingSecurities,
   submitTradingOrder,
@@ -153,6 +154,37 @@ test("submitTradingOrder posts the unified order payload", async () => {
     assert.equal(capturedInit?.method, "POST");
     assert.ok(String(capturedInit?.body).includes('"symbol":"AAPL.US"'));
     assert.equal(result.order_id, "MOCK-000001");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("fetchOrderEvents reads the OMS event timeline endpoint", async () => {
+  let capturedUrl = "";
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    capturedUrl = String(input);
+    return new Response(
+      JSON.stringify({
+        items: [
+          {
+            event_id: "evt-000001",
+            order_id: "MOCK-000001",
+            event_type: "submitted",
+            status: "submitted",
+            message: "accepted",
+            occurred_at: "2026-04-14T00:00:00+00:00",
+          },
+        ],
+      }),
+      { status: 200 },
+    );
+  }) as typeof fetch;
+
+  try {
+    const result = await fetchOrderEvents("MOCK-000001");
+    assert.equal(capturedUrl, "/api/trading/orders/MOCK-000001/events");
+    assert.equal(result[0]?.event_type, "submitted");
   } finally {
     globalThis.fetch = originalFetch;
   }

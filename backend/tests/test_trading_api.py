@@ -119,6 +119,11 @@ def test_limit_order_can_be_canceled_in_mock_provider(mock_trading_provider: Tes
     assert detail_resp.status_code == 200
     assert detail_resp.json()["status"] == "canceled"
 
+    events_resp = mock_trading_provider.get(f"/api/trading/orders/{order_id}/events")
+    assert events_resp.status_code == 200
+    events = events_resp.json()["items"]
+    assert [item["event_type"] for item in events] == ["submitted", "canceled"]
+
 
 def test_order_rejected_when_max_order_value_exceeded(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
     """统一 trading 主线应在提交前执行最大单笔金额风控."""
@@ -178,3 +183,24 @@ def test_order_rejected_when_daily_loss_limit_exceeded(client: TestClient, monke
     body = response.json()
     assert body["detail"]["code"] == "risk_rejected"
     assert "日内亏损" in body["detail"]["message"]
+
+
+def test_market_order_events_capture_submit_and_fill(mock_trading_provider: TestClient) -> None:
+    """最小 OMS 应为即时成交订单保留提交与成交事件时间线."""
+    submit_resp = mock_trading_provider.post(
+        "/api/trading/orders",
+        json={
+            "symbol": "AAPL.US",
+            "side": "buy",
+            "order_type": "market",
+            "quantity": 5,
+        },
+    )
+    assert submit_resp.status_code == 200
+    order_id = submit_resp.json()["order_id"]
+
+    events_resp = mock_trading_provider.get(f"/api/trading/orders/{order_id}/events")
+    assert events_resp.status_code == 200
+    events = events_resp.json()["items"]
+    assert [item["event_type"] for item in events] == ["submitted", "filled"]
+    assert events[-1]["status"] == "filled"

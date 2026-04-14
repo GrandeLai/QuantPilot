@@ -53,6 +53,7 @@ import {
   fetchHistoryExecutions,
   fetchHistoryOrders,
   fetchOrderDetail,
+  fetchOrderEvents,
   fetchTodayExecutions,
   fetchTodayOrders,
   fetchTradingAccount,
@@ -67,6 +68,7 @@ import {
   type TradingCashFlow,
   type TradingExecution,
   type TradingOrder,
+  type TradingOrderEvent,
   type TradingOrderEstimate,
   type TradingOrderStatus,
   type TradingOrderType,
@@ -471,6 +473,7 @@ export default function PaperTradingPanel() {
   const [estimate, setEstimate] = useState<TradingOrderEstimate | null>(null);
   const [searchResults, setSearchResults] = useState<TradingSecurity[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<TradingOrder | null>(null);
+  const [selectedOrderEvents, setSelectedOrderEvents] = useState<TradingOrderEvent[]>([]);
 
   const [mainTab, setMainTab] = useState<MainTab>("positions");
   const [orderTab, setOrderTab] = useState<HistoryTab>("today");
@@ -788,6 +791,7 @@ export default function PaperTradingPanel() {
       if (selectedOrder?.order_id === orderId) {
         const detail = await fetchOrderDetail(orderId);
         setSelectedOrder(detail);
+        setSelectedOrderEvents(await fetchOrderEvents(orderId));
       }
     } catch (error) {
       setFeedback({
@@ -801,11 +805,13 @@ export default function PaperTradingPanel() {
     try {
       const detail = await fetchOrderDetail(orderId);
       setSelectedOrder(detail);
+      setSelectedOrderEvents(await fetchOrderEvents(orderId));
     } catch (error) {
       setFeedback({
         tone: "error",
         message: error instanceof Error ? error.message : "订单详情加载失败",
       });
+      setSelectedOrderEvents([]);
     }
   };
 
@@ -1472,6 +1478,31 @@ export default function PaperTradingPanel() {
                     <SummaryItem label="更新时间" value={new Date(selectedOrder.updated_at).toLocaleString("zh-CN")} />
                     <SummaryItem label="备注" value={selectedOrder.message ?? "—"} />
                   </CardContent>
+                  {selectedOrderEvents.length > 0 ? (
+                    <CardContent className="pt-0">
+                      <div className="mb-3 text-sm font-medium text-foreground">状态时间线</div>
+                      <div className="space-y-2">
+                        {selectedOrderEvents.map((event) => (
+                          <div
+                            key={event.event_id}
+                            className="flex items-start justify-between gap-3 rounded-2xl border border-border bg-background/40 px-3 py-3"
+                          >
+                            <div>
+                              <div className="text-sm font-medium text-foreground">
+                                {orderStatusLabel(event.status)}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {event.message || event.event_type}
+                              </div>
+                            </div>
+                            <div className="text-right text-xs text-muted-foreground">
+                              {new Date(event.occurred_at).toLocaleString("zh-CN")}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  ) : null}
                 </Card>
               ) : null}
             </div>
