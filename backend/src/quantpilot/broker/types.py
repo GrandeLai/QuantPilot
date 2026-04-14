@@ -261,6 +261,11 @@ class TradingExecutionReport(BaseModel):
     fill_ratio: float
     event_count: int
     lifecycle_seconds: float
+    execution_count: int = 0
+    avg_execution_price: float | None = None
+    first_execution_at: str | None = None
+    last_execution_at: str | None = None
+    execution_span_seconds: float = 0.0
     price_delta: float | None = None
     slippage_bps: float | None = None
 
@@ -275,6 +280,10 @@ class TradingRiskStatus(BaseModel):
     daily_loss_limit_pct: float | None = None
     max_order_value: float | None = None
     current_today_pnl_pct: float = 0.0
+    open_position_count: int = 0
+    available_position_slots: int = 0
+    largest_position_symbol: str | None = None
+    largest_position_ratio: float = 0.0
     warnings: list[str] = Field(default_factory=list)
 
 

@@ -167,11 +167,20 @@ def _current_risk_status() -> TradingRiskStatus:
     warnings: list[str] = []
     current_today_pnl_pct = 0.0
     halted = False
+    open_position_count = 0
+    largest_position_symbol: str | None = None
+    largest_position_ratio = 0.0
 
     if enabled:
         try:
             account = _provider().get_account_overview()
+            positions = _provider().get_positions()
             current_today_pnl_pct = account.today_pnl_pct
+            open_position_count = sum(1 for item in positions if item.quantity > 0)
+            if account.total_assets > 0 and positions:
+                largest = max(positions, key=lambda item: item.market_value)
+                largest_position_symbol = largest.symbol
+                largest_position_ratio = largest.market_value / account.total_assets
             if daily_limit is not None and current_today_pnl_pct <= -daily_limit:
                 halted = True
                 warnings.append(
@@ -188,6 +197,10 @@ def _current_risk_status() -> TradingRiskStatus:
         daily_loss_limit_pct=daily_limit,
         max_order_value=max_order_value,
         current_today_pnl_pct=current_today_pnl_pct,
+        open_position_count=open_position_count,
+        available_position_slots=max(settings.trading_risk_max_position_count - open_position_count, 0),
+        largest_position_symbol=largest_position_symbol,
+        largest_position_ratio=round(largest_position_ratio, 6),
         warnings=warnings,
     )
 
@@ -307,7 +320,21 @@ def get_order_report(order_id: str) -> TradingExecutionReport:
     except TradingProviderError as exc:
         raise _translate_error(exc) from exc
     events = get_order_event_store().list_events(order_id)
-    return build_execution_report(detail, events)
+    try:
+        executions = [
+            item
+            for item in _provider().get_today_executions()
+            if item.order_id == order_id
+        ]
+        if not executions:
+            executions = [
+                item
+                for item in _provider().get_history_executions()
+                if item.order_id == order_id
+            ]
+    except TradingProviderError:
+        executions = []
+    return build_execution_report(detail, events, executions)
 
 
 @router.post("/orders/estimate")

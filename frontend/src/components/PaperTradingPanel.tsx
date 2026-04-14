@@ -951,6 +951,16 @@ export default function PaperTradingPanel() {
                   value={riskStatus.max_order_value != null ? `${riskStatus.max_order_value.toFixed(0)}` : "—"}
                   mono
                 />
+                <SummaryItem label="持仓数量" value={`${riskStatus.open_position_count}`} mono />
+                <SummaryItem label="剩余仓位槽" value={`${riskStatus.available_position_slots}`} mono />
+                <SummaryItem
+                  label="最大集中度"
+                  value={
+                    riskStatus.largest_position_symbol
+                      ? `${riskStatus.largest_position_symbol} · ${(riskStatus.largest_position_ratio * 100).toFixed(1)}%`
+                      : "当前无持仓"
+                  }
+                />
                 <SummaryItem
                   label="当前日内盈亏"
                   value={`${(riskStatus.current_today_pnl_pct * 100).toFixed(2)}%`}
@@ -1575,6 +1585,25 @@ export default function PaperTradingPanel() {
                           mono
                         />
                         <SummaryItem
+                          label="成交笔数"
+                          value={`${selectedOrderReport.execution_count}`}
+                          mono
+                        />
+                        <SummaryItem
+                          label="平均成交价"
+                          value={
+                            selectedOrderReport.avg_execution_price != null
+                              ? `${selectedOrderReport.avg_execution_price.toFixed(4)}`
+                              : "—"
+                          }
+                          mono
+                        />
+                        <SummaryItem
+                          label="成交耗时"
+                          value={`${selectedOrderReport.execution_span_seconds.toFixed(2)}s`}
+                          mono
+                        />
+                        <SummaryItem
                           label="价格偏差"
                           value={
                             selectedOrderReport.price_delta != null
@@ -1582,6 +1611,22 @@ export default function PaperTradingPanel() {
                               : "—"
                           }
                           mono
+                        />
+                        <SummaryItem
+                          label="首笔成交"
+                          value={
+                            selectedOrderReport.first_execution_at
+                              ? new Date(selectedOrderReport.first_execution_at).toLocaleString("zh-CN")
+                              : "—"
+                          }
+                        />
+                        <SummaryItem
+                          label="末笔成交"
+                          value={
+                            selectedOrderReport.last_execution_at
+                              ? new Date(selectedOrderReport.last_execution_at).toLocaleString("zh-CN")
+                              : "—"
+                          }
                         />
                       </div>
                     </CardContent>

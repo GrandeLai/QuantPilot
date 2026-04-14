@@ -299,6 +299,7 @@ def test_order_execution_report_summarizes_fill_ratio_and_lifecycle(
     assert report["event_count"] >= 1
     assert report["lifecycle_seconds"] >= 0.0
     assert report["submitted_quantity"] == 10
+    assert report["execution_count"] == 0
 
 
 def test_trading_risk_status_exposes_thresholds_and_halt_state(
@@ -332,3 +333,34 @@ def test_trading_risk_status_exposes_thresholds_and_halt_state(
     assert body["max_order_value"] == 5000.0
     assert body["daily_loss_limit_pct"] == 0.05
     assert body["current_today_pnl_pct"] == -0.06
+    assert body["open_position_count"] >= 0
+    assert "largest_position_symbol" in body
+
+
+def test_execution_report_includes_multi_fill_details(mock_trading_provider: TestClient) -> None:
+    """部分成交订单的执行报告应展示 execution 维度摘要."""
+    submit_resp = mock_trading_provider.post(
+        "/api/trading/orders",
+        json={
+            "symbol": "AAPL.US",
+            "side": "buy",
+            "order_type": "market",
+            "quantity": 200,
+        },
+    )
+    assert submit_resp.status_code == 200
+    order_id = submit_resp.json()["order_id"]
+
+    detail_resp = mock_trading_provider.get(f"/api/trading/orders/{order_id}")
+    assert detail_resp.status_code == 200
+
+    report_resp = mock_trading_provider.get(f"/api/trading/orders/{order_id}/report")
+    assert report_resp.status_code == 200
+    report = report_resp.json()
+
+    assert report["fill_ratio"] == 1.0
+    assert report["execution_count"] == 2
+    assert report["avg_execution_price"] is not None
+    assert report["first_execution_at"] is not None
+    assert report["last_execution_at"] is not None
+    assert report["execution_span_seconds"] >= 0.0

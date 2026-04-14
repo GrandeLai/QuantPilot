@@ -206,6 +206,11 @@ test("fetchOrderReport reads the execution report endpoint", async () => {
         fill_ratio: 1,
         event_count: 2,
         lifecycle_seconds: 3.2,
+        execution_count: 2,
+        avg_execution_price: 192.84,
+        first_execution_at: "2026-04-14T00:00:01+00:00",
+        last_execution_at: "2026-04-14T00:00:03+00:00",
+        execution_span_seconds: 2,
         price_delta: 0,
         slippage_bps: 0,
       }),
@@ -217,6 +222,7 @@ test("fetchOrderReport reads the execution report endpoint", async () => {
     const result = await fetchOrderReport("MOCK-000001");
     assert.equal(capturedUrl, "/api/trading/orders/MOCK-000001/report");
     assert.equal(result.fill_ratio, 1);
+    assert.equal(result.execution_count, 2);
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -236,6 +242,10 @@ test("fetchTradingRiskStatus reads the trading risk status endpoint", async () =
         daily_loss_limit_pct: 0.05,
         max_order_value: 5000,
         current_today_pnl_pct: -0.01,
+        open_position_count: 2,
+        available_position_slots: 8,
+        largest_position_symbol: "AAPL.US",
+        largest_position_ratio: 0.18,
         warnings: [],
       }),
       { status: 200 },
@@ -246,6 +256,7 @@ test("fetchTradingRiskStatus reads the trading risk status endpoint", async () =
     const result = await fetchTradingRiskStatus();
     assert.equal(capturedUrl, "/api/trading/risk");
     assert.equal(result.max_order_value, 5000);
+    assert.equal(result.largest_position_symbol, "AAPL.US");
   } finally {
     globalThis.fetch = originalFetch;
   }

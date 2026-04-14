@@ -178,6 +178,11 @@ export interface TradingExecutionReport {
   fill_ratio: number;
   event_count: number;
   lifecycle_seconds: number;
+  execution_count: number;
+  avg_execution_price?: number | null;
+  first_execution_at?: string | null;
+  last_execution_at?: string | null;
+  execution_span_seconds: number;
   price_delta?: number | null;
   slippage_bps?: number | null;
 }
@@ -190,6 +195,10 @@ export interface TradingRiskStatus {
   daily_loss_limit_pct?: number | null;
   max_order_value?: number | null;
   current_today_pnl_pct: number;
+  open_position_count: number;
+  available_position_slots: number;
+  largest_position_symbol?: string | null;
+  largest_position_ratio: number;
   warnings: string[];
 }
 
