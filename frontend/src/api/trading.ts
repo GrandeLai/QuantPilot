@@ -170,6 +170,18 @@ export interface TradingOrderEvent {
   occurred_at: string;
 }
 
+export interface TradingExecutionReport {
+  order_id: string;
+  status: TradingOrderStatus;
+  submitted_quantity: number;
+  executed_quantity: number;
+  fill_ratio: number;
+  event_count: number;
+  lifecycle_seconds: number;
+  price_delta?: number | null;
+  slippage_bps?: number | null;
+}
+
 export interface TradingCashFlow {
   cash_flow_id: string;
   currency: string;
@@ -279,6 +291,10 @@ export async function fetchOrderDetail(orderId: string): Promise<TradingOrder> {
 export async function fetchOrderEvents(orderId: string): Promise<TradingOrderEvent[]> {
   const json = await request<{ items: TradingOrderEvent[] }>(`${BASE}/orders/${encodeURIComponent(orderId)}/events`);
   return json.items;
+}
+
+export async function fetchOrderReport(orderId: string): Promise<TradingExecutionReport> {
+  return request<TradingExecutionReport>(`${BASE}/orders/${encodeURIComponent(orderId)}/report`);
 }
 
 export async function estimateTradingOrder(payload: {

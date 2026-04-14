@@ -271,3 +271,31 @@ def test_large_market_order_transitions_from_partial_fill_to_filled(
         "partial_filled",
         "filled",
     ]
+
+
+def test_order_execution_report_summarizes_fill_ratio_and_lifecycle(
+    mock_trading_provider: TestClient,
+) -> None:
+    """订单执行报告应提供成交率、生命周期和事件数摘要."""
+    submit_resp = mock_trading_provider.post(
+        "/api/trading/orders",
+        json={
+            "symbol": "AAPL.US",
+            "side": "buy",
+            "order_type": "limit",
+            "quantity": 10,
+            "submitted_price": 1.0,
+        },
+    )
+    assert submit_resp.status_code == 200
+    order_id = submit_resp.json()["order_id"]
+
+    report_resp = mock_trading_provider.get(f"/api/trading/orders/{order_id}/report")
+    assert report_resp.status_code == 200
+    report = report_resp.json()
+
+    assert report["order_id"] == order_id
+    assert report["fill_ratio"] == 0.0
+    assert report["event_count"] >= 1
+    assert report["lifecycle_seconds"] >= 0.0
+    assert report["submitted_quantity"] == 10

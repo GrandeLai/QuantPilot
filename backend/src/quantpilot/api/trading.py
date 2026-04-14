@@ -13,6 +13,7 @@ from fastapi import APIRouter, HTTPException, Query
 from quantpilot.broker.provider import get_trading_provider
 from quantpilot.broker.types import (
     TradingAssetType,
+    TradingExecutionReport,
     TradingMarket,
     TradingOrder,
     TradingOrderEstimateRequest,
@@ -25,6 +26,7 @@ from quantpilot.broker.types import (
 from quantpilot.config import get_settings
 from quantpilot.risk.manager import RiskConfig, RiskManager
 from quantpilot.trading.oms import get_order_event_store
+from quantpilot.trading.reporting import build_execution_report
 
 router = APIRouter(prefix="/trading", tags=["交易"])
 
@@ -254,6 +256,18 @@ def get_order_events(order_id: str) -> dict[str, Any]:
     """查询订单事件时间线."""
     items = get_order_event_store().list_events(order_id)
     return {"items": [item.model_dump() for item in items], "count": len(items)}
+
+
+@router.get("/orders/{order_id}/report", response_model=TradingExecutionReport)
+def get_order_report(order_id: str) -> TradingExecutionReport:
+    """查询订单执行报告."""
+    try:
+        detail = _provider().get_order_detail(order_id)
+        _sync_order_event(detail)
+    except TradingProviderError as exc:
+        raise _translate_error(exc) from exc
+    events = get_order_event_store().list_events(order_id)
+    return build_execution_report(detail, events)
 
 
 @router.post("/orders/estimate")

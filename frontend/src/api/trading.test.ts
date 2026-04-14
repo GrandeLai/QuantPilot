@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  fetchOrderReport,
   estimateTradingOrder,
   fetchOrderEvents,
   fetchTradingStatus,
@@ -185,6 +186,36 @@ test("fetchOrderEvents reads the OMS event timeline endpoint", async () => {
     const result = await fetchOrderEvents("MOCK-000001");
     assert.equal(capturedUrl, "/api/trading/orders/MOCK-000001/events");
     assert.equal(result[0]?.event_type, "submitted");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("fetchOrderReport reads the execution report endpoint", async () => {
+  let capturedUrl = "";
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    capturedUrl = String(input);
+    return new Response(
+      JSON.stringify({
+        order_id: "MOCK-000001",
+        status: "filled",
+        submitted_quantity: 10,
+        executed_quantity: 10,
+        fill_ratio: 1,
+        event_count: 2,
+        lifecycle_seconds: 3.2,
+        price_delta: 0,
+        slippage_bps: 0,
+      }),
+      { status: 200 },
+    );
+  }) as typeof fetch;
+
+  try {
+    const result = await fetchOrderReport("MOCK-000001");
+    assert.equal(capturedUrl, "/api/trading/orders/MOCK-000001/report");
+    assert.equal(result.fill_ratio, 1);
   } finally {
     globalThis.fetch = originalFetch;
   }

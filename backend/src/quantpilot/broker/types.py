@@ -251,6 +251,20 @@ class TradingOrderEvent(BaseModel):
     occurred_at: str
 
 
+class TradingExecutionReport(BaseModel):
+    """订单执行报告摘要."""
+
+    order_id: str
+    status: TradingOrderStatus
+    submitted_quantity: int
+    executed_quantity: int
+    fill_ratio: float
+    event_count: int
+    lifecycle_seconds: float
+    price_delta: float | None = None
+    slippage_bps: float | None = None
+
+
 class TradingCashFlow(BaseModel):
     """资金流水条目."""
 

@@ -54,6 +54,7 @@ import {
   fetchHistoryOrders,
   fetchOrderDetail,
   fetchOrderEvents,
+  fetchOrderReport,
   fetchTodayExecutions,
   fetchTodayOrders,
   fetchTradingAccount,
@@ -67,6 +68,7 @@ import {
   type TradingCancelResult,
   type TradingCashFlow,
   type TradingExecution,
+  type TradingExecutionReport,
   type TradingOrder,
   type TradingOrderEvent,
   type TradingOrderEstimate,
@@ -474,6 +476,7 @@ export default function PaperTradingPanel() {
   const [searchResults, setSearchResults] = useState<TradingSecurity[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<TradingOrder | null>(null);
   const [selectedOrderEvents, setSelectedOrderEvents] = useState<TradingOrderEvent[]>([]);
+  const [selectedOrderReport, setSelectedOrderReport] = useState<TradingExecutionReport | null>(null);
 
   const [mainTab, setMainTab] = useState<MainTab>("positions");
   const [orderTab, setOrderTab] = useState<HistoryTab>("today");
@@ -792,6 +795,7 @@ export default function PaperTradingPanel() {
         const detail = await fetchOrderDetail(orderId);
         setSelectedOrder(detail);
         setSelectedOrderEvents(await fetchOrderEvents(orderId));
+        setSelectedOrderReport(await fetchOrderReport(orderId));
       }
     } catch (error) {
       setFeedback({
@@ -806,12 +810,14 @@ export default function PaperTradingPanel() {
       const detail = await fetchOrderDetail(orderId);
       setSelectedOrder(detail);
       setSelectedOrderEvents(await fetchOrderEvents(orderId));
+      setSelectedOrderReport(await fetchOrderReport(orderId));
     } catch (error) {
       setFeedback({
         tone: "error",
         message: error instanceof Error ? error.message : "订单详情加载失败",
       });
       setSelectedOrderEvents([]);
+      setSelectedOrderReport(null);
     }
   };
 
@@ -1500,6 +1506,37 @@ export default function PaperTradingPanel() {
                             </div>
                           </div>
                         ))}
+                      </div>
+                    </CardContent>
+                  ) : null}
+                  {selectedOrderReport ? (
+                    <CardContent className="pt-0">
+                      <div className="mb-3 text-sm font-medium text-foreground">执行摘要</div>
+                      <div className="grid gap-3 md:grid-cols-2">
+                        <SummaryItem
+                          label="成交率"
+                          value={`${(selectedOrderReport.fill_ratio * 100).toFixed(1)}%`}
+                          mono
+                        />
+                        <SummaryItem
+                          label="生命周期"
+                          value={`${selectedOrderReport.lifecycle_seconds.toFixed(2)}s`}
+                          mono
+                        />
+                        <SummaryItem
+                          label="事件数"
+                          value={`${selectedOrderReport.event_count}`}
+                          mono
+                        />
+                        <SummaryItem
+                          label="价格偏差"
+                          value={
+                            selectedOrderReport.price_delta != null
+                              ? `${selectedOrderReport.price_delta >= 0 ? "+" : ""}${selectedOrderReport.price_delta.toFixed(4)}`
+                              : "—"
+                          }
+                          mono
+                        />
                       </div>
                     </CardContent>
                   ) : null}
