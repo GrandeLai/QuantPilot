@@ -56,6 +56,11 @@ def _build_risk_manager() -> RiskManager | None:
     return RiskManager(config)
 
 
+def _sync_order_event(order) -> None:
+    """Backfill OMS events from the latest provider snapshot."""
+    get_order_event_store().record_order_snapshot(order)
+
+
 def _enforce_pretrade_risk(req: TradingOrderRequest) -> None:
     manager = _build_risk_manager()
     if manager is None:
@@ -166,7 +171,10 @@ def get_today_orders(
 ) -> dict[str, Any]:
     """查询当日委托."""
     try:
-        items = [item.model_dump() for item in _provider().get_today_orders()]
+        orders = _provider().get_today_orders()
+        for order in orders:
+            _sync_order_event(order)
+        items = [item.model_dump() for item in orders]
     except TradingProviderError as exc:
         raise _translate_error(exc) from exc
     return _slice_items(items, page=page, page_size=page_size)
@@ -179,7 +187,10 @@ def get_history_orders(
 ) -> dict[str, Any]:
     """查询历史委托."""
     try:
-        items = [item.model_dump() for item in _provider().get_history_orders()]
+        orders = _provider().get_history_orders()
+        for order in orders:
+            _sync_order_event(order)
+        items = [item.model_dump() for item in orders]
     except TradingProviderError as exc:
         raise _translate_error(exc) from exc
     return _slice_items(items, page=page, page_size=page_size)
@@ -190,6 +201,7 @@ def get_order_detail(order_id: str) -> dict[str, Any]:
     """查询订单详情."""
     try:
         detail = _provider().get_order_detail(order_id)
+        _sync_order_event(detail)
     except TradingProviderError as exc:
         raise _translate_error(exc) from exc
     return detail.model_dump()

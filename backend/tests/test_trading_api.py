@@ -204,3 +204,40 @@ def test_market_order_events_capture_submit_and_fill(mock_trading_provider: Test
     events = events_resp.json()["items"]
     assert [item["event_type"] for item in events] == ["submitted", "filled"]
     assert events[-1]["status"] == "filled"
+
+
+def test_order_detail_refresh_backfills_provider_status_transition(
+    mock_trading_provider: TestClient,
+) -> None:
+    """读取订单详情时应把 provider 侧新状态同步回 OMS 事件账本."""
+    from quantpilot.broker.provider import get_trading_provider
+    from quantpilot.broker.types import TradingOrderStatus
+
+    submit_resp = mock_trading_provider.post(
+        "/api/trading/orders",
+        json={
+            "symbol": "AAPL.US",
+            "side": "buy",
+            "order_type": "limit",
+            "quantity": 5,
+            "submitted_price": 1.0,
+        },
+    )
+    assert submit_resp.status_code == 200
+    order_id = submit_resp.json()["order_id"]
+
+    provider = get_trading_provider()
+    order = provider.get_order_detail(order_id)
+    order.status = TradingOrderStatus.FILLED
+    order.executed_quantity = order.quantity
+    order.executed_price = 192.84
+    order.updated_at = "2026-04-14T12:00:00+00:00"
+    order.message = "provider sync filled"
+
+    detail_resp = mock_trading_provider.get(f"/api/trading/orders/{order_id}")
+    assert detail_resp.status_code == 200
+    assert detail_resp.json()["status"] == "filled"
+
+    events_resp = mock_trading_provider.get(f"/api/trading/orders/{order_id}/events")
+    assert events_resp.status_code == 200
+    assert [item["event_type"] for item in events_resp.json()["items"]] == ["submitted", "filled"]

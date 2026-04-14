@@ -71,7 +71,6 @@ class TradingOrderEventStore:
         return (
             previous.event_type == current.event_type
             and previous.status == current.status
-            and previous.message == current.message
         )
 
     def _now(self) -> str:
