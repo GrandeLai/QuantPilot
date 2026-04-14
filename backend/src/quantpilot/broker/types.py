@@ -78,6 +78,7 @@ class TradingOrderEventType(StrEnum):
     """订单事件类型."""
 
     SUBMITTED = "submitted"
+    PARTIAL_FILLED = "partial_filled"
     FILLED = "filled"
     CANCELED = "canceled"
     REJECTED = "rejected"

@@ -22,6 +22,7 @@ export type TradingOrderStatus =
   | "unknown";
 export type TradingOrderEventType =
   | "submitted"
+  | "partial_filled"
   | "filled"
   | "canceled"
   | "rejected"

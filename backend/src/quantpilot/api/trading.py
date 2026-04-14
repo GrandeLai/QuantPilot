@@ -5,15 +5,20 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from typing import Annotated, Any
 
 from fastapi import APIRouter, HTTPException, Query
 
 from quantpilot.broker.provider import get_trading_provider
 from quantpilot.broker.types import (
+    TradingAssetType,
+    TradingMarket,
+    TradingOrder,
     TradingOrderEstimateRequest,
     TradingOrderEventType,
     TradingOrderRequest,
+    TradingOrderSide,
     TradingOrderStatus,
     TradingProviderError,
 )
@@ -59,6 +64,43 @@ def _build_risk_manager() -> RiskManager | None:
 def _sync_order_event(order) -> None:
     """Backfill OMS events from the latest provider snapshot."""
     get_order_event_store().record_order_snapshot(order)
+
+
+def _market_from_symbol(symbol: str) -> TradingMarket:
+    if symbol.endswith(".US"):
+        return TradingMarket.US
+    if symbol.endswith(".HK"):
+        return TradingMarket.HK
+    return TradingMarket.UNKNOWN
+
+
+def _synthetic_order_snapshot(
+    *,
+    order_id: str,
+    req: TradingOrderRequest,
+    status: TradingOrderStatus,
+    message: str,
+) -> TradingOrder:
+    now = datetime.now(UTC).isoformat()
+    return TradingOrder(
+        order_id=order_id,
+        symbol=req.symbol,
+        name=req.symbol,
+        market=_market_from_symbol(req.symbol),
+        currency="USD" if req.symbol.endswith(".US") else "HKD" if req.symbol.endswith(".HK") else "USD",
+        asset_type=TradingAssetType.UNKNOWN,
+        side=TradingOrderSide(req.side),
+        order_type=req.order_type,
+        status=status,
+        quantity=req.quantity,
+        executed_quantity=req.quantity if status == TradingOrderStatus.FILLED else 0,
+        submitted_price=req.submitted_price,
+        trigger_price=req.trigger_price,
+        executed_price=req.submitted_price if status == TradingOrderStatus.FILLED else None,
+        submitted_at=now,
+        updated_at=now,
+        message=message,
+    )
 
 
 def _enforce_pretrade_risk(req: TradingOrderRequest) -> None:
@@ -231,15 +273,26 @@ def submit_order(req: TradingOrderRequest) -> dict[str, Any]:
     try:
         provider = _provider()
         result = provider.submit_order(req)
-        detail = provider.get_order_detail(result.order_id)
         store = get_order_event_store()
         store.record_order_snapshot(
-            detail.model_copy(update={"status": detail.status}),
+            _synthetic_order_snapshot(
+                order_id=result.order_id,
+                req=req,
+                status=TradingOrderStatus.SUBMITTED,
+                message=result.message,
+            ),
             event_type=TradingOrderEventType.SUBMITTED,
             message=result.message,
         )
-        if detail.status not in {TradingOrderStatus.SUBMITTED, TradingOrderStatus.PENDING_SUBMIT}:
-            store.record_order_snapshot(detail)
+        if result.status not in {TradingOrderStatus.SUBMITTED, TradingOrderStatus.PENDING_SUBMIT}:
+            store.record_order_snapshot(
+                _synthetic_order_snapshot(
+                    order_id=result.order_id,
+                    req=req,
+                    status=result.status,
+                    message=result.message,
+                ),
+            )
     except TradingProviderError as exc:
         raise _translate_error(exc) from exc
     return result.model_dump()

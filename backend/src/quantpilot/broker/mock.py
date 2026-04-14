@@ -70,6 +70,7 @@ class MockTradingProvider:
         self._orders: list[TradingOrder] = []
         self._executions: list[TradingExecution] = []
         self._cash_flows: list[TradingCashFlow] = []
+        self._pending_partial_fills: dict[str, dict[str, float]] = {}
         self._order_seq = 1
         self._execution_seq = 1
         self._cash_flow_seq = 1
@@ -198,12 +199,15 @@ class MockTradingProvider:
         return sorted(items, key=lambda item: item.market_value, reverse=True)
 
     def get_today_orders(self) -> list[TradingOrder]:
+        self._advance_partial_orders()
         return list(reversed(self._orders))
 
     def get_history_orders(self) -> list[TradingOrder]:
+        self._advance_partial_orders()
         return list(reversed(self._orders))
 
     def get_order_detail(self, order_id: str) -> TradingOrder:
+        self._advance_partial_orders(target_order_id=order_id)
         order = next((item for item in self._orders if item.order_id == order_id), None)
         if order is None:
             raise TradingProviderError("订单不存在", code="order_not_found", status_code=404)
@@ -286,7 +290,15 @@ class MockTradingProvider:
         )
 
         if should_fill:
-            self._fill_order(order, fill_price)
+            partial_qty = self._partial_fill_quantity(order)
+            if partial_qty < order.quantity:
+                self._apply_fill(order, fill_price, partial_qty, final=False)
+                self._pending_partial_fills[order.order_id] = {
+                    "remaining_quantity": float(order.quantity - partial_qty),
+                    "price": fill_price,
+                }
+            else:
+                self._fill_order(order, fill_price)
 
         return TradingSubmitResult(
             provider=TradingProviderKind.MOCK,
@@ -319,13 +331,15 @@ class MockTradingProvider:
         return list(reversed(self._cash_flows))
 
     def _fill_order(self, order: TradingOrder, price: float) -> None:
-        order.status = TradingOrderStatus.FILLED
-        order.executed_quantity = order.quantity
+        self._apply_fill(order, price, order.quantity - order.executed_quantity, final=True)
+
+    def _apply_fill(self, order: TradingOrder, price: float, quantity: int, *, final: bool) -> None:
+        order.executed_quantity += quantity
         order.executed_price = round(price, 4)
         order.updated_at = self._now()
-        order.message = "mock provider 已成交"
+        order.status = TradingOrderStatus.FILLED if final else TradingOrderStatus.PARTIAL_FILLED
+        order.message = "mock provider 已成交" if final else "mock provider 部分成交"
 
-        quantity = order.quantity
         cash_delta = price * quantity
         existing = self._positions.get(order.symbol)
 
@@ -403,6 +417,26 @@ class MockTradingProvider:
             )
         )
         self._cash_flow_seq += 1
+
+    def _advance_partial_orders(self, target_order_id: str | None = None) -> None:
+        if not self._pending_partial_fills:
+            return
+        order_ids = [target_order_id] if target_order_id else list(self._pending_partial_fills.keys())
+        for order_id in order_ids:
+            state = self._pending_partial_fills.get(order_id)
+            if state is None:
+                continue
+            order = next((item for item in self._orders if item.order_id == order_id), None)
+            if order is None:
+                self._pending_partial_fills.pop(order_id, None)
+                continue
+            self._apply_fill(order, float(state["price"]), int(state["remaining_quantity"]), final=True)
+            self._pending_partial_fills.pop(order_id, None)
+
+    def _partial_fill_quantity(self, order: TradingOrder) -> int:
+        if order.order_type == TradingOrderType.MARKET and order.quantity >= 100:
+            return max(order.quantity // 2, 1)
+        return order.quantity
 
     def _validate_security_for_trade(self, symbol: str) -> TradingSecurity:
         security = self._require_supported_security(symbol)

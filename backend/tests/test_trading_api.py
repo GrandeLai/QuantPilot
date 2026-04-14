@@ -241,3 +241,33 @@ def test_order_detail_refresh_backfills_provider_status_transition(
     events_resp = mock_trading_provider.get(f"/api/trading/orders/{order_id}/events")
     assert events_resp.status_code == 200
     assert [item["event_type"] for item in events_resp.json()["items"]] == ["submitted", "filled"]
+
+
+def test_large_market_order_transitions_from_partial_fill_to_filled(
+    mock_trading_provider: TestClient,
+) -> None:
+    """大额市价单应先进入 partial_filled，再在后续刷新中补齐成交。"""
+    submit_resp = mock_trading_provider.post(
+        "/api/trading/orders",
+        json={
+            "symbol": "AAPL.US",
+            "side": "buy",
+            "order_type": "market",
+            "quantity": 200,
+        },
+    )
+    assert submit_resp.status_code == 200
+    order_id = submit_resp.json()["order_id"]
+    assert submit_resp.json()["status"] == "partial_filled"
+
+    initial_detail = mock_trading_provider.get(f"/api/trading/orders/{order_id}")
+    assert initial_detail.status_code == 200
+    assert initial_detail.json()["status"] == "filled"
+
+    events_resp = mock_trading_provider.get(f"/api/trading/orders/{order_id}/events")
+    assert events_resp.status_code == 200
+    assert [item["event_type"] for item in events_resp.json()["items"]] == [
+        "submitted",
+        "partial_filled",
+        "filled",
+    ]

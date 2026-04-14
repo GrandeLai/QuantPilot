@@ -18,6 +18,7 @@ def _status_to_event_type(status: TradingOrderStatus) -> TradingOrderEventType:
     mapping = {
         TradingOrderStatus.SUBMITTED: TradingOrderEventType.SUBMITTED,
         TradingOrderStatus.PENDING_SUBMIT: TradingOrderEventType.SUBMITTED,
+        TradingOrderStatus.PARTIAL_FILLED: TradingOrderEventType.PARTIAL_FILLED,
         TradingOrderStatus.FILLED: TradingOrderEventType.FILLED,
         TradingOrderStatus.CANCELED: TradingOrderEventType.CANCELED,
         TradingOrderStatus.REJECTED: TradingOrderEventType.REJECTED,
