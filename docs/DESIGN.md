@@ -1,10 +1,17 @@
 # QuantPilot — 个人量化交易平台设计文档
 
-> **文档版本**：v0.1.0  
-> **创建日期**：2026-04-07  
-> **最后更新**：2026-04-07  
-> **作者**：赖俊金  
-> **状态**：Draft  
+> **文档版本**：v0.2.0
+> **创建日期**：2026-04-07
+> **最后更新**：2026-04-27（Phase A 拆分完成）
+> **作者**：赖俊金
+> **状态**：Active — 反映 Phase A 完工后的双产品 + 共享包结构
+
+> **重要相关文档**：
+> - **拆分计划**：`/Users/bytedance/.claude/plans/python-rust-common-wiggly-river.md`（Phase A-D 总体路线图）
+> - **迁移记录**：`docs/MIGRATION.md`（Phase A 8 个 PR 完工状态、模块归属表）
+> - **跨语言类型规范**：`docs/conventions/cross-language-types.md`
+> - **DuckDB 写权限协议**：`docs/protocols/duckdb-write-discipline.md`
+> - **验收流程**：`docs/conventions/acceptance-process.md`
 
 ---
 
@@ -13,6 +20,7 @@
 | 版本 | 日期 | 更新内容 | 作者 |
 |---|---|---|---|
 | v0.1.0 | 2026-04-07 | 初始版本，完成全功能规划与技术架构设计 | 赖俊金 |
+| v0.2.0 | 2026-04-27 | Phase A 拆分完成；更新 Section 5（架构）反映双产品 + 共享包；更新 Section 6（路线图）指向新计划。Section 4（功能模块）描述系统**做什么**未变；归属变更详见 `docs/MIGRATION.md` | Claude (Phase A 收尾) |
 
 ---
 
@@ -91,6 +99,11 @@
 ---
 
 ## 3. 功能模块总览
+
+> **拆分后**：以下功能模块在 Phase A 之后归属如下（详见 `docs/MIGRATION.md`）：
+> - **股票助手 (apps/stock-assistant/)** ：4.1 理财助理、4.4 可视化、4.10 告警、4.12 期权、4.13 社交跟单、4.15 插件、4.16 安全
+> - **量化助手 (apps/quant-assistant-py/ 临时 → apps/quant-assistant/ Rust)** ：4.2 策略管理、4.3 回测实盘、4.5 复盘、4.6 LLM 分析（advisor）、4.7 因子研究、4.8 ML 策略、4.9 组合管理、4.11 链上分析、4.14 数据 ETL
+> - **共享 (common/)** ：数据契约（contracts）、生成 schema、共享前端类型、Redis、配置、data fetchers、strategy persistence
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -553,48 +566,64 @@ class QuantPilotHookSpec:
 
 ### 5.1 系统架构总览
 
-#### 5.1.1 双前端产品形态
+#### 5.1.1 Phase A 完工后的双产品结构
 
-在 2026-04 的投资助理 MVP 迭代中，QuantPilot 明确拆分为两个面向不同工作流的前端产品：
+2026-04-27 完成 Phase A 拆分后，QuantPilot 是 monorepo 形态的**双独立产品** + 共享基础包：
 
-- `frontend/`：QuantPilot 主工作台，负责研究中心、策略库、验证中心、运行中心、风险与复盘等专业量化工作流。
-- `assistant_frontend/`：Investment Assistant，负责资产总览、机会池、调仓建议、风险雷达、复盘与问答等顾问式决策流程。
-- `backend/`：共享平台层，统一承载行情、组合、顾问接口、策略执行与身份配置能力，对两个前端暴露一致的 API 契约。
+- **股票交易助手 (`apps/stock-assistant/`)**：Python 3.12 后端 + 双前端（workbench 工作台 + assistant 决策辅助 UI）。覆盖**人参与决策**的交易工作流——股票（Longbridge / FuTu）、期权、加密（OKX）、portfolio、screener、sentiment、LLM 投顾。端口：后端 8001、workbench 5173、assistant 5174。
+- **个人量化交易助手**：分两阶段
+  - `apps/quant-assistant-py/`（Phase A 临时态）：Python 后端，端口 8002，承载**自动化研究 + 规则化执行**——回测、因子、ML、信号、策略、优化、研究。Step 4（Rust quant 对齐）后整目录删除。
+  - `apps/quant-assistant/`（Phase B+ 起目标态）：Rust 后端（axum + Polars + duckdb-rs），同端口 8002。Phase A 阶段仅含 PyO3 cdylib seed crate。
+- **共享基础包**：
+  - `common/schemas/`：JSON Schema 单源 → Python (Pydantic)、Rust (serde)、TS 三语言自动 codegen
+  - `common/python/quantpilot_common/`：基础设施（config / redis / data / plugins / platform 共享 contracts / strategy_persistence / risk / 生成的 schemas）
+  - `common/frontend-components/`：跨前端共享 TS 类型 + UI 组件（Phase A skeleton）
+  - `common/data-store/`：共享 DuckDB 行情库（stock 单写，其他只读）+ golden 数据集
+- **工具**（独立 CLI，非 app）：
+  - `tools/ml-trainer/`（Phase B+）：Python ML 训练 → ONNX 导出
+  - `tools/golden-generator/`：跨语言行为等价基准数据集生成器（Phase A skeleton）
 
-该拆分的目标是在共享同一数据与执行平台的前提下，为专业工作台和顾问式助手分别提供更聚焦的交互入口。
+详细模块归属见 `docs/MIGRATION.md`。
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        Frontend Layer                               │
-│                                                                     │
-│   Tauri 2.0 (桌面壳)  +  React 18  +  TypeScript                    │
-│   TradingView Lightweight Charts  |  ECharts  |  D3.js              │
-│   Monaco Editor (策略编辑器)  |  xterm.js (终端)                      │
-├─────────────────────────────────────────────────────────────────────┤
-│                        API Gateway                                  │
-│                     FastAPI (Python 3.12)                            │
-│              REST + WebSocket + SSE (LLM Streaming)                 │
-├──────────┬──────────┬──────────┬──────────┬─────────────────────────┤
-│ 回测引擎  │ 实盘引擎  │ 因子引擎  │ ML 引擎  │    LLM Gateway          │
-│          │          │          │          │                         │
-│ Python + │ asyncio  │ Polars + │ PyTorch  │  LiteLLM 统一路由        │
-│ Rust核心  │ Event    │ DuckDB   │ Optuna   │  OpenAI / Claude /     │
-│ (PyO3)   │ Driven   │          │ ONNX RT  │  DeepSeek / Ollama     │
-├──────────┴──────────┴──────────┴──────────┴─────────────────────────┤
-│                        Data Layer                                   │
-│                                                                     │
-│   DuckDB (K线/因子)  |  Redis (实时行情缓存)  |  SQLite (配置/日志)    │
-│   Parquet Files (历史数据归档)  |  本地 FS + AES (策略文件)            │
-├─────────────────────────────────────────────────────────────────────┤
-│                     Broker Adapter Layer                            │
-│                                                                     │
-│   富途  |  长桥  |  IB TWS  |  Alpaca  |  Binance  |  OKX  |  Bybit │
-├─────────────────────────────────────────────────────────────────────┤
-│                    Notification Layer                               │
-│                                                                     │
-│   飞书 Bot  |  Telegram  |  Email (SMTP)  |  Webhook  |  Discord    │
-└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        QuantPilot Monorepo                              │
+├─────────────────────────────────────────────────────────────────────────┤
+│ apps/stock-assistant/                  │ apps/quant-assistant-py/       │
+│ ┌─────────────────────────────────┐    │ (Phase A 临时态，Step 4 删)    │
+│ │ Python FastAPI (port 8001)      │    │ ┌───────────────────────────┐ │
+│ │ Longbridge / FuTu / OKX broker  │    │ │ Python FastAPI (port 8002)│ │
+│ │ paper trading, portfolio,       │    │ │ backtest, factors, ML,    │ │
+│ │ screener, sentiment, LLM 投顾    │    │ │ signals, strategy, optimize│ │
+│ │                                 │    │ │ research, advisor          │ │
+│ └─────────────────────────────────┘    │ └───────────────────────────┘ │
+│ ┌─────────────────┬──────────────┐    │ ┌───────────────────────────┐ │
+│ │ workbench       │ assistant    │    │ │ apps/quant-assistant/     │ │
+│ │ React 5173      │ React 5174   │    │ │ Rust + axum (Phase B+)    │ │
+│ └─────────────────┴──────────────┘    │ │ frontend 5175 (skeleton)   │ │
+│                                       │ └───────────────────────────┘ │
+├───────────────────────────────────────┴────────────────────────────────┤
+│                          common/                                        │
+│   schemas/  (JSON Schema 单源 → Py/Rust/TS codegen)                     │
+│   python/quantpilot_common/  (config/redis/data/contracts/risk/...)     │
+│   frontend-components/       (跨前端共享 TS 类型 + UI)                   │
+│   data-store/                (DuckDB 行情库 + golden 基准)               │
+├─────────────────────────────────────────────────────────────────────────┤
+│                          tools/                                         │
+│   ml-trainer/      (Phase B+: ML 训练 → ONNX)                           │
+│   golden-generator/  (跨语言行为等价基准 skeleton)                       │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Broker / Data Sources                                                  │
+│   Longbridge | FuTu | OKX | yfinance | akshare                          │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
+
+#### 5.1.2 关键不变式（强制）
+
+- `apps/stock-assistant/` 与 `apps/quant-assistant*/` **互不 import 对方源码**
+- `common/` 不反向 import `apps/*`
+- 跨语言类型只在 `common/schemas/*.schema.json` 定义
+- `common/data-store/market.duckdb` 仅 stock 可写（详见 `docs/protocols/duckdb-write-discipline.md`）
 
 ### 5.2 技术栈选型
 
@@ -876,6 +905,21 @@ volumes:
 ---
 
 ## 6. 开发路线图
+
+> **关于 Phase 编号的说明**：
+> - **Phase 0-4**（下方）：原始**产品功能**路线图，从技术验证 → MVP → 可用版 → 好用版 → 生态版（已完工至 Phase 4）。
+> - **Phase A-D**（见 `/Users/bytedance/.claude/plans/python-rust-common-wiggly-river.md`）：**架构拆分**路线图——单 backend 拆为 stock-assistant + quant-assistant + common（**Phase A 已于 2026-04-27 完工**）。
+
+### Phase A-D（架构拆分，2026-04 起）
+
+| Phase | 状态 | 范围 |
+|---|---|---|
+| **A** | ✅ **已完成 (2026-04-27)** | 仓库目录重构，单 backend → stock-assistant + quant-assistant-py（Python 临时态）+ Rust quant-assistant seed + common + tools。8 个 PR 全 PASS，500 测试，3 app 互不耦合。详见 `docs/MIGRATION.md`。 |
+| **B** | 待启 | Rust quant-assistant MVP：转 axum + Polars + duckdb-rs，实现 `/healthz` + `/backtest` 端点；与 quant-py 同输入回测，差 < 1e-9（goldens 基准）；Rhai DSL + native trait registry 混合策略 |
+| **C** | 待启 | Rust quant 增量替换 quant-py：因子库 → walk-forward → ONNX 推理 → 优化 → reports。每完成一项关 quant-py 对应模块。 |
+| **Step 4** | 待启 | quant-py 已无依赖 → 整目录删除；stock-assistant 的 advisor 改 HTTP-based 调 Rust quant-assistant |
+
+### Phase 0-4（产品功能，已完工至 Phase 4）
 
 ### Phase 0：技术验证（2 周）
 
