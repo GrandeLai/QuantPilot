@@ -2,18 +2,38 @@
 name = "quantpilot-quant"
 version = "0.1.0"
 edition = "2021"
-description = "QuantPilot 量化助手后端（Rust）"
+description = "QuantPilot 量化助手后端（Rust）：自动化研究 + 规则化执行 + ONNX 推理"
 license = "MIT"
 
 [lib]
 name = "quantpilot_quant"
-crate-type = ["cdylib", "rlib"]
+crate-type = ["rlib"]
+
+[[bin]]
+name = "quantpilot-quant-server"
+path = "src/main.rs"
 
 [dependencies]
-pyo3 = { version = "0.22", features = ["extension-module", "abi3-py312"] }
+# HTTP server
+axum = "0.7"
+tokio = { version = "1", features = ["full"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors", "trace"] }
+
+# Serialization
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+
+# Generated schemas (PR 2 codegen)
 chrono = { version = "0.4", features = ["serde"] }
+
+# Errors
+anyhow = "1"
+thiserror = "2"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [profile.release]
 lto = true
