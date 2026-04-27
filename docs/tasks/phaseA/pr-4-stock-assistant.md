@@ -1,8 +1,9 @@
 # Task phaseA.pr-4-stock-assistant: 股票助手抽出
 
 **Phase**: A
-**Status**: pending
-**Implementation PR**: <pending>
+**Status**: passed
+**Implementation PR**: commits `c0e6ff1` (Stage A) + `d8d6001` (Stage B)
+**Acceptance**: [docs/acceptance/phaseA/pr-4-stock-assistant.md](../../acceptance/phaseA/pr-4-stock-assistant.md) — ✅ PASS (2026-04-27)
 **Created**: 2026-04-27
 **Owner-agent**: implementation-agent
 **Reviewer-agent**: acceptance-agent
