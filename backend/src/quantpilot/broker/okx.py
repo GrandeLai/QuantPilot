@@ -31,7 +31,7 @@ from quantpilot.broker.types import (
     TradingOrderType,
     TradingProviderKind,
 )
-from quantpilot.config import get_settings
+from quantpilot_common.config import get_settings
 
 OKX_BASE_URL = "https://www.okx.com"
 
@@ -57,7 +57,7 @@ def _map_status(raw: str) -> TradingOrderStatus:
 
 def _parse_order(data: dict) -> CryptoOrder:
     """将 OKX 订单对象解析为 CryptoOrder 模型."""
-    from quantpilot.data.fetchers.okx_fetcher import display_symbol
+    from quantpilot_common.data.fetchers.okx_fetcher import display_symbol
 
     inst_id = data.get("instId", "")
     fill_sz = float(data.get("fillSz", 0) or 0)
@@ -176,7 +176,7 @@ class OKXTradingProvider:
 
     def get_price(self, symbol: str) -> float:
         """获取单个交易对最新价格."""
-        from quantpilot.data.fetchers.okx_fetcher import normalize_symbol
+        from quantpilot_common.data.fetchers.okx_fetcher import normalize_symbol
         try:
             data = self._get("/api/v5/market/ticker", {"instId": normalize_symbol(symbol)})
             return float(data["data"][0]["last"])
@@ -185,7 +185,7 @@ class OKXTradingProvider:
 
     def get_ticker_24h(self, symbols: list[str]) -> list[dict]:
         """批量获取 24h 行情 — 单次请求 /market/tickers?instType=SPOT 后过滤."""
-        from quantpilot.data.fetchers.okx_fetcher import normalize_symbol
+        from quantpilot_common.data.fetchers.okx_fetcher import normalize_symbol
         requested = {normalize_symbol(s) for s in symbols}
         try:
             data = self._get("/api/v5/market/tickers", {"instType": "SPOT"})
@@ -226,7 +226,7 @@ class OKXTradingProvider:
 
     def get_open_orders(self, symbol: str | None = None) -> list[CryptoOrder]:
         """获取当前挂单列表."""
-        from quantpilot.data.fetchers.okx_fetcher import normalize_symbol
+        from quantpilot_common.data.fetchers.okx_fetcher import normalize_symbol
         params: dict = {"instType": "SPOT"}
         if symbol:
             params["instId"] = normalize_symbol(symbol)
@@ -235,7 +235,7 @@ class OKXTradingProvider:
 
     def get_order_history(self, symbol: str, limit: int = 50) -> list[CryptoOrder]:
         """获取历史订单（最近 7 天）."""
-        from quantpilot.data.fetchers.okx_fetcher import normalize_symbol
+        from quantpilot_common.data.fetchers.okx_fetcher import normalize_symbol
         data = self._get(
             "/api/v5/trade/orders-history",
             {"instType": "SPOT", "instId": normalize_symbol(symbol), "limit": min(limit, 100)},
@@ -245,7 +245,7 @@ class OKXTradingProvider:
 
     def submit_order(self, req: CryptoOrderRequest) -> CryptoOrder:
         """提交新订单."""
-        from quantpilot.data.fetchers.okx_fetcher import normalize_symbol
+        from quantpilot_common.data.fetchers.okx_fetcher import normalize_symbol
         inst_id = normalize_symbol(req.symbol)
         body: dict = {
             "instId":  inst_id,
@@ -274,7 +274,7 @@ class OKXTradingProvider:
 
     def cancel_order(self, symbol: str, order_id: str) -> CryptoOrder:
         """撤销指定订单（OKX 撤单也是 POST）."""
-        from quantpilot.data.fetchers.okx_fetcher import normalize_symbol
+        from quantpilot_common.data.fetchers.okx_fetcher import normalize_symbol
         inst_id = normalize_symbol(symbol)
         resp = self._post(
             "/api/v5/trade/cancel-order",
@@ -292,7 +292,7 @@ class OKXTradingProvider:
 
     def get_swap_tickers(self) -> list[SwapTicker]:
         """获取热门永续合约行情（含资金费率）."""
-        from quantpilot.data.fetchers.okx_fetcher import POPULAR_SWAPS, display_swap_symbol
+        from quantpilot_common.data.fetchers.okx_fetcher import POPULAR_SWAPS, display_swap_symbol
         popular_set = set(POPULAR_SWAPS)
         try:
             data = self._get("/api/v5/market/tickers", {"instType": "SWAP"})

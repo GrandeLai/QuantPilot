@@ -6,7 +6,7 @@
   - 适合震荡市场，通过高抛低吸赚取价差
 """
 
-from quantpilot.data.models import OHLCVBar
+from quantpilot_common.data.models import OHLCVBar
 from quantpilot.strategy.base import BaseStrategy, OrderType, StrategyContext
 
 

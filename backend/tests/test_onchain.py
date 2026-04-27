@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from quantpilot.data.onchain import OnChainMetric, OnChainProvider
+from quantpilot_common.data.onchain import OnChainMetric, OnChainProvider
 
 
 class TestOnChainMetric:

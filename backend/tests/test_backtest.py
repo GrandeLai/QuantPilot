@@ -6,7 +6,7 @@ import pytest
 
 from quantpilot.backtest.engine import BacktestConfig, BacktestEngine, BacktestResult
 from quantpilot.backtest.metrics import TradeRecord, calculate_metrics
-from quantpilot.data.models import OHLCVBar
+from quantpilot_common.data.models import OHLCVBar
 from quantpilot.strategy.templates.ma_crossover import MACrossoverStrategy
 from quantpilot.strategy.templates.rsi_mean_reversion import RSIMeanReversionStrategy
 

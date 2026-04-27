@@ -6,8 +6,8 @@ from datetime import UTC, datetime, timedelta
 
 from fastapi.testclient import TestClient
 
-from quantpilot.data.models import OHLCVBar
-from quantpilot.data.storage import MarketDataStorage
+from quantpilot_common.data.models import OHLCVBar
+from quantpilot_common.data.storage import MarketDataStorage
 
 
 def _make_bar(

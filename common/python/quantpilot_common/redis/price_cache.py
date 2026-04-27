@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from loguru import logger
 
-from quantpilot.redis.client import RedisClient
+from quantpilot_common.redis.client import RedisClient
 
 _HASH_KEY = "quantpilot:prices"  # Redis Hash: field=symbol, value=price_str
 

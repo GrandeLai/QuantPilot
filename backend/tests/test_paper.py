@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from quantpilot.data.models import OHLCVBar
+from quantpilot_common.data.models import OHLCVBar
 from quantpilot.paper.engine import PaperSession, PaperTradingEngine
 from quantpilot.strategy.base import BaseStrategy, StrategyContext
 

@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from quantpilot.data.models import OHLCVBar
+from quantpilot_common.data.models import OHLCVBar
 from quantpilot.paper.engine import PaperSession
 from quantpilot.portfolio.manager import PortfolioManager, StrategySlot
 from quantpilot.strategy.base import BaseStrategy, StrategyContext

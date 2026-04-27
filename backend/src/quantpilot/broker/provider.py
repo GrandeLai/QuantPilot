@@ -22,7 +22,7 @@ from quantpilot.broker.types import (
     TradingSecurity,
     TradingSubmitResult,
 )
-from quantpilot.config import get_settings
+from quantpilot_common.config import get_settings
 
 
 class TradingProvider(Protocol):

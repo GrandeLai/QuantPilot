@@ -242,7 +242,7 @@ class PipelineOrchestrator:
             start_date: 起始日期字符串，格式 %Y-%m-%d。
             end_date: 结束日期字符串，格式 %Y-%m-%d。
         """
-        from quantpilot.data.fetchers.okx_fetcher import OKXFetcher, normalize_symbol
+        from quantpilot_common.data.fetchers.okx_fetcher import OKXFetcher, normalize_symbol
 
         step = self._get_step(state, "data_fetch")
         state.current_step = "data_fetch"

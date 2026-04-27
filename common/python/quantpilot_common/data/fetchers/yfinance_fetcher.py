@@ -9,8 +9,8 @@ import pandas as pd
 import yfinance as yf
 from loguru import logger
 
-from quantpilot.data.fetchers.base import BaseDataFetcher
-from quantpilot.data.models import AssetType, Exchange, OHLCVBar, SymbolInfo
+from quantpilot_common.data.fetchers.base import BaseDataFetcher
+from quantpilot_common.data.models import AssetType, Exchange, OHLCVBar, SymbolInfo
 
 # Yahoo Finance 周期映射
 _TF_MAP: dict[str, str] = {

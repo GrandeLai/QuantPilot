@@ -7,9 +7,9 @@ from datetime import UTC, datetime
 import fakeredis.aioredis
 import pytest
 
-from quantpilot.data.models import OHLCVBar
-from quantpilot.redis.client import RedisClient
-from quantpilot.redis.pubsub import BarPublisher, bar_channel
+from quantpilot_common.data.models import OHLCVBar
+from quantpilot_common.redis.client import RedisClient
+from quantpilot_common.redis.pubsub import BarPublisher, bar_channel
 
 
 @pytest.fixture(autouse=True)

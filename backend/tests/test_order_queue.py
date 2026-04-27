@@ -4,8 +4,8 @@ from __future__ import annotations
 import fakeredis.aioredis
 import pytest
 
-from quantpilot.redis.client import RedisClient
-from quantpilot.redis.order_queue import OrderQueue, QueuedOrder
+from quantpilot_common.redis.client import RedisClient
+from quantpilot_common.redis.order_queue import OrderQueue, QueuedOrder
 
 
 @pytest.fixture(autouse=True)

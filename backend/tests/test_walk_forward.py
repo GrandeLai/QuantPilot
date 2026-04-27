@@ -14,7 +14,7 @@ from quantpilot.backtest.walk_forward import (
     WalkForwardResult,
     WalkForwardWindowResult,
 )
-from quantpilot.data.models import OHLCVBar
+from quantpilot_common.data.models import OHLCVBar
 from quantpilot.strategy.templates.ma_crossover import MACrossoverStrategy
 
 

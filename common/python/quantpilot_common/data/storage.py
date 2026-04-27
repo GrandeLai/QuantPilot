@@ -14,7 +14,7 @@ import duckdb
 import polars as pl
 from loguru import logger
 
-from quantpilot.data.models import OHLCVBar, SymbolInfo
+from quantpilot_common.data.models import OHLCVBar, SymbolInfo
 
 # DuckDB 建表 DDL
 _DDL_MARKET_DATA = """

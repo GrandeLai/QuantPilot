@@ -6,10 +6,10 @@ from typing import TYPE_CHECKING
 
 from loguru import logger
 
-from quantpilot.redis.client import RedisClient
+from quantpilot_common.redis.client import RedisClient
 
 if TYPE_CHECKING:
-    from quantpilot.data.models import OHLCVBar
+    from quantpilot_common.data.models import OHLCVBar
 
 
 def bar_channel(symbol: str, timeframe: str) -> str:

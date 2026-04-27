@@ -13,7 +13,7 @@ STRATEGY_TEMPLATE = '''
 
 ```python
 from quantpilot.strategy.base import BaseStrategy, StrategyContext
-from quantpilot.data.models import OHLCVBar
+from quantpilot_common.data.models import OHLCVBar
 
 class MyStrategy(BaseStrategy):
     name = "my_strategy"           # 唯一标识

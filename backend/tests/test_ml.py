@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from quantpilot.data.models import OHLCVBar
+from quantpilot_common.data.models import OHLCVBar
 from quantpilot.ml.features import FeatureEngineer
 from quantpilot.ml.registry import MLModelRegistry
 from quantpilot.ml.strategy import LGBMStrategy

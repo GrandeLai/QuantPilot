@@ -24,7 +24,7 @@ _engine = AlertEngine()
 
 
 def _get_storage() -> AlertStorage:
-    from quantpilot.config import get_settings
+    from quantpilot_common.config import get_settings
     settings = get_settings()
     settings.data_dir.mkdir(parents=True, exist_ok=True)
     return AlertStorage(settings.data_dir / "alerts.sqlite")

@@ -21,7 +21,7 @@ router = APIRouter(prefix="/strategies", tags=["策略管理"])
 
 
 def _get_storage() -> StrategyStorage:
-    from quantpilot.config import get_settings
+    from quantpilot_common.config import get_settings
     settings = get_settings()
     return StrategyStorage(settings.strategy_dir)
 
@@ -145,7 +145,7 @@ def get_strategy_history(strategy_id: str) -> dict[str, object]:
     if record is None:
         raise HTTPException(status_code=404, detail=f"策略不存在: {strategy_id}")
     try:
-        from quantpilot.config import get_settings
+        from quantpilot_common.config import get_settings
         from quantpilot.strategy.git_manager import GitManager
         gm = GitManager(get_settings().strategy_dir)
         history = gm.log(f"{strategy_id}.py")
@@ -158,7 +158,7 @@ def get_strategy_history(strategy_id: str) -> dict[str, object]:
 def get_strategy_version(strategy_id: str, sha: str) -> dict[str, str]:
     """获取策略指定版本的代码."""
     try:
-        from quantpilot.config import get_settings
+        from quantpilot_common.config import get_settings
         from quantpilot.strategy.git_manager import GitManager
         gm = GitManager(get_settings().strategy_dir)
         code = gm.get_version(f"{strategy_id}.py", sha)

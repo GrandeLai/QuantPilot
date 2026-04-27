@@ -13,7 +13,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from quantpilot.backtest.engine import BacktestConfig
-from quantpilot.data.models import OHLCVBar
+from quantpilot_common.data.models import OHLCVBar
 from quantpilot.optimize.engine import OptimizationEngine, ParamGrid
 
 router = APIRouter(prefix="/optimize", tags=["参数优化"])

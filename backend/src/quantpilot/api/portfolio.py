@@ -18,7 +18,7 @@ from typing import Any, Literal
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
-from quantpilot.config import get_settings
+from quantpilot_common.config import get_settings
 from quantpilot.portfolio.manager import PortfolioManager
 from quantpilot.portfolio.snapshots import PortfolioSnapshot, SnapshotStorage, StrategySnapshot
 from quantpilot.strategy.storage import StrategyStorage

@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 
-from quantpilot.config import get_settings
+from quantpilot_common.config import get_settings
 
 
 @asynccontextmanager
@@ -22,7 +22,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     settings.log_dir.mkdir(parents=True, exist_ok=True)
 
     # 连接 Redis
-    from quantpilot.redis.client import RedisClient
+    from quantpilot_common.redis.client import RedisClient
     try:
         await RedisClient.connect(settings.redis_url)
     except Exception as e:
@@ -32,7 +32,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     yield
 
     # 断开 Redis
-    from quantpilot.redis.client import RedisClient as _RedisClient
+    from quantpilot_common.redis.client import RedisClient as _RedisClient
     await _RedisClient.disconnect()
     logger.info("QuantPilot API 正在关闭...")
 
@@ -137,7 +137,7 @@ def create_app() -> FastAPI:
     @app.get("/health", tags=["system"])
     async def health_check() -> dict[str, str]:
         """健康检查端点."""
-        from quantpilot.redis.client import RedisClient
+        from quantpilot_common.redis.client import RedisClient
         redis_ok = await RedisClient.ping()
         return {
             "status": "ok",

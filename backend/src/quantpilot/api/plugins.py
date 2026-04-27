@@ -11,7 +11,7 @@ from typing import Any
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from quantpilot.plugins.manager import PluginManager
+from quantpilot_common.plugins.manager import PluginManager
 
 router = APIRouter(prefix="/plugins", tags=["插件系统"])
 

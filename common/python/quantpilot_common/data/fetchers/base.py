@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from datetime import date
 
-from quantpilot.data.models import OHLCVBar, SymbolInfo
+from quantpilot_common.data.models import OHLCVBar, SymbolInfo
 
 
 class BaseDataFetcher(ABC):

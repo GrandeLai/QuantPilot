@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from quantpilot.platform.models import PlatformSummaryResponse
-from quantpilot.platform.services import build_platform_summary
+from quantpilot_common.platform.models import PlatformSummaryResponse
+from quantpilot_common.platform.services import build_platform_summary
 
 router = APIRouter(prefix="/platform", tags=["platform"])
 

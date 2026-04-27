@@ -9,8 +9,8 @@ import akshare as ak
 import pandas as pd
 from loguru import logger
 
-from quantpilot.data.fetchers.base import BaseDataFetcher
-from quantpilot.data.models import AssetType, Exchange, OHLCVBar, SymbolInfo
+from quantpilot_common.data.fetchers.base import BaseDataFetcher
+from quantpilot_common.data.models import AssetType, Exchange, OHLCVBar, SymbolInfo
 
 # AKShare 周期映射（stock_zh_a_hist 接口）
 _TF_MAP_A_STOCK: dict[str, str] = {

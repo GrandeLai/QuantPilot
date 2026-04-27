@@ -11,7 +11,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from quantpilot.data.models import OHLCVBar
+from quantpilot_common.data.models import OHLCVBar
 from quantpilot.indicators.calculator import INDICATOR_REGISTRY, IndicatorCalculator
 
 router = APIRouter(prefix="/indicators", tags=["技术指标"])

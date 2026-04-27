@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 from quantpilot.backtest.engine import BacktestConfig, BacktestEngine
 from quantpilot.backtest.walk_forward import WalkForwardConfig, WalkForwardEngine
-from quantpilot.data.models import OHLCVBar
+from quantpilot_common.data.models import OHLCVBar
 from quantpilot.strategy.loader import load_strategy_class
 
 router = APIRouter(prefix="/backtest", tags=["回测"])

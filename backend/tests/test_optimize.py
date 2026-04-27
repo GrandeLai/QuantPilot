@@ -6,7 +6,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 
 from quantpilot.backtest.engine import BacktestConfig
-from quantpilot.data.models import OHLCVBar
+from quantpilot_common.data.models import OHLCVBar
 from quantpilot.optimize.engine import OptimizationEngine, OptimizeResult, ParamGrid
 from quantpilot.strategy.base import BaseStrategy, StrategyContext
 

@@ -33,7 +33,7 @@ from quantpilot.broker.types import (
     TradingSessionStatus,
     TradingSubmitResult,
 )
-from quantpilot.config import get_settings
+from quantpilot_common.config import get_settings
 from quantpilot.security.keystore import load_api_key
 
 

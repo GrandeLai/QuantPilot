@@ -5,8 +5,8 @@ from datetime import UTC, datetime
 import polars as pl
 import pytest
 
-from quantpilot.data.models import AssetType, Exchange, OHLCVBar, SymbolInfo
-from quantpilot.data.storage import MarketDataStorage
+from quantpilot_common.data.models import AssetType, Exchange, OHLCVBar, SymbolInfo
+from quantpilot_common.data.storage import MarketDataStorage
 
 
 def _make_bar(

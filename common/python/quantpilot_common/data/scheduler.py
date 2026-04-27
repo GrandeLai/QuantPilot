@@ -12,10 +12,10 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from loguru import logger
 
-from quantpilot.data.fetchers.yfinance_fetcher import YFinanceFetcher
+from quantpilot_common.data.fetchers.yfinance_fetcher import YFinanceFetcher
 
 if TYPE_CHECKING:
-    from quantpilot.data.storage import MarketDataStorage
+    from quantpilot_common.data.storage import MarketDataStorage
 
 
 class DataScheduler:
@@ -67,8 +67,8 @@ class DataScheduler:
                 # 更新 Redis 价格缓存（最新收盘价）
                 latest_bar = bars[-1]
                 try:
-                    from quantpilot.redis.client import RedisClient
-                    from quantpilot.redis.price_cache import PriceCache
+                    from quantpilot_common.redis.client import RedisClient
+                    from quantpilot_common.redis.price_cache import PriceCache
                     if RedisClient._instance is not None:
                         loop = asyncio.new_event_loop()
                         loop.run_until_complete(PriceCache().set_price(symbol, latest_bar.close))
@@ -78,8 +78,8 @@ class DataScheduler:
 
                 # 发布到 Redis pub/sub（行情实时推送）
                 try:
-                    from quantpilot.redis.client import RedisClient
-                    from quantpilot.redis.pubsub import BarPublisher
+                    from quantpilot_common.redis.client import RedisClient
+                    from quantpilot_common.redis.pubsub import BarPublisher
                     if RedisClient._instance is not None:
                         publisher = BarPublisher()
                         loop = asyncio.new_event_loop()

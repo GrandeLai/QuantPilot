@@ -2,7 +2,7 @@
 
 from fastapi.testclient import TestClient
 
-from quantpilot.platform.models import PlatformSummaryResponse
+from quantpilot_common.platform.models import PlatformSummaryResponse
 
 
 def test_platform_summary_lists_all_domains(client: TestClient) -> None:

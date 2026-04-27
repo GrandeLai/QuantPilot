@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 from loguru import logger
 
 from quantpilot.backtest.engine import BacktestConfig, BacktestEngine
-from quantpilot.data.models import OHLCVBar
+from quantpilot_common.data.models import OHLCVBar
 
 if TYPE_CHECKING:
     from quantpilot.strategy.base import BaseStrategy

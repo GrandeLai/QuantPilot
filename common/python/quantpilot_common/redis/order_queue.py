@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 
 from loguru import logger
 
-from quantpilot.redis.client import RedisClient
+from quantpilot_common.redis.client import RedisClient
 
 
 def _stream_key(session_id: str) -> str:

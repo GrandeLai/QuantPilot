@@ -9,8 +9,8 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
-from quantpilot.data.models import OHLCVBar
-from quantpilot.data.storage import MarketDataStorage
+from quantpilot_common.data.models import OHLCVBar
+from quantpilot_common.data.storage import MarketDataStorage
 from quantpilot.ml.crypto_features import CryptoFeaturePipeline
 from quantpilot.ml.ensemble import EnsembleStrategy
 from quantpilot.ml.feature_selector import FeatureSelector

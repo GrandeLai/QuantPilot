@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from loguru import logger
 
-from quantpilot.data.models import OHLCVBar
+from quantpilot_common.data.models import OHLCVBar
 from quantpilot.paper.engine import PaperSession, PaperTradingEngine
 
 if TYPE_CHECKING:

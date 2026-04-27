@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from quantpilot.platform.models import DomainStatus, FactEnvelope
+from quantpilot_common.platform.models import DomainStatus, FactEnvelope
 
 
 def _build_placeholder_domain_status(name: str, updated_at: datetime) -> dict[str, str | datetime]:

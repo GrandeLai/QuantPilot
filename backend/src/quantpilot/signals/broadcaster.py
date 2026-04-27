@@ -131,8 +131,8 @@ class SignalBroadcaster:
 
         # Redis pub/sub：实时推送信号（非阻塞，失败不影响主流程）
         try:
-            from quantpilot.redis.client import RedisClient
-            from quantpilot.redis.pubsub import signal_channel
+            from quantpilot_common.redis.client import RedisClient
+            from quantpilot_common.redis.pubsub import signal_channel
             if RedisClient._instance is not None:
                 r = RedisClient.get()
                 channel = signal_channel(signal.symbol)

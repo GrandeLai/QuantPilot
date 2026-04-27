@@ -31,7 +31,7 @@ from fastapi import APIRouter, HTTPException, Query
 
 from quantpilot.broker.okx import get_okx_provider
 from quantpilot.broker.types import CryptoOrderRequest, SwapOrderRequest, TradingProviderKind
-from quantpilot.data.fetchers.okx_fetcher import (
+from quantpilot_common.data.fetchers.okx_fetcher import (
     OPTIONS_UNDERLYINGS,
     POPULAR_PAIRS,
     display_symbol,

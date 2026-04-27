@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 
-from quantpilot.data.storage import MarketDataStorage
+from quantpilot_common.data.storage import MarketDataStorage
 
 
 @dataclass(slots=True)

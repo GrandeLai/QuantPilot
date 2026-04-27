@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, patch
 import pandas as pd
 import pytest
 
-from quantpilot.data.fetchers.yfinance_fetcher import YFinanceFetcher
-from quantpilot.data.models import OHLCVBar
+from quantpilot_common.data.fetchers.yfinance_fetcher import YFinanceFetcher
+from quantpilot_common.data.models import OHLCVBar
 
 
 def _make_yf_df(n: int = 5) -> pd.DataFrame:

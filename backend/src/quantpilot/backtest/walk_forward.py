@@ -34,7 +34,7 @@ from loguru import logger
 
 from quantpilot.backtest.engine import BacktestConfig, BacktestEngine, BacktestResult
 from quantpilot.backtest.metrics import BacktestMetrics, TradeRecord, calculate_metrics
-from quantpilot.data.models import OHLCVBar
+from quantpilot_common.data.models import OHLCVBar
 from quantpilot.optimize.engine import OptimizationEngine, ParamGrid
 from quantpilot.research.validation import TimeSeriesValidationConfig, build_walk_forward_windows
 

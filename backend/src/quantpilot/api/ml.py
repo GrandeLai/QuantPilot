@@ -13,7 +13,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from quantpilot.data.models import OHLCVBar
+from quantpilot_common.data.models import OHLCVBar
 from quantpilot.ml.feature_selector import FeatureSelector
 from quantpilot.ml.features import FeatureEngineer
 from quantpilot.ml.registry import MLModelRegistry

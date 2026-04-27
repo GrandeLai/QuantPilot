@@ -193,8 +193,8 @@ async def enqueue_order(session_id: str, req: dict[str, Any]) -> dict[str, str]:
 
     Request body: {"symbol": "AAPL", "side": "buy", "quantity": 10, "price": 150.0, "reason": ""}
     """
-    from quantpilot.redis.client import RedisClient
-    from quantpilot.redis.order_queue import OrderQueue, QueuedOrder
+    from quantpilot_common.redis.client import RedisClient
+    from quantpilot_common.redis.order_queue import OrderQueue, QueuedOrder
 
     if RedisClient._instance is None:
         raise HTTPException(status_code=503, detail="Redis 未连接")
@@ -218,8 +218,8 @@ async def enqueue_order(session_id: str, req: dict[str, Any]) -> dict[str, str]:
 @router.get("/sessions/{session_id}/orders/queue")
 async def get_order_queue(session_id: str, count: int = 20) -> dict[str, Any]:
     """查看指定 session 的订单队列."""
-    from quantpilot.redis.client import RedisClient
-    from quantpilot.redis.order_queue import OrderQueue
+    from quantpilot_common.redis.client import RedisClient
+    from quantpilot_common.redis.order_queue import OrderQueue
 
     if RedisClient._instance is None:
         raise HTTPException(status_code=503, detail="Redis 未连接")

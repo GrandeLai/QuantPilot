@@ -7,8 +7,8 @@ from pathlib import Path
 
 import fakeredis.aioredis
 
-from quantpilot.redis.client import RedisClient
-from quantpilot.redis.pubsub import signal_channel
+from quantpilot_common.redis.client import RedisClient
+from quantpilot_common.redis.pubsub import signal_channel
 from quantpilot.signals.broadcaster import SignalBroadcaster, TradingSignal
 from quantpilot.signals.subscriber import SignalSubscriber
 

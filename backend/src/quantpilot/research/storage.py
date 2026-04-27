@@ -6,7 +6,7 @@ import sqlite3
 import threading
 from pathlib import Path
 
-from quantpilot.config import get_settings
+from quantpilot_common.config import get_settings
 from quantpilot.research.models import CryptoResearchOptimizationSummary, CryptoResearchTrainSummary
 
 

@@ -15,7 +15,7 @@ def load_strategy_class(name: str) -> type | None:
     from quantpilot.strategy.builtin import BUILTIN_STRATEGIES
     from quantpilot.strategy.storage import StrategyStorage
     from quantpilot.strategy.base import BaseStrategy
-    from quantpilot.config import get_settings
+    from quantpilot_common.config import get_settings
 
     builtin = BUILTIN_STRATEGIES.get(name)
     if builtin is not None:

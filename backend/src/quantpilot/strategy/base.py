@@ -12,7 +12,7 @@ from enum import StrEnum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from quantpilot.data.models import OHLCVBar
+    from quantpilot_common.data.models import OHLCVBar
 
 
 class OrderSide(StrEnum):

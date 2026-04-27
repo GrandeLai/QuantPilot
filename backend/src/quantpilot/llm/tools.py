@@ -69,8 +69,8 @@ async def execute_tool(tool_name: str, arguments: dict[str, Any]) -> str:
     """执行工具调用并返回结果字符串."""
     try:
         if tool_name == "fetch_bars":
-            from quantpilot.config import get_settings
-            from quantpilot.data.storage import MarketDataStorage
+            from quantpilot_common.config import get_settings
+            from quantpilot_common.data.storage import MarketDataStorage
 
             settings = get_settings()
             storage = MarketDataStorage(settings.duckdb_path)
@@ -83,7 +83,7 @@ async def execute_tool(tool_name: str, arguments: dict[str, Any]) -> str:
             return f"{symbol} {timeframe} 最近 {len(df)} 根K线，最新收盘价: {df['close'][-1]:.4f}"
 
         if tool_name == "list_strategies":
-            from quantpilot.config import get_settings
+            from quantpilot_common.config import get_settings
             from quantpilot.strategy.storage import StrategyStorage
 
             settings = get_settings()

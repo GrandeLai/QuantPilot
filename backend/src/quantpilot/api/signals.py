@@ -13,7 +13,7 @@ from typing import Any
 from fastapi import APIRouter, Query
 from pydantic import BaseModel
 
-from quantpilot.config import get_settings
+from quantpilot_common.config import get_settings
 from quantpilot.signals.broadcaster import SignalBroadcaster, TradingSignal
 from quantpilot.signals.quantile_filter import RollingQuantileFilter
 

@@ -13,11 +13,13 @@
 
 ### 做什么
 - 把现有 `backend/src/quantpilot/` 下的基础设施模块整体移到 `common/python/quantpilot_common/`：
-  - `config.py` → `common/python/quantpilot_common/config/__init__.py`（如果只是单文件）或保持子包
+  - `config.py` → `common/python/quantpilot_common/config.py`
   - `redis/` → `common/python/quantpilot_common/redis/`
-  - `platform/` → `common/python/quantpilot_common/platform/`
   - `plugins/` → `common/python/quantpilot_common/plugins/`
   - `data/` → `common/python/quantpilot_common/data/`
+  - **`platform/` 拆分**：
+    - `platform/models.py` + `platform/services.py` → `common/python/quantpilot_common/platform/`（真正的共享 contract）
+    - `platform/{advisor_service.py, agent_models.py}` 保留在 `backend/src/quantpilot/platform/`（依赖 quant 模块如 research/service，违反 common 解耦原则；PR 4 移到 stock-assistant）
 - 完整保留 PR 2 已生成的 `common/python/quantpilot_common/schemas/` 不动
 - 更新 `common/python/pyproject.toml`：注册 uv workspace member、声明依赖闭包（含 redis、yfinance、akshare、duckdb 等基础设施依赖）
 - 在仓库根 `pyproject.toml` 的 uv workspace members 中加入 `common/python`
@@ -40,7 +42,7 @@
 - [ ] **AC-4**: `common/python/` 是根 `pyproject.toml` uv workspace 的合法 member（`uv sync` 退出码 0）
 - [ ] **AC-5**: `cd backend && uv run pytest tests/ -x` 全过（现有 backend 测试在 import 替换后仍能通过）
 - [ ] **AC-6**: `cd common/python && uv run pytest tests/ -x` 全过（移过来的测试还能跑）
-- [ ] **AC-7**: 任何 `backend/src/quantpilot/` 中的剩余代码 import 都不再使用 `from quantpilot.config|redis|platform|plugins|data` 这种旧路径：`! grep -rE "from quantpilot\.(config|redis|platform|plugins|data)" backend/src/`
+- [ ] **AC-7**: `backend/src/quantpilot/` 中的剩余代码 import 都不再使用已迁出模块的旧路径（`quantpilot.config`、`quantpilot.redis`、`quantpilot.plugins`、`quantpilot.data`、`quantpilot.platform.models`、`quantpilot.platform.services`）；仅保留 `quantpilot.platform.{agent_models,advisor_service}`（PR 4 移到 stock-assistant）
 - [ ] **AC-8**: `common/python/` 中没有反向 import `apps/`：`! grep -r "from apps\." common/python/ && ! grep -r "import apps\." common/python/`
 
 ---
@@ -77,8 +79,8 @@ cd ..
 cd common/python && uv run pytest tests/ -x
 cd ../..
 
-# AC-7
-! grep -rE "from quantpilot\.(config|redis|platform|plugins|data)" backend/src/
+# AC-7: 已迁出的旧路径不再被引用（quantpilot.platform.{agent_models,advisor_service} 例外，PR 4 处理）
+! grep -rE "from quantpilot\.(config|redis|plugins|data) |from quantpilot\.(config|redis|plugins|data)\.|from quantpilot\.platform\.(models|services)" backend/src/
 
 # AC-8
 ! grep -rE "from apps\.|import apps\." common/python/

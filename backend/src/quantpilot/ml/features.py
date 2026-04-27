@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from quantpilot.data.models import OHLCVBar
+from quantpilot_common.data.models import OHLCVBar
 
 
 class FeatureEngineer:

@@ -39,7 +39,7 @@ from quantpilot.broker.types import (
     TradingSessionStatus,
     TradingSubmitResult,
 )
-from quantpilot.config import get_settings
+from quantpilot_common.config import get_settings
 
 
 class MockTradingProvider:

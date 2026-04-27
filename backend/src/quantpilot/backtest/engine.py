@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
 from loguru import logger
 
 from quantpilot.backtest.metrics import BacktestMetrics, TradeRecord, calculate_metrics
-from quantpilot.data.models import OHLCVBar
+from quantpilot_common.data.models import OHLCVBar
 from quantpilot.strategy.base import (
     Order,
     OrderSide,

@@ -7,7 +7,7 @@
 
 from collections import deque
 
-from quantpilot.data.models import OHLCVBar
+from quantpilot_common.data.models import OHLCVBar
 from quantpilot.strategy.base import BaseStrategy, OrderType, StrategyContext
 
 

@@ -14,7 +14,7 @@ from quantpilot.backtest.metrics import TradeRecord
 from quantpilot.strategy.base import Order, OrderSide, Position, StrategyContext
 
 if TYPE_CHECKING:
-    from quantpilot.data.models import OHLCVBar
+    from quantpilot_common.data.models import OHLCVBar
     from quantpilot.strategy.base import BaseStrategy
 
 

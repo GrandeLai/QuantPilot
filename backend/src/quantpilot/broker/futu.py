@@ -34,7 +34,7 @@ from quantpilot.broker.types import (
     TradingSessionStatus,
     TradingSubmitResult,
 )
-from quantpilot.config import Settings, get_settings
+from quantpilot_common.config import Settings, get_settings
 
 
 @dataclass(frozen=True, slots=True)

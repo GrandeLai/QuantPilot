@@ -6,8 +6,8 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from quantpilot.data.models import OHLCVBar
-from quantpilot.data.storage import MarketDataStorage
+from quantpilot_common.data.models import OHLCVBar
+from quantpilot_common.data.storage import MarketDataStorage
 from quantpilot.ml.crypto_features import CryptoFeaturePipeline
 from quantpilot.research.crypto_dataset import MultiTimeframeDatasetBuilder
 from quantpilot.research.validation import TimeSeriesValidationConfig, build_walk_forward_windows

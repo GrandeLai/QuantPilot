@@ -25,8 +25,8 @@ async def ws_bars(websocket: WebSocket, symbol: str, timeframe: str) -> None:
         symbol: 标的代码，如 AAPL
         timeframe: K 线周期，如 1d
     """
-    from quantpilot.redis.client import RedisClient
-    from quantpilot.redis.pubsub import bar_channel
+    from quantpilot_common.redis.client import RedisClient
+    from quantpilot_common.redis.pubsub import bar_channel
 
     await websocket.accept()
     channel = bar_channel(symbol.upper(), timeframe)
@@ -55,7 +55,7 @@ async def ws_signals(websocket: WebSocket) -> None:
 
     客户端连接后，任何策略发布的信号（通过 signals:* 频道）都会实时转发。
     """
-    from quantpilot.redis.client import RedisClient
+    from quantpilot_common.redis.client import RedisClient
 
     await websocket.accept()
     channel = "signals:*"

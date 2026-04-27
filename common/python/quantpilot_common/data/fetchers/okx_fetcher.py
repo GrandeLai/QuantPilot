@@ -12,8 +12,8 @@ from datetime import date, datetime, timezone
 import httpx
 from loguru import logger
 
-from quantpilot.data.fetchers.base import BaseDataFetcher
-from quantpilot.data.models import OHLCVBar, SymbolInfo
+from quantpilot_common.data.fetchers.base import BaseDataFetcher
+from quantpilot_common.data.models import OHLCVBar, SymbolInfo
 
 OKX_REST_URL = "https://www.okx.com"
 

@@ -24,7 +24,7 @@ from quantpilot.broker.types import (
     TradingProviderError,
     TradingRiskStatus,
 )
-from quantpilot.config import get_settings
+from quantpilot_common.config import get_settings
 from quantpilot.risk.manager import RiskConfig, RiskManager
 from quantpilot.trading.oms import get_order_event_store
 from quantpilot.trading.reporting import build_execution_report

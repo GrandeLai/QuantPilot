@@ -16,15 +16,15 @@ from typing import Annotated, Any
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from loguru import logger
 
-from quantpilot.data.fetchers.akshare_fetcher import AKShareFetcher
-from quantpilot.data.fetchers.okx_fetcher import OKXFetcher, normalize_symbol as normalize_crypto_symbol
-from quantpilot.data.fetchers.yfinance_fetcher import YFinanceFetcher
-from quantpilot.data.models import (
+from quantpilot_common.data.fetchers.akshare_fetcher import AKShareFetcher
+from quantpilot_common.data.fetchers.okx_fetcher import OKXFetcher, normalize_symbol as normalize_crypto_symbol
+from quantpilot_common.data.fetchers.yfinance_fetcher import YFinanceFetcher
+from quantpilot_common.data.models import (
     DataFetchRequest,
     OHLCVBar,
     OHLCVResponse,
 )
-from quantpilot.data.storage import MarketDataStorage
+from quantpilot_common.data.storage import MarketDataStorage
 
 _CRYPTO_QUOTES = ("USDT", "BUSD", "USDC", "BTC", "ETH", "OKB")
 
@@ -45,7 +45,7 @@ def get_storage() -> MarketDataStorage:
     """依赖注入：获取存储实例."""
     global _storage
     if _storage is None:
-        from quantpilot.config import get_settings
+        from quantpilot_common.config import get_settings
         settings = get_settings()
         settings.data_dir.mkdir(parents=True, exist_ok=True)
         _storage = MarketDataStorage(settings.duckdb_path)
@@ -180,7 +180,7 @@ def get_range(
 @router.get("/onchain/btc")
 async def get_btc_onchain() -> dict[str, Any]:
     """获取 BTC 链上指标（来自 blockchain.info）."""
-    from quantpilot.data.onchain import OnChainProvider
+    from quantpilot_common.data.onchain import OnChainProvider
 
     provider = OnChainProvider()
     metrics = await provider.fetch_btc_stats()
@@ -194,8 +194,8 @@ async def get_btc_onchain() -> dict[str, Any]:
 @router.get("/prices")
 async def get_latest_prices() -> dict[str, Any]:
     """从 Redis 缓存读取所有标的最新价格（O(1) 查询）."""
-    from quantpilot.redis.client import RedisClient
-    from quantpilot.redis.price_cache import PriceCache
+    from quantpilot_common.redis.client import RedisClient
+    from quantpilot_common.redis.price_cache import PriceCache
     if RedisClient._instance is None:
         raise HTTPException(status_code=503, detail="Redis 未连接")
     prices = await PriceCache().get_all()
@@ -205,8 +205,8 @@ async def get_latest_prices() -> dict[str, Any]:
 @router.get("/prices/{symbol}")
 async def get_symbol_price(symbol: str) -> dict[str, Any]:
     """读取单个标的最新缓存价格."""
-    from quantpilot.redis.client import RedisClient
-    from quantpilot.redis.price_cache import PriceCache
+    from quantpilot_common.redis.client import RedisClient
+    from quantpilot_common.redis.price_cache import PriceCache
     if RedisClient._instance is None:
         raise HTTPException(status_code=503, detail="Redis 未连接")
     price = await PriceCache().get_price(symbol.upper())
@@ -220,7 +220,7 @@ async def get_btc_metric(metric: str) -> dict[str, Any]:
     """获取单个 BTC 链上指标."""
     from fastapi import HTTPException
 
-    from quantpilot.data.onchain import OnChainProvider
+    from quantpilot_common.data.onchain import OnChainProvider
 
     provider = OnChainProvider()
     result = await provider.fetch_metric(metric)

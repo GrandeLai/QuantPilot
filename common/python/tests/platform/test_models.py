@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 
 from pydantic import ValidationError
 
-from quantpilot.platform.models import DomainStatus, FactEnvelope
+from quantpilot_common.platform.models import DomainStatus, FactEnvelope
 
 
 def test_domain_status_exposes_required_fields() -> None:

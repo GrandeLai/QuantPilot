@@ -7,7 +7,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
-from quantpilot.platform.models import FreshnessState
+from quantpilot_common.platform.models import FreshnessState
 
 AdviceType = Literal[
     "opportunity",

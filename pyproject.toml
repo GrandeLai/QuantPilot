@@ -7,13 +7,12 @@ dependencies = []
 
 [tool.uv.workspace]
 # Members are added incrementally as Phase A PRs land:
-#   PR 3: common/python
+#   PR 3: common/python ✅
 #   PR 4: apps/stock-assistant/backend
 #   PR 5: apps/quant-assistant-py/backend
 #   PR 7: tools/golden-generator
 #   ml-trainer: tools/ml-trainer (Phase B)
-# 临时：PR 1 时 members 为空数组——uv sync 仅同步根项目（无依赖）。
-members = []
+members = ["common/python"]
 
 [tool.uv]
 package = false

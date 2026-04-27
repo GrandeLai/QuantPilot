@@ -4,8 +4,8 @@ from __future__ import annotations
 import sys
 import types
 
-from quantpilot.plugins.manager import PluginManager
-from quantpilot.plugins.spec import QuantPilotSpec
+from quantpilot_common.plugins.manager import PluginManager
+from quantpilot_common.plugins.spec import QuantPilotSpec
 
 
 class ConcretePlugin:
@@ -64,7 +64,7 @@ class TestPluginManager:
     def test_hot_reload_module(self) -> None:
         mod_name = "fake_plugin_mod"
         src = (
-            "from quantpilot.plugins.spec import QuantPilotSpec\n"
+            "from quantpilot_common.plugins.spec import QuantPilotSpec\n"
             "class FakePlugin:\n"
             "    @QuantPilotSpec.hookimpl\n"
             "    def on_alert(self, message: str) -> str:\n"

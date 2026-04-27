@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from quantpilot.data.models import OHLCVBar
+from quantpilot_common.data.models import OHLCVBar
 from quantpilot.strategy.base import BaseStrategy, Position, StrategyContext
 from quantpilot.strategy.storage import StrategyMeta, StrategyRecord, StrategyStorage
 from quantpilot.strategy.templates import TEMPLATE_STRATEGIES

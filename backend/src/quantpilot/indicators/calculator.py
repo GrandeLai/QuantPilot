@@ -16,7 +16,7 @@ import pandas as pd
 import pandas_ta as ta  # type: ignore[import]
 from loguru import logger
 
-from quantpilot.data.models import OHLCVBar
+from quantpilot_common.data.models import OHLCVBar
 
 # 指标注册表：name -> (计算函数参数说明, 默认参数)
 INDICATOR_REGISTRY: dict[str, dict[str, Any]] = {

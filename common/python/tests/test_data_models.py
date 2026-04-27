@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from quantpilot.data.models import (
+from quantpilot_common.data.models import (
     TIMEFRAMES,
     AssetType,
     Exchange,

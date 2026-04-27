@@ -4,8 +4,8 @@ from __future__ import annotations
 import fakeredis.aioredis
 import pytest
 
-from quantpilot.redis.client import RedisClient
-from quantpilot.redis.price_cache import PriceCache
+from quantpilot_common.redis.client import RedisClient
+from quantpilot_common.redis.price_cache import PriceCache
 
 
 @pytest.fixture(autouse=True)

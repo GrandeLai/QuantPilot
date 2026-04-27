@@ -7,7 +7,7 @@ import inspect
 import pluggy
 from loguru import logger
 
-from quantpilot.plugins.spec import QuantPilotSpec
+from quantpilot_common.plugins.spec import QuantPilotSpec
 
 
 class PluginManager:
