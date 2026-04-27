@@ -1,8 +1,9 @@
 # Task phaseA.pr-5-quant-assistant-py: 量化助手 Python 临时态抽出
 
 **Phase**: A
-**Status**: pending
-**Implementation PR**: <pending>
+**Status**: passed
+**Implementation PR**: commits `429f764` + `1cfed48`
+**Acceptance**: [docs/acceptance/phaseA/pr-5-quant-assistant-py.md](../../acceptance/phaseA/pr-5-quant-assistant-py.md) — ✅ PASS (2026-04-27)
 **Created**: 2026-04-27
 **Owner-agent**: implementation-agent
 **Reviewer-agent**: acceptance-agent
