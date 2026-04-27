@@ -387,7 +387,7 @@ export default function App() {
         </header>
 
         {/* ── 主内容 ──────────────────────────────────── */}
-        <main className="flex-1 overflow-y-auto py-4 px-5">
+        <main className="flex-1 overflow-hidden">
           <Suspense
             fallback={
               <div className="flex min-h-[420px] items-center justify-center">

@@ -14,6 +14,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from quantpilot.data.models import OHLCVBar
+from quantpilot.ml.feature_selector import FeatureSelector
 from quantpilot.ml.features import FeatureEngineer
 from quantpilot.ml.registry import MLModelRegistry
 from quantpilot.ml.strategy import LGBMStrategy
@@ -38,6 +39,7 @@ class BarInput(BaseModel):
 class TrainRequest(BaseModel):
     model_name: str
     bars: list[BarInput]
+    corr_threshold: float = 0.85  # 特征相关性去冗余阈值
 
 
 class PredictRequest(BaseModel):
@@ -70,10 +72,32 @@ def train_model(req: TrainRequest) -> dict[str, Any]:
     df = _feature_engineer.compute(bars)
     if len(df) < 10:
         raise HTTPException(status_code=400, detail="特征计算后数据不足")
+
+    # ── 动态特征筛选：去除高相关冗余，保留互信息更高的特征 ────────────────
+    candidate_cols = [c for c in LGBMStrategy.FEATURE_COLS if c in df.columns]
+    selected_cols = candidate_cols  # 默认：保留所有候选特征
+    if len(candidate_cols) >= 2 and len(df) >= 10:
+        try:
+            selector = FeatureSelector(corr_threshold=req.corr_threshold)
+            selected_cols, selection_report = selector.fit_transform(
+                X=df[candidate_cols],
+                y=df["target"],
+                target_type="classification",
+            )
+        except ValueError:
+            selected_cols = candidate_cols  # 筛选失败则回退到全量特征
+    # ─────────────────────────────────────────────────────────────────────────
+
     strat = LGBMStrategy()
-    strat.fit(df)
+    strat.fit(df, feature_columns=selected_cols)
     _registry.save(req.model_name, strat)
-    return {"message": f"模型 '{req.model_name}' 训练完成", "samples": len(df)}
+    return {
+        "message": f"模型 '{req.model_name}' 训练完成",
+        "samples": len(df),
+        "features_before_selection": len(candidate_cols),
+        "features_after_selection": len(selected_cols),
+        "selected_features": selected_cols,
+    }
 
 
 @router.post("/predict")

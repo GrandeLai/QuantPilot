@@ -47,7 +47,13 @@ def list_sessions() -> dict[str, Any]:
     with _lock:
         return {
             "sessions": [
-                {"session_id": sid, "symbol": s.symbol, "timeframe": s.timeframe, "bars_processed": s.bars_processed}
+                {
+                    "id": sid,
+                    "session_id": sid,
+                    "symbol": s.symbol,
+                    "timeframe": s.timeframe,
+                    "bars_processed": s.bars_processed,
+                }
                 for sid, (s, _) in _sessions.items()
             ]
         }
@@ -154,6 +160,31 @@ def execute_manual_order(session_id: str, req: ManualOrderRequest) -> dict[str, 
         "cash_after": round(sess.cash, 2),
         "portfolio_value": round(sess.portfolio_value(current_prices), 2),
     }
+
+
+@router.get("/sessions/{session_id}/orders")
+def list_manual_orders(session_id: str) -> dict[str, Any]:
+    """返回前端可直接展示的模拟盘成交记录."""
+    with _lock:
+        if session_id not in _sessions:
+            raise HTTPException(status_code=404, detail=f"会话不存在: {session_id}")
+        sess, _ = _sessions[session_id]
+        trades = list(sess.trades)
+
+    orders = [
+        {
+            "id": f"{session_id}-{idx}",
+            "symbol": trade.symbol,
+            "side": trade.side.upper(),
+            "qty": trade.quantity,
+            "entry_price": trade.entry_price,
+            "exit_price": trade.exit_price,
+            "pnl": trade.pnl,
+            "created_at": trade.exit_time.isoformat(),
+        }
+        for idx, trade in enumerate(reversed(trades), start=1)
+    ]
+    return {"session_id": session_id, "orders": orders, "count": len(orders)}
 
 
 @router.post("/sessions/{session_id}/orders/enqueue")

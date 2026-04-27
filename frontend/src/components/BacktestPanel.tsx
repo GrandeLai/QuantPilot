@@ -14,7 +14,9 @@ import {
   RefreshCw,
   ChevronDown,
   ChevronUp,
+  ArrowRight,
 } from "lucide-react";
+import FeatureGuideButton from "@/components/guides/FeatureGuideButton";
 import { cn } from "../lib/utils";
 
 // ── 数据类型 ──────────────────────────────────────────────────────────────────
@@ -24,6 +26,8 @@ interface AvailableStrategy {
   name: string;
   description: string;
   default_params: Record<string, unknown>;
+  source?: "template" | "user";
+  version?: string;
 }
 
 interface BacktestMetrics {
@@ -48,7 +52,7 @@ interface BacktestMetrics {
   trading_days: number;
 }
 
-interface BacktestResult {
+export interface BacktestResult {
   symbol: string;
   timeframe: string;
   strategy_id: string;
@@ -94,7 +98,12 @@ function MetricTile({
 
 // ── 主组件 ────────────────────────────────────────────────────────────────────
 
-export default function BacktestPanel() {
+interface BacktestPanelProps {
+  onResult?: (result: BacktestResult) => void;
+  onGoToPaper?: () => void;
+}
+
+export default function BacktestPanel({ onResult, onGoToPaper }: BacktestPanelProps = {}) {
   // ── 配置状态
   const [strategies, setStrategies] = useState<AvailableStrategy[]>([]);
   const [strategyId, setStrategyId] = useState("");
@@ -187,6 +196,7 @@ export default function BacktestPanel() {
       const data = (await runRes.json()) as BacktestResult;
       setResult(data);
       setStatus("done");
+      onResult?.(data);
     } catch (e: unknown) {
       if (e instanceof DOMException && e.name === "AbortError") return;
       setErrorMsg(e instanceof Error ? e.message : String(e));
@@ -205,7 +215,7 @@ export default function BacktestPanel() {
 
   return (
     <div
-      className="flex bg-[#0d1117] rounded-xl overflow-hidden border border-[#30363d]"
+      className="relative flex bg-[#0d1117] rounded-xl overflow-hidden border border-[#30363d]"
       style={{ height: "calc(100vh - 120px)" }}
     >
       {/* ── 左侧配置栏 ────────────────────────────────── */}
@@ -235,7 +245,7 @@ export default function BacktestPanel() {
               ) : (
                 strategies.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.name}
+                    {s.source === "user" ? `[用户] ${s.name}` : `[模板] ${s.name}`}
                   </option>
                 ))
               )}
@@ -243,6 +253,9 @@ export default function BacktestPanel() {
             {selectedStrategy && (
               <p className="text-[10px] text-[#8b949e] leading-relaxed">
                 {selectedStrategy.description}
+                <span className="ml-2 inline-flex items-center rounded-full border border-[#30363d] bg-[#161b22] px-2 py-0.5 text-[9px] uppercase tracking-wider text-[#8b949e]">
+                  {selectedStrategy.source === "user" ? "User Strategy" : "Template"}
+                </span>
               </p>
             )}
           </div>
@@ -572,9 +585,23 @@ export default function BacktestPanel() {
                 </div>
               </div>
             </div>
+
+            {/* 前往模拟交易验证 CTA */}
+            {onGoToPaper && (
+              <div className="flex justify-end pt-2">
+                <button
+                  onClick={onGoToPaper}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-blue-900/20"
+                >
+                  <ArrowRight className="w-4 h-4" />
+                  前往模拟交易验证 →
+                </button>
+              </div>
+            )}
           </div>
         )}
       </main>
+      <FeatureGuideButton guideKey="backtest.workspace" className="bottom-5 right-5" />
     </div>
   );
 }

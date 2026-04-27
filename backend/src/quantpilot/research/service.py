@@ -7,10 +7,16 @@ from dataclasses import dataclass
 import lightgbm as lgb
 import numpy as np
 import pandas as pd
+from loguru import logger
 
 from quantpilot.data.models import OHLCVBar
 from quantpilot.data.storage import MarketDataStorage
 from quantpilot.ml.crypto_features import CryptoFeaturePipeline
+from quantpilot.ml.ensemble import EnsembleStrategy
+from quantpilot.ml.feature_selector import FeatureSelector
+
+# 支持 lgb.LGBMClassifier 和 EnsembleStrategy 的联合类型（duck typing）
+_MulticlassModel = lgb.LGBMClassifier | EnsembleStrategy
 from quantpilot.optimize.engine import OptimizationEngine, ParamGrid
 from quantpilot.research.crypto_dataset import MultiTimeframeDatasetBuilder
 from quantpilot.research.models import (
@@ -38,11 +44,18 @@ class CryptoResearchRequest:
 class CryptoResearchService:
     """多时间维度 OKX 加密研究服务."""
 
-    def __init__(self, storage: MarketDataStorage) -> None:
+    def __init__(
+        self,
+        storage: MarketDataStorage,
+        corr_threshold: float = 0.85,
+        use_ensemble: bool = False,
+    ) -> None:
         self._storage = storage
         self._builder = MultiTimeframeDatasetBuilder(storage)
         self._pipeline = CryptoFeaturePipeline()
         self._results = CryptoResearchStorage()
+        self._feature_selector = FeatureSelector(corr_threshold=corr_threshold)
+        self._use_ensemble = use_ensemble
 
     def build_dataset_summary(
         self,
@@ -76,12 +89,28 @@ class CryptoResearchService:
         )
         features = self._pipeline.compute(dataset.frame)
         feature_columns = self._feature_columns(features)
+
+        # ── 动态特征筛选：去除高相关冗余因子，保留互信息更高的特征 ──────────
+        # 注意：此处在全量数据上执行筛选（全局筛选），特征列名一经确定后在所有
+        # walk-forward 窗口中复用。如需消除轻微前视偏差，可改为在每个 window
+        # 的 train_df 内分别调用 fit_transform，代价是每窗口耗时略增。
+        if len(features) >= 10 and len(feature_columns) >= 2:
+            try:
+                feature_columns, _selection_report = self._feature_selector.fit_transform(
+                    X=features[feature_columns],
+                    y=features["target_class"],
+                    target_type="classification",
+                )
+            except ValueError as exc:
+                logger.warning(f"[FeatureSelector] 跳过特征筛选：{exc}")
+        # ─────────────────────────────────────────────────────────────────────
+
         windows = build_walk_forward_windows(total_rows=len(features), config=request.validation)
         if not windows:
             raise ValueError("数据不足，无法构建 walk-forward 验证窗口")
 
         window_metrics: list[WalkForwardWindowMetric] = []
-        final_multiclass: lgb.LGBMClassifier | None = None
+        final_multiclass: _MulticlassModel | None = None
         final_reversal: lgb.LGBMClassifier | None = None
 
         for window in windows:
@@ -216,7 +245,29 @@ class CryptoResearchService:
         excluded = {"target_class", "target_reversal", "forward_return_1d"}
         return [column for column in features.columns if column not in excluded and pd.api.types.is_numeric_dtype(features[column])]
 
-    def _fit_multiclass(self, df: pd.DataFrame, feature_columns: list[str]) -> lgb.LGBMClassifier:
+    def _fit_multiclass(self, df: pd.DataFrame, feature_columns: list[str]) -> _MulticlassModel:
+        """训练多分类模型.
+
+        ``use_ensemble=True`` 时返回 ``EnsembleStrategy``（LightGBM + CatBoost 融合）；
+        否则返回标准 ``lgb.LGBMClassifier``。两者均支持 ``predict_proba()``，
+        后续方法通过 duck typing 统一调用。
+        """
+        if self._use_ensemble:
+            ens = EnsembleStrategy(
+                lgbm_params={
+                    "n_estimators": 60, "num_leaves": 31,
+                    "learning_rate": 0.05, "n_jobs": 1, "verbosity": -1,
+                },
+                catboost_params={
+                    "iterations": 100, "depth": 4,
+                    "learning_rate": 0.05, "thread_count": 1,
+                },
+            )
+            # EnsembleStrategy 要求目标列名为 "target"，从 "target_class" 重命名
+            train_df = df.assign(target=df["target_class"])
+            ens.fit(train_df, feature_columns=feature_columns)
+            return ens
+
         model = lgb.LGBMClassifier(
             objective="multiclass",
             num_class=3,
@@ -245,19 +296,24 @@ class CryptoResearchService:
 
     def _predict_multiclass(
         self,
-        model: lgb.LGBMClassifier,
+        model: _MulticlassModel,
         df: pd.DataFrame,
         feature_columns: list[str],
     ) -> np.ndarray:
-        return model.predict(df[feature_columns]) - 1
+        if isinstance(model, EnsembleStrategy):
+            # EnsembleStrategy.predict() 返回 list[int]，已是 -1/0/1
+            return np.array(model.predict(df[feature_columns]))
+        # lgb.LGBMClassifier.predict() 返回 0/1/2，需减 1
+        return model.predict(df[feature_columns]) - 1  # type: ignore[operator]
 
     def _latest_probabilities(
         self,
-        model: lgb.LGBMClassifier,
+        model: _MulticlassModel,
         df: pd.DataFrame,
         feature_columns: list[str],
     ) -> dict[str, float]:
-        probs = model.predict_proba(df[feature_columns])[0]
+        # 两种模型均实现了 predict_proba(df) → shape (n, 3)
+        probs = model.predict_proba(df[feature_columns])[0]  # type: ignore[union-attr]
         return {
             "-1": float(probs[0]),
             "0": float(probs[1]),
@@ -266,10 +322,21 @@ class CryptoResearchService:
 
     def _feature_importance(
         self,
-        model: lgb.LGBMClassifier,
+        model: _MulticlassModel,
         feature_columns: list[str],
     ) -> dict[str, float]:
-        values = model.feature_importances_
+        if isinstance(model, EnsembleStrategy):
+            # 按模型权重加权平均 LGBM 和 CatBoost 的重要度
+            imps = model.feature_importances()
+            w_lgbm, w_cb = model.weights
+            combined = {
+                f: w_lgbm * imps["lgbm"].get(f, 0.0) + w_cb * imps["catboost"].get(f, 0.0)
+                for f in feature_columns
+            }
+            total = sum(combined.values()) or 1.0
+            return {f: v / total for f, v in combined.items()}
+
+        values = model.feature_importances_  # type: ignore[union-attr]
         total = float(values.sum()) or 1.0
         return {feature: float(score / total) for feature, score in zip(feature_columns, values, strict=False)}
 

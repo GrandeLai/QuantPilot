@@ -299,6 +299,14 @@ export default function StrategyPanel({ onNavigate }: Props) {
     searchInputRef.current?.focus();
   };
 
+  const saveStateLabel = saving ? "Saving…" : isDirty ? "Unsaved changes" : "Saved";
+  const saveStateClass = saving
+    ? "text-blue-400"
+    : isDirty
+      ? "text-yellow-500"
+      : "text-green-500";
+  const disableSave = saving || (!isDirty && selectedId !== null && !isTemplate);
+
   return (
     <div
       className="flex bg-[#0d1117] rounded-xl overflow-hidden border border-[#30363d]"
@@ -498,19 +506,19 @@ export default function StrategyPanel({ onNavigate }: Props) {
               <div
                 className={cn(
                   "flex items-center gap-1.5 text-[11px] font-medium whitespace-nowrap",
-                  isDirty ? "text-yellow-500" : "text-green-500",
+                  saveStateClass,
                 )}
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                {isDirty ? "Unsaved changes" : "Auto-saved"}
+                {saveStateLabel}
               </div>
               <button
                 onClick={() => void handleSave()}
-                disabled={saving}
+                disabled={disableSave}
                 className="flex items-center gap-1.5 h-8 px-3 text-[#8b949e] hover:text-white text-sm rounded-md hover:bg-[#21262d] transition-colors disabled:opacity-50"
               >
                 <Save className="w-3.5 h-3.5" />
-                {saving ? "Saving…" : "Save Now"}
+                {saving ? "Saving…" : isDirty ? "Save Now" : "Saved"}
               </button>
               {selectedId && !isTemplate && (
                 <button

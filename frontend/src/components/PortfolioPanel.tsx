@@ -67,6 +67,8 @@ interface AvailableStrategy {
   name: string;
   description: string;
   default_params: Record<string, unknown>;
+  source?: "template" | "user";
+  version?: string;
 }
 
 // ── 添加策略弹窗 ─────────────────────────────────────────────────────────────
@@ -176,13 +178,18 @@ function AddStrategyModal({ onClose, onAdded }: AddStrategyModalProps) {
                 <option value="">加载中…</option>
               ) : (
                 availableStrategies.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
+                  <option key={s.id} value={s.id}>
+                    {s.source === "user" ? `[用户] ${s.name}` : `[模板] ${s.name}`}
+                  </option>
                 ))
               )}
             </select>
             {availableStrategies.find((s) => s.id === strategyClass)?.description && (
               <p className="text-[10px] text-[#8E9299]">
                 {availableStrategies.find((s) => s.id === strategyClass)?.description}
+                <span className="ml-2 inline-flex items-center rounded-full border border-[#2A2D35] bg-[#1C1E22] px-2 py-0.5 text-[9px] uppercase tracking-wider text-[#8E9299]">
+                  {availableStrategies.find((s) => s.id === strategyClass)?.source === "user" ? "User" : "Template"}
+                </span>
               </p>
             )}
           </div>

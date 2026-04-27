@@ -22,6 +22,7 @@ dependencies = [
     "httpx>=0.27.0",
     "websockets>=12.0",
     "aiofiles>=23.0.0",
+    "longbridge>=0.4.0",
     # Phase 1 — 数据模块
     "yfinance>=0.2.50",
     "akshare>=1.14.0",
@@ -42,6 +43,7 @@ dependencies = [
     "jinja2>=3.1.0",
     "gitpython>=3.1.0",
     "aiosqlite>=0.20.0",
+    "catboost>=1.2.0",
 ]
 
 [project.optional-dependencies]

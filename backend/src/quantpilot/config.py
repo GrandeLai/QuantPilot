@@ -67,6 +67,20 @@ class Settings(BaseSettings):
     okx_passphrase: str = Field(default="", description="OKX API Passphrase（创建 API Key 时设定）")
     okx_demo: bool = Field(default=True, description="使用模拟盘（True = x-simulated-trading:1）")
 
+    # ML 模型超参数
+    ml_lgbm_n_estimators: int = Field(default=50, description="LightGBM 树的数量")
+    ml_lgbm_num_leaves: int = Field(default=15, description="LightGBM 每棵树的最大叶子数")
+    ml_lgbm_learning_rate: float = Field(default=0.1, description="LightGBM 学习率")
+    ml_catboost_iterations: int = Field(default=100, description="CatBoost 迭代次数")
+    ml_catboost_depth: int = Field(default=4, description="CatBoost 树深度")
+    ml_catboost_learning_rate: float = Field(default=0.1, description="CatBoost 学习率")
+    ml_feature_corr_threshold: float = Field(default=0.85, description="特征相关性去冗余阈值")
+
+    # 信号过滤配置
+    signal_filter_window: int = Field(default=20, description="滚动分位数过滤器回看窗口大小")
+    signal_filter_quantile: float = Field(default=0.75, description="滚动分位数阈值（0~1）")
+    signal_filter_min_periods: int = Field(default=5, description="过滤器热身期最小样本数")
+
 
 def get_settings() -> Settings:
     """获取全局配置单例."""

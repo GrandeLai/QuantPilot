@@ -56,7 +56,7 @@ export const useStrategyStore = create<StrategyState>((set) => ({
   setTemplates: (templates) => set({ templates }),
   selectStrategy: (selectedId) => set({ selectedId }),
   setEditorCode: (editorCode) => set({ editorCode, isDirty: true }),
-  setEditorName: (editorName) => set({ editorName }),
-  setEditorDescription: (editorDescription) => set({ editorDescription }),
+  setEditorName: (editorName) => set({ editorName, isDirty: true }),
+  setEditorDescription: (editorDescription) => set({ editorDescription, isDirty: true }),
   markClean: () => set({ isDirty: false }),
 }));

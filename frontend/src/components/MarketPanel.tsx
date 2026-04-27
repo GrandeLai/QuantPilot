@@ -2,6 +2,7 @@
  * 行情面板 — 合并：走势图 / 新闻情绪 / 实时推送
  */
 import { useState } from "react";
+import FeatureGuideButton from "@/components/guides/FeatureGuideButton";
 import ChartLayout from "./ChartLayout";
 import LiveDataPanel from "./LiveDataPanel";
 import SentimentPanel from "./SentimentPanel";
@@ -16,9 +17,10 @@ const SUBS: { key: Sub; label: string }[] = [
 
 export default function MarketPanel() {
   const [sub, setSub] = useState<Sub>("chart");
+  const guideKey = sub === "chart" ? "market.chart" : sub === "sentiment" ? "market.sentiment" : "market.live";
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div className="relative" style={{ display: "flex", flexDirection: "column" }}>
       <div
         style={{
           display: "flex",
@@ -50,6 +52,7 @@ export default function MarketPanel() {
       {sub === "chart" && <ChartLayout />}
       {sub === "sentiment" && <SentimentPanel />}
       {sub === "live" && <LiveDataPanel />}
+      <FeatureGuideButton guideKey={guideKey} />
     </div>
   );
 }

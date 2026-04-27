@@ -128,6 +128,9 @@ def create_app() -> FastAPI:
     include_with_api_alias(crypto_research_router)
     include_with_api_alias(crypto_router)
 
+    from quantpilot.api.pipeline import router as pipeline_router
+    include_with_api_alias(pipeline_router)
+
     from quantpilot.api.ws import router as ws_router
     app.include_router(ws_router)
 

@@ -9,6 +9,7 @@
   GET  /data/onchain/btc/{metric}  获取单个 BTC 链上指标
 """
 
+import re
 from datetime import datetime
 from typing import Annotated, Any
 
@@ -16,6 +17,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from loguru import logger
 
 from quantpilot.data.fetchers.akshare_fetcher import AKShareFetcher
+from quantpilot.data.fetchers.okx_fetcher import OKXFetcher, normalize_symbol as normalize_crypto_symbol
 from quantpilot.data.fetchers.yfinance_fetcher import YFinanceFetcher
 from quantpilot.data.models import (
     DataFetchRequest,
@@ -23,6 +25,15 @@ from quantpilot.data.models import (
     OHLCVResponse,
 )
 from quantpilot.data.storage import MarketDataStorage
+
+_CRYPTO_QUOTES = ("USDT", "BUSD", "USDC", "BTC", "ETH", "OKB")
+
+
+def _is_crypto_symbol(symbol: str) -> bool:
+    """判断是否为加密货币交易对（如 BTCUSDT / BTC-USDT / BTC/USDT）."""
+    s = re.sub(r"[^A-Za-z0-9]", "", symbol).upper()
+    return any(s.endswith(q) for q in _CRYPTO_QUOTES) and "." not in symbol
+
 
 router = APIRouter(prefix="/data", tags=["数据"])
 
@@ -113,20 +124,26 @@ def fetch_data(
                 else _date.today()
             )
 
-            source = req.source
-            if source == "auto":
-                # 自动选择：A 股用 akshare，其他用 yfinance
-                source = "akshare" if len(req.symbol) == 6 and req.symbol.isdigit() else "yfinance"
+            symbol = req.symbol
 
-            if source == "yfinance":
-                fetcher = YFinanceFetcher()
+            if _is_crypto_symbol(req.symbol):
+                fetcher = OKXFetcher()
+                symbol = normalize_crypto_symbol(req.symbol)  # 规范化为 BTC-USDT
             else:
-                fetcher = AKShareFetcher()
+                source = req.source
+                if source == "auto":
+                    # 自动选择：A 股用 akshare，其他用 yfinance
+                    source = "akshare" if len(req.symbol) == 6 and req.symbol.isdigit() else "yfinance"
 
-            bars = fetcher.fetch_ohlcv(req.symbol, req.timeframe, start_date, end_date)
+                if source == "yfinance":
+                    fetcher = YFinanceFetcher()
+                else:
+                    fetcher = AKShareFetcher()
+
+            bars = fetcher.fetch_ohlcv(symbol, req.timeframe, start_date, end_date)
             if bars:
                 written = storage.upsert_bars(bars)
-                logger.info(f"[API/fetch] {req.symbol} 写入 {written} 条")
+                logger.info(f"[API/fetch] {symbol} 写入 {written} 条")
         except Exception as e:
             logger.error(f"[API/fetch] 后台任务失败: {e}")
 

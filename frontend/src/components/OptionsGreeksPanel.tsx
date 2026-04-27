@@ -14,6 +14,7 @@ import {
   TrendingUp,
   Zap,
 } from "lucide-react";
+import FeatureGuideButton from "@/components/guides/FeatureGuideButton";
 import {
   AreaChart,
   Area,
@@ -303,6 +304,11 @@ export default function OptionsGreeksPanel() {
     const flat = scenario.matrix.flat();
     return [Math.min(...flat), Math.max(...flat)];
   }, [scenario]);
+  const guideKey = activeView === "payoff"
+    ? "options.payoff"
+    : activeView === "sensitivity"
+      ? "options.sensitivity"
+      : "options.scenario";
 
   // ── 汇总
   const hasResult = greeks !== null;
@@ -312,7 +318,7 @@ export default function OptionsGreeksPanel() {
 
   return (
     <div
-      className="flex bg-[#131722] rounded-xl overflow-hidden border border-[#2a2e39]"
+      className="relative flex bg-[#131722] rounded-xl overflow-hidden border border-[#2a2e39]"
       style={{ height: "calc(100vh - 120px)" }}
     >
       {/* ── 左侧参数栏 ──────────────────────────────── */}
@@ -736,6 +742,7 @@ export default function OptionsGreeksPanel() {
           </div>
         )}
       </main>
+      <FeatureGuideButton guideKey={guideKey} className="bottom-5 right-5" />
     </div>
   );
 }

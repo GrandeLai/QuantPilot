@@ -20,6 +20,7 @@ import {
   TrendingUp,
   TrendingDown,
 } from "lucide-react";
+import FeatureGuideButton from "@/components/guides/FeatureGuideButton";
 import {
   useScreenerStore,
   type ScreenResult,
@@ -648,10 +649,18 @@ export default function ScreenerPanel() {
       setScreenLoading(false);
     }
   };
+  const guideKey =
+    subTab === "results"
+      ? "screener.results"
+      : subTab === "market"
+        ? "screener.market"
+        : subTab === "detail"
+          ? "screener.detail"
+          : "screener.analyze";
 
   return (
     <div
-      className="flex overflow-hidden bg-[#131722]"
+      className="relative flex overflow-hidden bg-[#131722]"
       style={{ height: "calc(100vh - 130px)" }}
     >
       {/* Sidebar */}
@@ -783,6 +792,7 @@ export default function ScreenerPanel() {
           {subTab === "analyze" && <AnalyzePanel />}
         </div>
       </main>
+      <FeatureGuideButton guideKey={guideKey} className="bottom-5 right-5" />
     </div>
   );
 }

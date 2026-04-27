@@ -5,7 +5,9 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from quantpilot.factors.providers.advanced_crypto import AdvancedCryptoFactorProvider
 from quantpilot.factors.providers.core_crypto import CoreCryptoFactorProvider
+from quantpilot.factors.providers.pandas_ta_crypto import PandasTaCryptoFactorProvider
 from quantpilot.factors.providers.registry import FactorProviderRegistry
 
 
@@ -14,7 +16,11 @@ class CryptoFeaturePipeline:
 
     def __init__(self, provider_registry: FactorProviderRegistry | None = None) -> None:
         self._provider_registry = provider_registry or FactorProviderRegistry(
-            providers=[CoreCryptoFactorProvider()]
+            providers=[
+                CoreCryptoFactorProvider(),
+                AdvancedCryptoFactorProvider(),
+                PandasTaCryptoFactorProvider(),
+            ]
         )
 
     def compute(self, frame: pd.DataFrame) -> pd.DataFrame:

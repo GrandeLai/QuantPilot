@@ -4,6 +4,7 @@
  */
 import { useEffect, useState, useRef } from "react";
 import { Plus, X } from "lucide-react";
+import FeatureGuideButton from "@/components/guides/FeatureGuideButton";
 import { useChartStore } from "../../store/chartStore";
 import { cn } from "../../lib/utils";
 
@@ -79,9 +80,12 @@ export default function ChartWatchlist() {
   const displayList = tab === "default"
     ? [...DEFAULT_SYMBOLS, ...Object.keys(prices).filter((s) => !DEFAULT_SYMBOLS.includes(s))]
     : customList;
+  const guideKey = tab === "default"
+    ? "market.chart.watchlist.default"
+    : "market.chart.watchlist.custom";
 
   return (
-    <div className="flex flex-col h-1/2 border-b border-gray-800">
+    <div className="relative flex flex-col h-1/2 border-b border-gray-800">
       {/* Tab 切换 */}
       <div className="flex border-b border-gray-800 text-[10px] uppercase font-bold text-gray-500 shrink-0">
         <button
@@ -193,6 +197,7 @@ export default function ChartWatchlist() {
           )}
         </div>
       )}
+      <FeatureGuideButton guideKey={guideKey} className="bottom-3 right-3" />
     </div>
   );
 }

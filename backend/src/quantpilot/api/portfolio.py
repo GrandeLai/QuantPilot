@@ -7,7 +7,7 @@
   GET  /portfolio/summary              组合概览（同时记录历史快照）
   GET  /portfolio/correlation          相关性矩阵
   GET  /portfolio/equity               权益曲线（历史净值序列）
-  GET  /portfolio/available-strategies 可加入的模板策略
+  GET  /portfolio/available-strategies 可运行策略目录（模板 + 用户策略）
 """
 from __future__ import annotations
 
@@ -18,8 +18,10 @@ from typing import Any, Literal
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
+from quantpilot.config import get_settings
 from quantpilot.portfolio.manager import PortfolioManager
 from quantpilot.portfolio.snapshots import PortfolioSnapshot, SnapshotStorage, StrategySnapshot
+from quantpilot.strategy.storage import StrategyStorage
 
 router = APIRouter(prefix="/portfolio", tags=["组合管理"])
 
@@ -46,7 +48,9 @@ def add_strategy(req: AddStrategyRequest) -> dict[str, str]:
     if cls is None:
         raise HTTPException(status_code=404, detail=f"策略 '{req.strategy_class}' 未找到")
     try:
-        strategy = cls(**req.params)
+        strategy = cls()
+        if req.params:
+            strategy.default_params = {**strategy.default_params, **req.params}
         _manager.add_strategy(req.name, strategy, req.symbol, req.timeframe, req.allocation)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -168,17 +172,35 @@ def correlation_matrix() -> dict[str, Any]:
 
 @router.get("/available-strategies")
 def available_strategies() -> dict[str, Any]:
-    """返回可加入组合的模板策略列表（含默认参数）."""
+    """返回可运行策略目录（模板策略 + 用户策略）."""
+    from quantpilot.strategy.loader import load_strategy_class
     from quantpilot.strategy.templates import TEMPLATE_STRATEGIES
 
-    return {
-        "strategies": [
+    strategies: list[dict[str, Any]] = [
+        {
+            "id": sid,
+            "name": cls.name,
+            "description": cls.description,
+            "default_params": cls.default_params,
+            "version": getattr(cls, "version", "1.0.0"),
+            "source": "template",
+        }
+        for sid, cls in TEMPLATE_STRATEGIES.items()
+    ]
+
+    storage = StrategyStorage(get_settings().strategy_dir)
+    for meta in storage.list_all():
+        loaded = load_strategy_class(meta.id)
+        params = getattr(loaded, "default_params", None) if loaded is not None else None
+        strategies.append(
             {
-                "id": sid,
-                "name": cls.name,
-                "description": cls.description,
-                "default_params": cls.default_params,
+                "id": meta.id,
+                "name": meta.name,
+                "description": meta.description,
+                "default_params": params or meta.params,
+                "version": meta.version,
+                "source": "user",
             }
-            for sid, cls in TEMPLATE_STRATEGIES.items()
-        ]
-    }
+        )
+
+    return {"strategies": strategies, "count": len(strategies)}

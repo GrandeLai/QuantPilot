@@ -6,6 +6,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Settings, Maximize2, RefreshCw } from "lucide-react";
+import FeatureGuideButton from "@/components/guides/FeatureGuideButton";
 import CandlestickChart from "../CandlestickChart";
 import { useChartStore, TIMEFRAMES, type Timeframe } from "../../store/chartStore";
 import { useChartDrawingStore } from "../../store/chartDrawing";
@@ -283,6 +284,7 @@ export default function ChartMainArea() {
           </span>
         )}
       </div>
+      <FeatureGuideButton guideKey="market.chart.main" className="bottom-12 right-4" />
     </div>
   );
 }
