@@ -37,7 +37,7 @@ backend/data/*.duckdb.wal
 backend/data/crypto_research.sqlite
 
 # ML training artifacts
-backend/catboost_info/
+**/catboost_info/
 
 # Claude Code / Superpowers local state
 .claude/settings.local.json
