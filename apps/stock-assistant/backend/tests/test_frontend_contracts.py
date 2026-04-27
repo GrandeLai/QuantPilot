@@ -17,22 +17,28 @@ from fastapi.testclient import TestClient
 from quantpilot_common.strategy_persistence import StrategyMeta, StrategyRecord, StrategyStorage
 
 
-@pytest.mark.skip(reason="PR 4: tests cross-stock+quant routes; restore in PR 5+")
 def test_api_aliases_are_available(client: TestClient) -> None:
-    """前端统一使用 /api 前缀时，关键接口也应可访问."""
+    """前端统一使用 /api 前缀时，关键 stock 接口应可访问.
+
+    Phase A 拆分后，/api/signals/feed 等量化路由迁到 quant-assistant-py 后端
+    （端口 8002），不再在 stock TestClient 范围内；改测 stock 自己的关键 alias。
+    """
     assert client.get("/api/data/symbols").status_code == 200
-    assert client.get("/api/signals/feed").status_code == 200
     assert client.get("/api/plugins").status_code == 200
     assert client.get("/api/crypto/status").status_code == 200
 
 
-@pytest.mark.skip(reason="PR 4: load_strategy_class is in quant; restore in PR 5+")
 def test_available_strategies_include_user_strategies(
     client: TestClient,
     monkeypatch,
     tmp_path: Path,
 ) -> None:
-    """可运行策略目录应同时包含模板策略和用户策略."""
+    """可运行策略目录应包含 stock 本地用户策略.
+
+    Phase A 拆分后，模板策略列表（TEMPLATE_STRATEGIES）来自 quant-assistant-py；
+    stock-assistant 独立进程下模板列表暂空，仅保证用户策略经 StrategyStorage
+    持久化后能被 /api/portfolio/available-strategies 列出。
+    """
     monkeypatch.setenv("QUANTPILOT_STRATEGY_DIR", str(tmp_path))
 
     storage = StrategyStorage(tmp_path)
