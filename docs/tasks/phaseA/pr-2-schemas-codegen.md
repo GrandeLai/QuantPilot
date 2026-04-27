@@ -1,8 +1,9 @@
 # Task phaseA.pr-2-schemas-codegen: Schema 单源 + Codegen 流水线
 
 **Phase**: A
-**Status**: pending
-**Implementation PR**: <pending>
+**Status**: passed
+**Implementation PR**: commit `801dbfa`
+**Acceptance**: [docs/acceptance/phaseA/pr-2-schemas-codegen.md](../../acceptance/phaseA/pr-2-schemas-codegen.md) — ✅ PASS (2026-04-27)
 **Created**: 2026-04-27
 **Owner-agent**: implementation-agent
 **Reviewer-agent**: acceptance-agent

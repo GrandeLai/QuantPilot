@@ -13,6 +13,7 @@
 
 | 日期 | Task ID | Verdict | 报告 |
 |---|---|---|---|
+| 2026-04-27 | phaseA.pr-2-schemas-codegen | ✅ PASS | [pr-2-schemas-codegen.md](phaseA/pr-2-schemas-codegen.md) |
 | 2026-04-27 | phaseA.pr-1-skeleton | ✅ PASS | [pr-1-skeleton.md](phaseA/pr-1-skeleton.md) |
 | 2026-04-27 | phaseA.pr-0-cleanup | ✅ PASS | [pr-0-cleanup.md](phaseA/pr-0-cleanup.md) |
 | 2026-04-27 | phaseA.pr-minus-1-acceptance-infra | ✅ PASS | [pr-minus-1-acceptance-infra.md](phaseA/pr-minus-1-acceptance-infra.md) |
