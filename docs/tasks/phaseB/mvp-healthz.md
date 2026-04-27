@@ -1,8 +1,9 @@
 # Task phaseB.mvp.healthz: Rust quant-assistant /healthz endpoint + axum scaffolding
 
 **Phase**: B
-**Status**: pending
-**Implementation PR**: <pending>
+**Status**: passed
+**Implementation PR**: commit `f12fcc4`
+**Acceptance**: [docs/acceptance/phaseB/mvp-healthz.md](../../acceptance/phaseB/mvp-healthz.md) — ✅ PASS (2026-04-27)
 **Created**: 2026-04-27
 **Owner-agent**: implementation-agent
 **Reviewer-agent**: acceptance-agent
