@@ -1,8 +1,9 @@
 # Task phaseA.pr-3-common-py: common/python 抽出基础设施
 
 **Phase**: A
-**Status**: pending
-**Implementation PR**: <pending>
+**Status**: passed
+**Implementation PR**: commit `eb06d9a`
+**Acceptance**: [docs/acceptance/phaseA/pr-3-common-py.md](../../acceptance/phaseA/pr-3-common-py.md) — ✅ PASS (2026-04-27)
 **Created**: 2026-04-27
 **Owner-agent**: implementation-agent
 **Reviewer-agent**: acceptance-agent
