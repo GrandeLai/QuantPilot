@@ -1,8 +1,9 @@
 # Task phaseA.pr-1-skeleton: 仓库 layout 骨架
 
 **Phase**: A
-**Status**: pending
-**Implementation PR**: <pending>
+**Status**: passed
+**Implementation PR**: commit `28a02e3`
+**Acceptance**: [docs/acceptance/phaseA/pr-1-skeleton.md](../../acceptance/phaseA/pr-1-skeleton.md) — ✅ PASS (2026-04-27)
 **Created**: 2026-04-27
 **Owner-agent**: implementation-agent
 **Reviewer-agent**: acceptance-agent
