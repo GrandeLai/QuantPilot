@@ -1,8 +1,9 @@
 # Task phaseA.pr-7-scripts-ci-docs: 启动脚本 + CI 拆分 + 文档
 
 **Phase**: A
-**Status**: pending
-**Implementation PR**: <pending>
+**Status**: passed
+**Implementation PR**: commit `3094b2c`
+**Acceptance**: [docs/acceptance/phaseA/pr-7-scripts-ci-docs.md](../../acceptance/phaseA/pr-7-scripts-ci-docs.md) — ✅ PASS (2026-04-27) **— Phase A complete**
 **Created**: 2026-04-27
 **Owner-agent**: implementation-agent
 **Reviewer-agent**: acceptance-agent
