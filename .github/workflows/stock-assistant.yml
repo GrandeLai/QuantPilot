@@ -1,0 +1,46 @@
+name: stock-assistant
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/stock-assistant/**'
+      - 'common/python/**'
+      - 'common/schemas/**'
+      - '.github/workflows/stock-assistant.yml'
+  pull_request:
+    paths:
+      - 'apps/stock-assistant/**'
+      - 'common/python/**'
+      - 'common/schemas/**'
+      - '.github/workflows/stock-assistant.yml'
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@v3
+      - name: uv sync
+        run: uv sync
+      - name: pytest
+        run: |
+          cd apps/stock-assistant/backend
+          uv run pytest tests/ -v
+
+  build-frontends:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: npm install
+        run: npm install
+      - name: build workbench
+        run: cd apps/stock-assistant/frontends/workbench && npm run build
+      - name: build assistant
+        run: cd apps/stock-assistant/frontends/assistant && npm run build

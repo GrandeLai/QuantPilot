@@ -5,14 +5,19 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
-# 加载 backend/.env
-env_file="$ROOT_DIR/backend/.env"
-if [[ -f "$env_file" ]]; then
-    while IFS='=' read -r key value; do
-        [[ "$key" =~ ^#.*$ || -z "$key" ]] && continue
-        [[ -z "${!key+x}" ]] && export "$key=$value"
-    done < "$env_file"
-fi
+# 加载 .env（依次尝试 stock-assistant、quant-assistant-py、root）
+for env_file in \
+    "$ROOT_DIR/apps/stock-assistant/backend/.env" \
+    "$ROOT_DIR/apps/quant-assistant-py/backend/.env" \
+    "$ROOT_DIR/.env"; do
+    if [[ -f "$env_file" ]]; then
+        while IFS='=' read -r key value; do
+            [[ "$key" =~ ^#.*$ || -z "$key" ]] && continue
+            [[ -z "${!key+x}" ]] && export "$key=$value"
+        done < "$env_file"
+        break
+    fi
+done
 
 REDIS_URL="${QUANTPILOT_REDIS_URL:-redis://localhost:6379}"
 

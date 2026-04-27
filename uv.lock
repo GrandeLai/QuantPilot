@@ -13,6 +13,7 @@ resolution-markers = [
 [manifest]
 members = [
     "quantpilot-common",
+    "quantpilot-golden",
     "quantpilot-monorepo",
     "quantpilot-quant",
     "quantpilot-stock",
@@ -3006,6 +3007,27 @@ dev = [
     { name = "fakeredis", specifier = ">=2.20.0" },
     { name = "pytest", specifier = ">=8.0.0" },
     { name = "pytest-asyncio", specifier = ">=0.23.0" },
+]
+
+[[package]]
+name = "quantpilot-golden"
+version = "0.1.0"
+source = { editable = "tools/golden-generator" }
+dependencies = [
+    { name = "loguru" },
+    { name = "polars" },
+    { name = "pyarrow" },
+    { name = "quantpilot-common" },
+    { name = "typer" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "loguru", specifier = ">=0.7.0" },
+    { name = "polars", specifier = ">=0.20.0" },
+    { name = "pyarrow", specifier = ">=15.0.0" },
+    { name = "quantpilot-common", editable = "common/python" },
+    { name = "typer", specifier = ">=0.12.0" },
 ]
 
 [[package]]

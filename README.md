@@ -20,20 +20,38 @@ QuantPilot 是一款面向个人量化交易者的本地优先平台，兼具专
 - **OKX 加密研究链路**：已补齐 BTC/ETH 多时间维度研究数据集、核心因子 provider、walk-forward 验证、反转概率输出，并同时接入主工作台与投资助理
 - **趋势策略模板**：已内置 `VWAP + 双 EMA` 的加密趋势策略模板，支持动态止损、超时离场和后续参数搜索
 
-## 技术架构
+## 技术架构（Phase A 完成后的拆分版）
+
+QuantPilot 拆成两个独立产品 + 共享基础：
 
 ```
-frontend/        React 18 + TypeScript + Vite 8 + TradingView Lightweight Charts
-assistant_frontend/ React 19 + TypeScript + Vite 8 + Zustand
-backend/         Python 3.12 + FastAPI + DuckDB + LiteLLM
-rust_core/       Rust + PyO3（高性能回测引擎核心）
+apps/
+├── stock-assistant/        # Python: 股票/期权/加密的人决策交易（端口 8001）
+│   ├── backend/                FastAPI + Longbridge/FuTu/OKX broker + paper trading + LLM 投顾
+│   └── frontends/
+│       ├── workbench/          React 19 工作台（端口 5173）
+│       └── assistant/          React 19 决策辅助 UI（端口 5174）
+│
+├── quant-assistant-py/     # Phase A 临时态：Python 量化研究后端（端口 8002，Step 4 删除）
+│   └── backend/                回测、因子、ML、信号、策略、优化、研究
+│
+└── quant-assistant/        # Phase B+：Rust 量化助手
+    ├── backend/                axum + Polars + duckdb-rs（Phase A 仅 PyO3 seed）
+    └── frontend/               研究台 (端口 5175，Phase A skeleton)
+
+common/
+├── schemas/                JSON Schema 单源 → 三语言 codegen
+├── data-store/             共享 DuckDB 行情库（stock 单写，其他只读）
+├── frontend-components/    跨前端共享 TS 类型 + UI 组件
+├── python/                 共享 Python 设施（config / redis / data / contracts / risk / ...）
+└── docs/
+
+tools/
+├── ml-trainer/             Python ML 训练 → ONNX (Phase B+)
+└── golden-generator/       跨语言行为等价基准数据集生成 (Phase A skeleton)
 ```
 
-### 产品结构说明
-
-- `frontend/`：QuantPilot 主工作台，承载研究、策略、验证、运行等量化工作流
-- `assistant_frontend/`：Investment Assistant 前端，承载资产总览、机会池、调仓建议、风险雷达、复盘与问答
-- `backend/`：共享后端与平台层，同时服务主工作台与投资助理
+详细拆分历史 + 模块归属 见 [`docs/MIGRATION.md`](docs/MIGRATION.md)。
 
 ## 快速开始
 
@@ -45,64 +63,72 @@ rust_core/       Rust + PyO3（高性能回测引擎核心）
 | uv | ≥ 0.11 | `brew install uv` |
 | Rust | ≥ 1.75 | `brew install rust` |
 | Node.js | ≥ 20 | `brew install node` |
-| Docker | ≥ 24 | [docker.com](https://docker.com) |
+| Redis | 任意 | `brew install redis` |
 
-### 一键启动（推荐）
-
-```bash
-# 启动所有服务（Redis + 后端 API）
-./scripts/dev.sh
-
-# 仅启动基础设施（Redis）
-./scripts/infra.sh
-```
-
-### 分步启动
+### 安装依赖
 
 ```bash
-# 1. 启动基础设施
-docker compose up redis -d
-
-# 2. 安装后端依赖 & 构建 Rust 扩展
-cd backend
-uv sync --extra dev
-uv run maturin develop --manifest-path ../rust_core/Cargo.toml
-cd ..
-
-# 3. 启动后端 API（http://localhost:8000）
-./scripts/start_backend.sh
-
-# 4. 安装前端依赖 & 启动开发服务器（http://localhost:5173）
-./scripts/start_frontend.sh
+# 从仓库根目录
+uv sync                # 同步所有 Python workspace member（common/python + 三个 app + tools）
+npm install            # 同步所有前端 npm workspace
 ```
 
-### Docker Compose 完整部署
+### 启动各 app（按需）
 
 ```bash
-docker compose up -d
+# 股票助手（推荐主开发模式）
+./scripts/dev-stock.sh
+# → API:       http://localhost:8001
+# → workbench: http://localhost:5173
+# → assistant: http://localhost:5174
+
+# 量化助手 Python 临时态（Phase A 期间）
+./scripts/dev-quant-py.sh
+# → API:       http://localhost:8002
+# → frontend:  http://localhost:5175
+
+# 量化助手 Rust（Phase B+ 起真正可用）
+./scripts/dev-quant.sh
 ```
+
+每个脚本独立可跑，不需要全部启动。
 
 ## 开发命令
 
-### 后端（`cd backend`）
+### Python 测试（按 app）
 
 ```bash
-uv sync --extra dev              # 安装依赖（含开发工具）
-uv run pytest tests/ -v          # 运行测试
-uv run ruff check src/ tests/    # 代码检查
-uv run ruff format src/ tests/   # 代码格式化
-uv run mypy src/                 # 类型检查
+# common/python
+(cd common/python && uv run --group dev pytest tests/ -v)
+
+# stock-assistant
+(cd apps/stock-assistant/backend && uv run pytest tests/ -v)
+
+# quant-assistant-py
+(cd apps/quant-assistant-py/backend && uv run pytest tests/ -v)
 ```
 
-### Rust 核心（`cd rust_core`）
+### Rust（quant-assistant 后端）
 
 ```bash
-cargo build                      # 编译（debug）
-cargo build --release            # 编译（release，性能优化）
-cargo test                       # 运行 Rust 单元测试
+(cd apps/quant-assistant/backend && cargo check)
+(cd apps/quant-assistant/backend && cargo test)
+```
 
-# 构建并安装 Python 扩展（在 backend/ 目录下执行）
-cd ../backend && uv run maturin develop --manifest-path ../rust_core/Cargo.toml
+### 前端 build
+
+```bash
+(cd apps/stock-assistant/frontends/workbench && npm run build)
+(cd apps/stock-assistant/frontends/assistant && npm run build)
+(cd apps/quant-assistant/frontend && npm run build)
+(cd common/frontend-components && npm run build)
+```
+
+### Schema codegen（改 schema 后必跑）
+
+```bash
+bash common/schemas/codegen.sh
+```
 ```
 
 ### 前端（`cd frontend`）

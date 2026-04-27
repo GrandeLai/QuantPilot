@@ -1,0 +1,44 @@
+name: common
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'common/**'
+      - 'pyproject.toml'
+      - 'package.json'
+      - '.github/workflows/common.yml'
+  pull_request:
+    paths:
+      - 'common/**'
+      - 'pyproject.toml'
+      - 'package.json'
+      - '.github/workflows/common.yml'
+
+jobs:
+  test-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@v3
+      - name: uv sync
+        run: uv sync
+      - name: pytest
+        run: |
+          cd common/python
+          uv run --group dev pytest tests/ -v
+
+  build-frontend-types:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: npm install
+        run: npm install
+      - name: build common-frontend
+        run: cd common/frontend-components && npm run build

@@ -12,7 +12,12 @@ dependencies = []
 #   PR 5: apps/quant-assistant-py/backend ✅
 #   PR 7: tools/golden-generator
 #   ml-trainer: tools/ml-trainer (Phase B)
-members = ["common/python", "apps/stock-assistant/backend", "apps/quant-assistant-py/backend"]
+members = [
+    "common/python",
+    "apps/stock-assistant/backend",
+    "apps/quant-assistant-py/backend",
+    "tools/golden-generator",
+]
 
 [tool.uv]
 package = false

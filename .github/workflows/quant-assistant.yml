@@ -1,0 +1,42 @@
+name: quant-assistant
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/quant-assistant/**'
+      - 'common/schemas/**'
+      - 'Cargo.toml'
+      - '.github/workflows/quant-assistant.yml'
+  pull_request:
+    paths:
+      - 'apps/quant-assistant/**'
+      - 'common/schemas/**'
+      - 'Cargo.toml'
+      - '.github/workflows/quant-assistant.yml'
+
+jobs:
+  cargo-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: dtolnay/rust-toolchain@stable
+      - name: cargo check
+        run: |
+          cd apps/quant-assistant/backend
+          cargo check
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: npm install
+        run: npm install
+      - name: build quant frontend
+        run: cd apps/quant-assistant/frontend && npm run build

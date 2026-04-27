@@ -1,0 +1,32 @@
+name: quant-assistant-py
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/quant-assistant-py/**'
+      - 'common/python/**'
+      - 'common/schemas/**'
+      - '.github/workflows/quant-assistant-py.yml'
+  pull_request:
+    paths:
+      - 'apps/quant-assistant-py/**'
+      - 'common/python/**'
+      - 'common/schemas/**'
+      - '.github/workflows/quant-assistant-py.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@v3
+      - name: uv sync
+        run: uv sync
+      - name: pytest
+        run: |
+          cd apps/quant-assistant-py/backend
+          uv run pytest tests/ -v
