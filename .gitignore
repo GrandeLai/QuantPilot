@@ -14,9 +14,9 @@ venv/
 backend/.venv/
 backend/uv.lock
 
-# Rust
-rust_core/target/
-rust_core/Cargo.lock
+# Rust（workspace 根 target/ 与 Cargo.lock）
+target/
+Cargo.lock
 
 # Node / Frontend
 frontend/node_modules/

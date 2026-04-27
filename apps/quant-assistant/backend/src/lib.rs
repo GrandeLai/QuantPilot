@@ -131,9 +131,9 @@ fn max_drawdown(portfolio_values: Vec<f64>) -> (f64, usize, usize) {
     (max_dd, dd_start, dd_end)
 }
 
-/// QuantPilot Rust 核心模块
+/// QuantPilot 量化助手 Rust 模块（PyO3 binding；Phase B 起将替换为 axum 服务）
 #[pymodule]
-fn quantpilot_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn quantpilot_quant(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(version, m)?)?;
     m.add_function(wrap_pyfunction!(run_ma_crossover_backtest, m)?)?;
     m.add_function(wrap_pyfunction!(sharpe_ratio, m)?)?;

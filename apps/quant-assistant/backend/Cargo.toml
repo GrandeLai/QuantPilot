@@ -1,13 +1,13 @@
 [package]
-name = "quantpilot-core"
+name = "quantpilot-quant"
 version = "0.1.0"
 edition = "2021"
-description = "QuantPilot 高性能计算核心（Rust + PyO3）"
+description = "QuantPilot 量化助手后端（Rust）"
 license = "MIT"
 
 [lib]
-name = "quantpilot_core"
-crate-type = ["cdylib"]
+name = "quantpilot_quant"
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 pyo3 = { version = "0.22", features = ["extension-module", "abi3-py312"] }

@@ -3,9 +3,9 @@ requires = ["maturin>=1.5,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "quantpilot-core"
+name = "quantpilot-quant"
 version = "0.1.0"
-description = "QuantPilot 高性能计算核心（Rust + PyO3）"
+description = "QuantPilot 量化助手后端（Rust + PyO3 binding for transitional use; Phase B 起改纯 axum 服务）"
 requires-python = ">=3.12"
 classifiers = [
     "Programming Language :: Rust",
@@ -13,5 +13,5 @@ classifiers = [
 ]
 
 [tool.maturin]
-module-name = "quantpilot_core"
+module-name = "quantpilot_quant"
 features = ["pyo3/extension-module"]

@@ -1,0 +1,7 @@
+{
+  "name": "quantpilot-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "description": "QuantPilot monorepo (npm workspace root)",
+  "workspaces": []
+}
