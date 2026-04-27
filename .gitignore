@@ -25,14 +25,23 @@ frontend/.vite/
 assistant_frontend/node_modules/
 assistant_frontend/dist/
 assistant_frontend/.vite/
-assistant_frontend/tsconfig.tsbuildinfo
+**/tsconfig.tsbuildinfo
 
 # Data
 data/*.duckdb
 data/*.sqlite
 data/*.parquet
 data/strategies/
+backend/data/*.duckdb
+backend/data/*.duckdb.wal
 backend/data/crypto_research.sqlite
+
+# ML training artifacts
+backend/catboost_info/
+
+# Claude Code / Superpowers local state
+.claude/settings.local.json
+.superpowers/
 
 # Logs
 logs/
