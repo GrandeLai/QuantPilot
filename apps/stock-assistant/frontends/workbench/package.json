@@ -10,6 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@quantpilot/common-frontend": "*",
     "@base-ui/react": "^1.3.0",
     "@fontsource-variable/geist": "^5.2.8",
     "@monaco-editor/react": "^4.7.0",

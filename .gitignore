@@ -67,3 +67,9 @@ logs/
 htmlcov/
 .coverage
 coverage.xml
+
+# npm workspace per-member node_modules (extra coverage)
+**/node_modules/
+apps/**/dist/
+apps/**/.vite/
+common/frontend-components/dist/
