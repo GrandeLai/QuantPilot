@@ -1,6 +1,9 @@
-//! QuantPilot 核心计算引擎（Rust + PyO3）
+//! QuantPilot 量化助手后端（Rust）
 //!
-//! 提供高性能回测循环和量化计算原语，通过 PyO3 暴露给 Python 层。
+//! Phase A: 保留原 PyO3 计算函数作为 Phase B 起点种子。
+//! Phase B 起：转为 axum 服务 + Polars + duckdb-rs，PyO3 binding 移除。
+
+pub mod schemas;
 
 use pyo3::prelude::*;
 

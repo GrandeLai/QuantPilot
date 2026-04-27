@@ -1,0 +1,49 @@
+name: codegen-drift
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'common/schemas/**'
+      - 'common/python/quantpilot_common/schemas/**'
+      - 'apps/quant-assistant/backend/src/schemas/**'
+      - 'common/frontend-components/src/types/**'
+      - '.github/workflows/codegen-drift.yml'
+  pull_request:
+    paths:
+      - 'common/schemas/**'
+      - 'common/python/quantpilot_common/schemas/**'
+      - 'apps/quant-assistant/backend/src/schemas/**'
+      - 'common/frontend-components/src/types/**'
+      - '.github/workflows/codegen-drift.yml'
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run codegen
+        run: bash common/schemas/codegen.sh
+
+      - name: Assert no drift
+        run: |
+          if ! git diff --exit-code; then
+            echo "::error::codegen drift detected — run 'bash common/schemas/codegen.sh' locally and commit the result"
+            git diff
+            exit 1
+          fi
+          echo "✓ codegen artifacts match schemas"
