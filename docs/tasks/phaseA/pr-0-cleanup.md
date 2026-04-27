@@ -1,8 +1,9 @@
 # Task phaseA.pr-0-cleanup: 仓库清理预备
 
 **Phase**: A
-**Status**: pending
-**Implementation PR**: <pending>
+**Status**: passed
+**Implementation PR**: commits `60fb932`, `1710e2c`, `4b6b498`
+**Acceptance**: [docs/acceptance/phaseA/pr-0-cleanup.md](../../acceptance/phaseA/pr-0-cleanup.md) — ✅ PASS (2026-04-27)
 **Created**: 2026-04-27
 **Owner-agent**: implementation-agent
 **Reviewer-agent**: acceptance-agent
