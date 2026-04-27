@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from quantpilot.api.data import get_storage
+from quantpilot_common.data import get_storage
 from quantpilot.platform.agent_models import AdviceCard, AdviceEvidence
 from quantpilot.research.service import CryptoResearchRequest, CryptoResearchService
 from quantpilot.research.validation import TimeSeriesValidationConfig

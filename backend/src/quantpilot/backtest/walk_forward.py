@@ -35,8 +35,10 @@ from loguru import logger
 from quantpilot.backtest.engine import BacktestConfig, BacktestEngine, BacktestResult
 from quantpilot.backtest.metrics import BacktestMetrics, TradeRecord, calculate_metrics
 from quantpilot_common.data.models import OHLCVBar
-from quantpilot.optimize.engine import OptimizationEngine, ParamGrid
 from quantpilot.research.validation import TimeSeriesValidationConfig, build_walk_forward_windows
+
+# OptimizationEngine + ParamGrid imports are lazy (inside _search_best_params)
+# to avoid circular import with optimize.engine which imports backtest.engine.
 
 if TYPE_CHECKING:
     from quantpilot.strategy.base import BaseStrategy
@@ -321,6 +323,10 @@ class WalkForwardEngine:
 
         if not param_grid or len(train_bars) < 2:
             return defaults
+
+        # Lazy import to break circular dependency: optimize.engine imports
+        # backtest.engine which imports backtest.__init__ which imports this module.
+        from quantpilot.optimize.engine import OptimizationEngine, ParamGrid
 
         opt = OptimizationEngine(self._config, train_bars)
         results = opt.grid_search(strategy_cls, ParamGrid(param_grid))

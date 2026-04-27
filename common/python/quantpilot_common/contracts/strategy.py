@@ -1,11 +1,16 @@
-"""策略上下文数据契约（不含策略基类，BaseStrategy 留在量化模块）."""
+"""策略数据契约：StrategyContext + BaseStrategy 抽象基类."""
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from quantpilot_common.contracts.order import Order, OrderSide, OrderType
 from quantpilot_common.contracts.position import Position
+
+if TYPE_CHECKING:
+    from quantpilot_common.data.models import OHLCVBar
 
 
 @dataclass
@@ -74,3 +79,38 @@ class StrategyContext:
             for pos in self.positions.values()
         )
         return self.cash + equity
+
+
+class BaseStrategy(ABC):
+    """量化策略抽象基类.
+
+    子类必须实现：
+        - on_bar(bar, context): 每根 K 线到达时的处理逻辑
+
+    可选覆盖：
+        - on_init(context): 策略初始化
+        - on_stop(context): 策略停止时的清仓/汇报逻辑
+    """
+
+    # 策略元信息（子类覆盖）
+    name: str = "BaseStrategy"
+    description: str = ""
+    version: str = "1.0.0"
+    author: str = ""
+
+    # 默认参数（子类覆盖）
+    default_params: dict[str, object] = {}
+
+    def on_init(self, context: StrategyContext) -> None:  # noqa: B027
+        """策略初始化（可选覆盖）."""
+
+    @abstractmethod
+    def on_bar(self, bar: OHLCVBar, context: StrategyContext) -> None:
+        """处理新 K 线（子类必须实现）."""
+
+    def on_stop(self, context: StrategyContext) -> None:  # noqa: B027
+        """策略停止时执行（可选覆盖）."""
+
+    def get_param(self, context: StrategyContext, key: str, default: object = None) -> object:
+        """获取策略参数（优先从 context.params 读取，否则使用 default_params）."""
+        return context.params.get(key, self.default_params.get(key, default))

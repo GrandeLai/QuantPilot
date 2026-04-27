@@ -7,7 +7,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from quantpilot.api.data import get_storage
+from quantpilot_common.data import get_storage
 from quantpilot_common.data.storage import MarketDataStorage
 from quantpilot.research.models import (
     CryptoResearchDatasetSummary,

@@ -25,4 +25,4 @@ def test_openapi_schema(client: TestClient) -> None:
     response = client.get("/openapi.json")
     assert response.status_code == 200
     schema = response.json()
-    assert schema["info"]["title"] == "QuantPilot"
+    assert schema["info"]["title"] == "QuantPilot (legacy/quant)"

@@ -81,7 +81,7 @@ def test_advisor_opportunities_return_advice_cards(client: TestClient) -> None:
 
 def test_advisor_crypto_opportunities_return_crypto_cards(client: TestClient, monkeypatch) -> None:
     """Crypto opportunities should be derived from the crypto research stack."""
-    from quantpilot.api import data as data_api
+    import quantpilot_common.data as data_api
 
     storage = MarketDataStorage(db_path=":memory:")
     _seed_crypto(storage)
@@ -103,7 +103,7 @@ def test_advisor_crypto_opportunities_return_crypto_cards(client: TestClient, mo
 
 def test_advisor_crypto_risks_return_risk_alerts(client: TestClient, monkeypatch) -> None:
     """Crypto risks should expose structured risk-alert cards."""
-    from quantpilot.api import data as data_api
+    import quantpilot_common.data as data_api
 
     storage = MarketDataStorage(db_path=":memory:")
     _seed_crypto(storage)

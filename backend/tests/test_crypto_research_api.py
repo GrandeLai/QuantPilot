@@ -52,7 +52,7 @@ def _seed(storage: MarketDataStorage, symbol: str = "BTC-USDT") -> None:
 
 
 def test_crypto_research_dataset_summary(client: TestClient, monkeypatch) -> None:
-    from quantpilot.api import data as data_api
+    import quantpilot_common.data as data_api
 
     storage = MarketDataStorage(db_path=":memory:")
     _seed(storage)
@@ -77,7 +77,7 @@ def test_crypto_research_dataset_summary(client: TestClient, monkeypatch) -> Non
 
 
 def test_crypto_research_training_summary(client: TestClient, monkeypatch) -> None:
-    from quantpilot.api import data as data_api
+    import quantpilot_common.data as data_api
 
     storage = MarketDataStorage(db_path=":memory:")
     _seed(storage)
@@ -113,7 +113,7 @@ def test_crypto_research_training_summary(client: TestClient, monkeypatch) -> No
 
 
 def test_crypto_research_latest_returns_cached_summary(client: TestClient, monkeypatch) -> None:
-    from quantpilot.api import data as data_api
+    import quantpilot_common.data as data_api
 
     storage = MarketDataStorage(db_path=":memory:")
     _seed(storage)
@@ -146,7 +146,7 @@ def test_crypto_research_latest_returns_cached_summary(client: TestClient, monke
 
 
 def test_crypto_research_optimize_returns_best_params(client: TestClient, monkeypatch) -> None:
-    from quantpilot.api import data as data_api
+    import quantpilot_common.data as data_api
 
     storage = MarketDataStorage(db_path=":memory:")
     _seed(storage)
@@ -178,7 +178,7 @@ def test_crypto_research_optimize_returns_best_params(client: TestClient, monkey
 
 
 def test_crypto_research_latest_optimization_returns_cached_summary(client: TestClient, monkeypatch) -> None:
-    from quantpilot.api import data as data_api
+    import quantpilot_common.data as data_api
 
     storage = MarketDataStorage(db_path=":memory:")
     _seed(storage)

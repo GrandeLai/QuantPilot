@@ -6,7 +6,7 @@ from typing import Any
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel
 
-from quantpilot.api.data import get_storage
+from quantpilot_common.data import get_storage
 from quantpilot.pipeline.orchestrator import PipelineJobState, PipelineOrchestrator, make_job
 
 router = APIRouter(prefix="/pipeline", tags=["AutoPilot Pipeline"])

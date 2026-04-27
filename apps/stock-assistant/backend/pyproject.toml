@@ -1,0 +1,56 @@
+[project]
+name = "quantpilot-stock"
+version = "0.1.0"
+description = "QuantPilot 股票交易助手后端：股票/期权/加密的人决策交易、portfolio、screener、LLM 投顾"
+requires-python = ">=3.12"
+readme = "README.md"
+dependencies = [
+    "quantpilot-common",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "loguru>=0.7.0",
+    "pydantic>=2.7.0",
+    "pydantic-settings>=2.3.0",
+    "litellm>=1.40.0",
+    "python-dotenv>=1.0.0",
+    "keyring>=25.0.0",
+    "typer>=0.12.0",
+    "apscheduler>=3.10.0",
+    "httpx>=0.27.0",
+    "websockets>=12.0",
+    "aiofiles>=23.0.0",
+    "longbridge>=0.4.0",
+    "okx>=2.1.2",
+    "pandas-ta>=0.3.0b0",
+    "vaderSentiment>=3.3.0",
+    "feedparser>=6.0.0",
+    "futu-api>=9.3.0; sys_platform != 'darwin' or platform_machine != 'arm64'",
+    "scipy>=1.13.0",
+    "numpy>=1.26.0",
+    "pandas>=2.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/quantpilot_stock"]
+
+[tool.uv]
+package = true
+
+[tool.uv.sources]
+quantpilot-common = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "fakeredis>=2.20.0",
+    "httpx>=0.27.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
