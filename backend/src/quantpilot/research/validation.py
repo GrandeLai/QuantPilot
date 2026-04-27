@@ -1,28 +1,22 @@
-"""时间序列验证窗口构建器."""
+"""时间序列验证窗口构建器.
+
+数据契约（TimeSeriesValidationConfig、ValidationWindow）已下沉到
+``quantpilot_common.contracts.validation``；构建函数 ``build_walk_forward_windows``
+仍是量化模块的内部实现。
+"""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from quantpilot_common.contracts.validation import (
+    TimeSeriesValidationConfig,
+    ValidationWindow,
+)
 
-
-@dataclass(frozen=True, slots=True)
-class TimeSeriesValidationConfig:
-    """Walk-forward / embargo 验证参数."""
-
-    train_size: int
-    test_size: int
-    step_size: int
-    embargo_size: int = 0
-
-
-@dataclass(frozen=True, slots=True)
-class ValidationWindow:
-    """单个时间序列训练/验证窗口."""
-
-    train_start: int
-    train_end: int
-    test_start: int
-    test_end: int
+__all__ = [
+    "TimeSeriesValidationConfig",
+    "ValidationWindow",
+    "build_walk_forward_windows",
+]
 
 
 def build_walk_forward_windows(

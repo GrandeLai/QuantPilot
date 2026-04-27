@@ -2,132 +2,32 @@
 
 所有量化策略必须继承此类，并实现 on_bar 方法。
 事件驱动架构：on_init → on_bar* → on_stop
+
+数据契约（Order/Position/StrategyContext/OrderSide/OrderType）已下沉到
+``quantpilot_common.contracts``；本模块从那里 re-export 以保持向后兼容。
 """
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
-from enum import StrEnum
 from typing import TYPE_CHECKING
+
+from quantpilot_common.contracts.order import Order, OrderSide, OrderType
+from quantpilot_common.contracts.position import Position
+from quantpilot_common.contracts.strategy import StrategyContext
 
 if TYPE_CHECKING:
     from quantpilot_common.data.models import OHLCVBar
 
 
-class OrderSide(StrEnum):
-    """订单方向."""
-
-    BUY = "buy"
-    SELL = "sell"
-
-
-class OrderType(StrEnum):
-    """订单类型."""
-
-    MARKET = "market"
-    LIMIT = "limit"
-    STOP = "stop"
-
-
-@dataclass
-class Order:
-    """订单对象."""
-
-    symbol: str
-    side: OrderSide
-    order_type: OrderType
-    quantity: float
-    price: float | None = None    # 限价单价格
-    stop_price: float | None = None  # 止损触发价
-    strategy_id: str = ""
-    comment: str = ""
-
-
-@dataclass
-class Position:
-    """持仓对象."""
-
-    symbol: str
-    quantity: float          # 正数多头，负数空头
-    avg_price: float
-    unrealized_pnl: float = 0.0
-
-    @property
-    def is_long(self) -> bool:
-        return self.quantity > 0
-
-    @property
-    def is_short(self) -> bool:
-        return self.quantity < 0
-
-
-@dataclass
-class StrategyContext:
-    """策略运行时上下文，由回测引擎注入."""
-
-    symbol: str
-    timeframe: str
-    initial_cash: float = 1_000_000.0
-    cash: float = 0.0
-    positions: dict[str, Position] = field(default_factory=dict)
-    orders: list[Order] = field(default_factory=list)
-    params: dict[str, object] = field(default_factory=dict)
-
-    def __post_init__(self) -> None:
-        if self.cash == 0.0:
-            self.cash = self.initial_cash
-
-    def buy(
-        self,
-        symbol: str,
-        quantity: float,
-        order_type: OrderType = OrderType.MARKET,
-        price: float | None = None,
-        comment: str = "",
-    ) -> Order:
-        """创建买入订单."""
-        order = Order(
-            symbol=symbol,
-            side=OrderSide.BUY,
-            order_type=order_type,
-            quantity=quantity,
-            price=price,
-            comment=comment,
-        )
-        self.orders.append(order)
-        return order
-
-    def sell(
-        self,
-        symbol: str,
-        quantity: float,
-        order_type: OrderType = OrderType.MARKET,
-        price: float | None = None,
-        comment: str = "",
-    ) -> Order:
-        """创建卖出订单."""
-        order = Order(
-            symbol=symbol,
-            side=OrderSide.SELL,
-            order_type=order_type,
-            quantity=quantity,
-            price=price,
-            comment=comment,
-        )
-        self.orders.append(order)
-        return order
-
-    def get_position(self, symbol: str) -> Position | None:
-        return self.positions.get(symbol)
-
-    def portfolio_value(self, current_prices: dict[str, float]) -> float:
-        """计算组合总价值."""
-        equity = sum(
-            pos.quantity * current_prices.get(pos.symbol, pos.avg_price)
-            for pos in self.positions.values()
-        )
-        return self.cash + equity
+__all__ = [
+    "Order",
+    "OrderSide",
+    "OrderType",
+    "Position",
+    "StrategyContext",
+    "BaseStrategy",
+]
 
 
 class BaseStrategy(ABC):

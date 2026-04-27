@@ -2,45 +2,22 @@
 
 实现：止损、止盈、最大持仓数量限制、日亏损上限检查。
 同时在回测引擎和实盘引擎中使用。
+
+数据契约（RiskConfig、RiskCheckResult）已下沉到
+``quantpilot_common.contracts.risk``；本模块从那里 re-export 以保持向后兼容。
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 from loguru import logger
 
+from quantpilot_common.contracts.risk import RiskCheckResult, RiskConfig
 
-@dataclass
-class RiskConfig:
-    """风控规则配置."""
-
-    # 止损/止盈（基于持仓成本的百分比）
-    stop_loss_pct: float | None = None       # 如 0.05 表示亏损 5% 止损
-    take_profit_pct: float | None = None     # 如 0.15 表示盈利 15% 止盈
-    # 仓位限制
-    max_position_count: int = 10             # 同时持有标的最大数量
-    max_single_position_pct: float = 0.30   # 单标的最大占组合比例
-    # 日亏损上限
-    daily_loss_limit_pct: float | None = None  # 如 0.05 表示当日亏 5% 停止交易
-    # 单笔最大交易金额
-    max_order_value: float | None = None
-
-
-@dataclass
-class RiskCheckResult:
-    """风控检查结果."""
-
-    allowed: bool
-    reason: str = ""
-
-    @classmethod
-    def ok(cls) -> RiskCheckResult:
-        return cls(allowed=True)
-
-    @classmethod
-    def reject(cls, reason: str) -> RiskCheckResult:
-        return cls(allowed=False, reason=reason)
+__all__ = [
+    "RiskConfig",
+    "RiskCheckResult",
+    "RiskManager",
+]
 
 
 class RiskManager:

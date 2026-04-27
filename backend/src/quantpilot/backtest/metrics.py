@@ -2,42 +2,19 @@
 
 支持：Sharpe Ratio、Max Drawdown、Calmar Ratio、Win Rate、
       Profit Factor、Sortino Ratio、年化收益率等。
+
+TradeRecord 数据契约已下沉到 ``quantpilot_common.contracts.trade``；
+本模块从那里 re-export 以保持向后兼容。
 """
 
 from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from datetime import datetime
 
+from quantpilot_common.contracts.trade import TradeRecord
 
-@dataclass
-class TradeRecord:
-    """单笔交易记录."""
-
-    symbol: str
-    side: str             # 'buy' / 'sell'
-    entry_time: datetime
-    exit_time: datetime
-    entry_price: float
-    exit_price: float
-    quantity: float
-    commission: float = 0.0
-    slippage: float = 0.0
-
-    @property
-    def pnl(self) -> float:
-        """净盈亏（扣除手续费和滑点）."""
-        gross = (self.exit_price - self.entry_price) * self.quantity
-        if self.side == "sell":
-            gross = -gross
-        return gross - self.commission - self.slippage
-
-    @property
-    def return_pct(self) -> float:
-        """单笔收益率."""
-        cost = self.entry_price * self.quantity
-        return self.pnl / cost if cost != 0 else 0.0
+__all__ = ["TradeRecord", "BacktestMetrics", "calculate_metrics"]
 
 
 @dataclass
