@@ -13,6 +13,7 @@
 
 | 日期 | Task ID | Verdict | 报告 |
 |---|---|---|---|
+| 2026-04-27 | phaseA.pr-6-frontend-split | ✅ PASS | [pr-6-frontend-split.md](phaseA/pr-6-frontend-split.md) |
 | 2026-04-27 | phaseA.pr-5-quant-assistant-py | ✅ PASS | [pr-5-quant-assistant-py.md](phaseA/pr-5-quant-assistant-py.md) |
 | 2026-04-27 | phaseA.pr-4-stock-assistant | ✅ PASS | [pr-4-stock-assistant.md](phaseA/pr-4-stock-assistant.md) |
 | 2026-04-27 | phaseA.pr-3-common-py | ✅ PASS | [pr-3-common-py.md](phaseA/pr-3-common-py.md) |

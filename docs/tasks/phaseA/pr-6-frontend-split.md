@@ -1,8 +1,9 @@
 # Task phaseA.pr-6-frontend-split: 前端三拆 + 共享组件抽出
 
 **Phase**: A
-**Status**: pending
-**Implementation PR**: <pending>
+**Status**: passed
+**Implementation PR**: commit `38984e3`
+**Acceptance**: [docs/acceptance/phaseA/pr-6-frontend-split.md](../../acceptance/phaseA/pr-6-frontend-split.md) — ✅ PASS (2026-04-27)
 **Created**: 2026-04-27
 **Owner-agent**: implementation-agent
 **Reviewer-agent**: acceptance-agent
