@@ -80,3 +80,4 @@ quant-assistant 前端目前有两个 Tab：回测（BacktestPanel）和参数�
 
 修改：
 - `apps/quant-assistant/frontend/src/App.tsx`
+- `docs/tasks/phaseE/walk-forward-panel.md`（spec 本身：修正 API 路径拼写错误 `/api/data/klines` → `/api/data/bars`）
