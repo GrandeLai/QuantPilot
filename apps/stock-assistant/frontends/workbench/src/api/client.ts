@@ -1,6 +1,6 @@
 /**
  * QuantPilot API client — 封装所有后端接口调用.
- * 使用 Vite dev-proxy：/api/* → http://127.0.0.1:8000/*
+ * 使用 Vite dev-proxy：/api/* → http://127.0.0.1:8001/*
  */
 
 const BASE = "/api";

@@ -64,7 +64,7 @@ export default function LiveDataPanel() {
   const [timeframe, setTimeframe] = useState("1d");
   const [barEnabled, setBarEnabled] = useState(false);
   const [signalEnabled, setSignalEnabled] = useState(false);
-  const [wsBase, setWsBase] = useState("ws://localhost:8000");
+  const [wsBase, setWsBase] = useState("ws://localhost:8001");
 
   const barUrl = `${wsBase}/ws/bars/${symbol}/${timeframe}`;
   const signalUrl = `${wsBase}/ws/signals`;
