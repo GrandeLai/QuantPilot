@@ -42,6 +42,8 @@ See also: [quant-assistant-api.md](quant-assistant-api.md) for the full Rust API
 | `/api/*` | `http://127.0.0.1:8000` | All stock-assistant API calls (rewrite strips `/api` prefix) |
 
 > **Note:** The vite.config.ts rewrites `/api` → `` (empty) before forwarding, so the backend sees paths without the `/api` prefix. The dev script starts the stock-assistant backend on port **8001**; ensure the vite config target port matches your local setup.
+>
+> **Warning:** The actual `vite.config.ts` targets port 8000, but the stock-assistant backend canonical port is 8001 (see `scripts/dev-stock.sh` and CLAUDE.md). The `vite.config.ts` likely contains a stale port value and may need updating.
 
 ---
 
@@ -55,7 +57,7 @@ This frontend has a minimal Vite config with no explicit proxy block. The dev sc
 (cd apps/stock-assistant/frontends/assistant && npm run dev -- --port 5174 --strictPort)
 ```
 
-API calls from this frontend must be directed to the stock-assistant backend at port 8001 using a full URL or a separate proxy configuration added to its `vite.config.ts`.
+API calls from this frontend must be directed to the stock-assistant backend at port 8001 using a full URL or a separate proxy configuration added to its `vite.config.ts`. Note: the assistant frontend's `src/api/client.ts` issues calls to relative paths such as `/api/advisor/*` and `/api/crypto/*` — these will only resolve correctly in development once a proxy block (targeting port 8001) is added to its `vite.config.ts`, or when the frontend is served behind a reverse proxy that forwards those paths to stock-assistant.
 
 ---
 

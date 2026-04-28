@@ -206,9 +206,9 @@ Run walk-forward cross-validation by splitting the close price series into seque
 | Field | Type | Description |
 |-------|------|-------------|
 | `train_start` | `usize` | Inclusive start index of training segment |
-| `train_end` | `usize` | Exclusive end index of training segment |
+| `train_end` | `usize` | Inclusive end index of training segment |
 | `test_start` | `usize` | Inclusive start index of test segment |
-| `test_end` | `usize` | Exclusive end index of test segment |
+| `test_end` | `usize` | Inclusive end index of test segment |
 
 ### Example
 
