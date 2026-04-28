@@ -37,6 +37,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # Strategy DSL
 rhai = { version = "1.21", features = ["sync"] }
+tract-onnx = "0.22.1"
 
 [profile.release]
 lto = true

@@ -5,6 +5,7 @@
 //! Phase C.1 起：runtime 子模块提供 Rhai 策略 DSL 引擎.
 
 pub mod indicators;
+pub mod ml_runner;
 pub mod runtime;
 pub mod schemas;
 pub mod walk_forward;

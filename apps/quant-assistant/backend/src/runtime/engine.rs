@@ -16,6 +16,7 @@ use std::path::Path;
 use rhai::{Dynamic, Engine, AST};
 
 use crate::indicators::{ema_rhai, sma_rhai};
+use crate::ml_runner::MlRunner;
 
 /// 策略信号（最简化 MVP；Phase C.x 扩 strength/reason 等）.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -101,6 +102,26 @@ impl RhaiEngine {
                     .into_iter()
                     .map(Dynamic::from_float)
                     .collect()
+            },
+        );
+
+        // ── 注册 ml_predict_from_dir ─────────────────────────────────────────
+        // MVP：每次调用时加载模型（无缓存）；C.x 版本可改为全局 Arc<Mutex<HashMap>> 缓存。
+        engine.register_fn(
+            "ml_predict_from_dir",
+            |model_dir: String, features: rhai::Array| -> rhai::Dynamic {
+                let feat: Vec<f64> = features.iter().map(dynamic_to_float).collect();
+                match MlRunner::load(std::path::Path::new(&model_dir)) {
+                    Ok(runner) => match runner.predict(&feat) {
+                        Ok(outputs) => {
+                            let arr: rhai::Array =
+                                outputs.into_iter().map(Dynamic::from_float).collect();
+                            Dynamic::from(arr)
+                        }
+                        Err(e) => Dynamic::from(format!("ERROR:{e}")),
+                    },
+                    Err(e) => Dynamic::from(format!("ERROR:{e}")),
+                }
             },
         );
 
