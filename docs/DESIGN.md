@@ -21,7 +21,7 @@
 |---|---|---|
 | v0.1.0 | 2026-04-07 | 初始版本 |
 | v0.2.0 | 2026-04-27 | Phase A 拆分完成；双产品 + 共享包结构 |
-| v0.3.0 | 2026-04-28 | Phase A–E 完工；Rust 量化后端全 API + 前端接线；删除 quant-assistant-py |
+| v0.3.0 | 2026-04-28 | Phase A–E 完工；Rust 量化后端全 API + 前端接线；删除 Python 量化临时后端 |
 
 ---
 
@@ -163,7 +163,7 @@ common/schemas/*.schema.json  （源，手写）
 | Phase | 状态 | 摘要 |
 |---|---|---|
 | A | ✅ 2026-04-27 | Monorepo 拆分（8 PR），500 测试，3 app 互不耦合 |
-| Step 4 | ✅ 2026-04-27 | 删除 quant-assistant-py |
+| Step 4 | ✅ 2026-04-27 | 删除 Python 量化临时后端（见 MIGRATION.md） |
 | B | ✅ 含于 Phase A–E | Rust MVP：axum + Polars backtest |
 | C | ✅ (Phase D) | Walk-forward / optimize / indicators API |
 | D | ✅ 2026-04-28 | src/api/ 模块化 + trade tracking |
