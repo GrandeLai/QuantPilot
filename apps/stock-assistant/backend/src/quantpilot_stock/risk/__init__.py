@@ -14,6 +14,12 @@ from quantpilot_stock.risk.sharpe_decay import (
     rolling_sharpe,
     sharpe_z_score,
 )
+from quantpilot_stock.risk.var_cvar import (
+    historical_cvar,
+    historical_var,
+    parametric_var,
+    var_summary,
+)
 from quantpilot_stock.risk.vol_target import (
     realized_volatility,
     regime_classify,
@@ -26,12 +32,16 @@ __all__ = [
     "capped_kelly",
     "decay_alert_level",
     "fractional_kelly",
+    "historical_cvar",
+    "historical_var",
     "kelly_fraction_binary",
     "kelly_fraction_from_returns",
+    "parametric_var",
     "realized_volatility",
     "regime_classify",
     "rolling_sharpe",
     "sharpe_z_score",
+    "var_summary",
     "vol_target_position_size",
     "vol_target_recommendation",
 ]
