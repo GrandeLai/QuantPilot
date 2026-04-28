@@ -81,6 +81,18 @@ npm install   # 仅根目录跑一次（npm workspace 装所有前端依赖）
 bash common/schemas/codegen.sh   # 改 schema 后必跑
 ```
 
+### Quant-Assistant API 端点（Rust, port 8002）
+
+```
+GET  /healthz
+POST /api/backtest/run      # MA crossover 回测（bars + fast/slow period）
+POST /api/walk-forward      # Walk-forward 验证窗口切分
+POST /api/optimize          # 网格搜索最优参数（top-N by Sharpe）
+POST /api/indicators        # SMA / EMA 指标计算
+```
+
+详细 request/response schema 见 `docs/architecture/quant-assistant-api.md`。
+
 ### Lint / 类型检查
 
 ```bash

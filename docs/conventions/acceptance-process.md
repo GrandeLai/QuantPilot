@@ -130,5 +130,6 @@ QuantPilot 拆分期间所有 PR/任务必须走验收流程。本文是流程�
 - **没有 task spec 不动手**
 - **没有 PASS 不合 PR**
 - **任务范围之外的改动 = FAIL**（不接受"顺手做了一点别的"）
+- **NEEDS-REVISION 的两种原因**：(a) 实现 scope creep（需修实现）；(b) task spec 白名单遗漏必要伴随文件（需修 spec 白名单后重验）。acceptance-agent 报告中会说明属于哪种。
 - **AC 是冻结契约**：写错了改 spec 而不是放宽验收
 - **验收记录全 commit，永不删**

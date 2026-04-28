@@ -2,13 +2,13 @@
 
 ## 协议
 
-`common/data-store/market.duckdb`（共享行情库）只能由 **stock-assistant** 写入。所有其他 app（包括 quant-assistant-py 和 Rust quant-assistant）只能 **read-only** 消费。
+`common/data-store/market.duckdb`（共享行情库）只能由 **stock-assistant** 写入。所有其他 app（包括 Rust quant-assistant）只能 **read-only** 消费。
 
 ## 为什么
 
 - DuckDB 单进程多写并发不友好；锁冲突会破坏数据
 - 行情数据来源（yfinance / akshare / OKX）通过 stock-assistant 的 `quantpilot_common.data.fetchers` + `data_storage` 拉取写入
-- 量化助手的 backtest / 因子计算 **只读** 历史行情；自身产出的中间数据（因子值、回测结果、信号）写入**自己的** `apps/quant-assistant-py/data/results.duckdb`（或 Rust 版的同名独立 db）
+- 量化助手的 backtest / 因子计算 **只读** 历史行情；自身产出的中间数据（因子值、回测结果、信号）写入**自己的** `apps/quant-assistant/data/results.duckdb`
 
 ## 实施
 
@@ -17,14 +17,10 @@
 - 写入路径：`common/python/quantpilot_common/data/storage.MarketDataStorage.upsert_bars()`
 - DuckDB 路径：`get_settings().duckdb_path`（默认 `common/data-store/market.duckdb`）
 
-### Quant-assistant-py 侧（只读方）
-- `apps/quant-assistant-py/backend/src/quantpilot_quant/data/`（并不存在；通过 `quantpilot_common.data` 间接访问）
-- **只调用** read-only 方法：`MarketDataStorage.query_bars()`、`get_symbols()`
-- 自有写入：因子值、回测结果走独立 db（结构待定）
-
 ### Rust quant-assistant 侧（只读方）
 - 用 `duckdb-rs` 以 read-only 模式打开 `common/data-store/market.duckdb`
-- 自有写入：`apps/quant-assistant/data/results.duckdb`（Rust 独立 db）
+- 自有写入（如未来需要持久化回测结果）：`apps/quant-assistant/data/results.duckdb`（独立 db，与 market.duckdb 完全隔离）
+- Phase D–E 当前实现：backtest/optimize/indicators 端点只返回 JSON，不写磁盘；results.duckdb 是预留路径
 
 ## CI 守卫（Phase B+）
 
