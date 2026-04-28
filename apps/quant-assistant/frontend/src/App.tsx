@@ -7,14 +7,15 @@
  */
 
 import { useState } from "react";
-import { BarChart3, Settings2 } from "lucide-react";
+import { BarChart3, Settings2, GitBranch } from "lucide-react";
 import { cn } from "@/lib/utils";
 import BacktestPanel from "@/components/BacktestPanel";
 import OptimizationPanel from "@/components/OptimizationPanel";
+import WalkForwardPanel from "@/components/WalkForwardPanel";
 
 // ── Tab 定义 ──────────────────────────────────────────────────────────────────
 
-type TabId = "backtest" | "optimize";
+type TabId = "backtest" | "optimize" | "walk-forward";
 
 interface Tab {
   id: TabId;
@@ -25,6 +26,7 @@ interface Tab {
 const TABS: Tab[] = [
   { id: "backtest", label: "回测", icon: BarChart3 },
   { id: "optimize", label: "参数优化", icon: Settings2 },
+  { id: "walk-forward", label: "Walk-Forward", icon: GitBranch },
 ];
 
 // ── 主应用 ────────────────────────────────────────────────────────────────────
@@ -76,6 +78,7 @@ export function App() {
       <div className="max-w-[1400px] mx-auto px-6 py-6">
         {activeTab === "backtest" && <BacktestPanel />}
         {activeTab === "optimize" && <OptimizationPanel />}
+        {activeTab === "walk-forward" && <WalkForwardPanel />}
       </div>
     </div>
   );
