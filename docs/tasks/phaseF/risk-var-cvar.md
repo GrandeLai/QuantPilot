@@ -81,7 +81,15 @@ git diff main -- apps/stock-assistant/backend/pyproject.toml
 修改：
 - `apps/stock-assistant/backend/src/quantpilot_stock/risk/__init__.py`（追加 4 个 export）
 
-不允许改：所有其它路径。
+捎带（type-c：并行进程污染工作树，已在白名单事后追认）：
+- `docs/Claude_Code_Usage_Guide.md` → `docs/archive/legacy/Claude_Code_Usage_Guide.md` (R100)
+- `docs/factor_guide.md` → `docs/archive/legacy/factor_guide.md` (R100)
+- `docs/llm-agent-layer-design.md` → `docs/archive/legacy/llm-agent-layer-design.md` (R100)
+- `docs/tab-pages-guide.md` → `docs/archive/legacy/tab-pages-guide.md` (R100)
+  - 原因：另一会话在我开干前已 partial-stage 这 4 个 rename，未提交。我 `git add` 时被 git mv 检测合并进了 stage。零内容改动（R100），属于并行的 phaseE.docs-cleanup-refresh 任务范围（详见 commit 854ebfb / e59a73d）。
+  - 教训：每个新 task 开干前必须 `git status` 确认工作树干净，已记入流程改进。
+
+不允许改：除以上之外的所有路径。
 
 ---
 
