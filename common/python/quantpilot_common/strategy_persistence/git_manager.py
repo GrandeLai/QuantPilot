@@ -25,7 +25,7 @@ class GitManager:
             repo.index.commit("chore: init strategy repo")
             logger.info(f"[GitManager] Initialized repo at {self._dir}")
 
-    def _repo(self) -> object:
+    def _repo(self) -> Any:
         import git
         try:
             return git.Repo(str(self._dir))

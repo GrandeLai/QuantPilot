@@ -361,7 +361,7 @@ class FutuTradingProvider:
             port=self._settings.futu_port,
         )
         trade_context = self._sdk.OpenSecTradeContext(  # type: ignore[union-attr]
-            filter_trdmarket=self._sdk.TrdMarket[self._settings.futu_market.upper()],
+            filter_trdmarket=self._sdk.TrdMarket[self._settings.futu_market.upper()],  # type: ignore[union-attr]
             host=self._settings.futu_host,
             port=self._settings.futu_port,
         )
@@ -415,9 +415,9 @@ class FutuTradingProvider:
                 if isinstance(item, Mapping):
                     rows.append(dict(item))
                 else:
-                    rows.append(vars(item))
+                    rows.append(dict(vars(item)))
             return rows
-        return [vars(data)]
+        return [dict(vars(data))]
 
     def _first_row(self, data: Any) -> dict[str, Any]:
         rows = self._rows(data)
@@ -537,13 +537,13 @@ class FutuTradingProvider:
         )
 
     def _sdk_order_side(self, side: TradingOrderSide) -> Any:
-        return self._sdk.TrdSide.BUY if side == TradingOrderSide.BUY else self._sdk.TrdSide.SELL
+        return self._sdk.TrdSide.BUY if side == TradingOrderSide.BUY else self._sdk.TrdSide.SELL  # type: ignore[union-attr]
 
     def _sdk_order_type(self, order_type: TradingOrderType) -> Any:
-        return self._sdk.OrderType.NORMAL if order_type == TradingOrderType.LIMIT else self._sdk.OrderType.MARKET
+        return self._sdk.OrderType.NORMAL if order_type == TradingOrderType.LIMIT else self._sdk.OrderType.MARKET  # type: ignore[union-attr]
 
     def _sdk_modify_order_cancel(self) -> Any:
-        return self._sdk.ModifyOrderOp.CANCEL
+        return self._sdk.ModifyOrderOp.CANCEL  # type: ignore[union-attr]
 
     def _map_order_side(self, raw: Any) -> TradingOrderSide:
         text = str(raw).lower()

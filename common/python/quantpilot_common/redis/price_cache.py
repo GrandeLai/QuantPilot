@@ -22,7 +22,7 @@ class PriceCache:
             price: 最新价格
         """
         r = RedisClient.get()
-        await r.hset(_HASH_KEY, symbol, str(price))
+        await r.hset(_HASH_KEY, symbol, str(price))  # type: ignore[misc]
         logger.debug(f"[PriceCache] {symbol} = {price}")
 
     async def get_price(self, symbol: str) -> float | None:
@@ -32,7 +32,7 @@ class PriceCache:
             float 价格，或 None（不存在时）
         """
         r = RedisClient.get()
-        val = await r.hget(_HASH_KEY, symbol)
+        val = await r.hget(_HASH_KEY, symbol)  # type: ignore[misc]
         return float(val) if val is not None else None
 
     async def get_all(self) -> dict[str, float]:
@@ -42,10 +42,10 @@ class PriceCache:
             {symbol: price} 字典
         """
         r = RedisClient.get()
-        raw: dict[str, str] = await r.hgetall(_HASH_KEY)
+        raw: dict[str, str] = await r.hgetall(_HASH_KEY)  # type: ignore[misc]
         return {k: float(v) for k, v in raw.items()}
 
     async def delete_price(self, symbol: str) -> None:
         """删除标的价格缓存."""
         r = RedisClient.get()
-        await r.hdel(_HASH_KEY, symbol)
+        await r.hdel(_HASH_KEY, symbol)  # type: ignore[misc]

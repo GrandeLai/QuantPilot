@@ -54,3 +54,32 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+exclude = ["src/quantpilot_stock/schemas/"]
+
+[[tool.mypy.overrides]]
+module = "longbridge.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "futu.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "redis.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "pandas_ta.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "vaderSentiment.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "litellm.*"
+ignore_missing_imports = true

@@ -13,13 +13,13 @@ class QuantPilotSpec:
     hookimpl = staticmethod(hookimpl)
 
     @hookspec
-    def on_bar(self, symbol: str, close: float) -> str:
+    def on_bar(self, symbol: str, close: float) -> str:  # type: ignore[empty-body]
         """每根 K 线到达时调用."""
 
     @hookspec
-    def on_signal(self, symbol: str, signal: str) -> str:
+    def on_signal(self, symbol: str, signal: str) -> str:  # type: ignore[empty-body]
         """交易信号产生时调用."""
 
     @hookspec
-    def on_alert(self, message: str) -> str:
+    def on_alert(self, message: str) -> str:  # type: ignore[empty-body]
         """告警触发时调用."""

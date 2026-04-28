@@ -24,7 +24,7 @@ class RedisClient:
             url: Redis 连接 URL，如 redis://host:6379 或 redis://:password@host:6379/0
         """
         cls._instance = aioredis.from_url(url, decode_responses=True)
-        await cls._instance.ping()
+        await cls._instance.ping()  # type: ignore[misc]
         logger.info(f"[Redis] 已连接: {url.split('@')[-1]}")  # 隐藏密码
 
     @classmethod
@@ -54,6 +54,6 @@ class RedisClient:
             True 表示连通，False 表示未连接或超时
         """
         try:
-            return bool(await cls.get().ping())
+            return bool(await cls.get().ping())  # type: ignore[misc]
         except Exception:
             return False

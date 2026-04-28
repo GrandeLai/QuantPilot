@@ -43,3 +43,19 @@ dev = [
 testpaths = ["tests"]
 asyncio_mode = "auto"
 
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+# 排除 codegen 生成的 schemas/ 目录（confloat/conint 旧式用法由 datamodel-codegen 输出）
+exclude = ["quantpilot_common/schemas/"]
+
+[[tool.mypy.overrides]]
+# gitpython 无类型 stubs，忽略属性访问错误
+module = "git.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# redis.asyncio stubs 存在 Awaitable[T] | T 联合类型，mypy 无法处理
+module = "redis.*"
+ignore_missing_imports = true
+

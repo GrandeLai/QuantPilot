@@ -58,7 +58,7 @@ class OrderQueue:
             "timestamp": order.timestamp,
             "reason": order.reason,
         }
-        entry_id: str = await r.xadd(self._key, payload)
+        entry_id: str = await r.xadd(self._key, payload)  # type: ignore[arg-type, misc]
         order.entry_id = entry_id
         logger.info(f"[OrderQueue] 入队 {entry_id}: {order.side} {order.symbol} x{order.quantity}")
         return entry_id

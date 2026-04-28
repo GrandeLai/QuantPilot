@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import Any
 from zoneinfo import ZoneInfo
 
 from quantpilot_stock.broker.catalog import find_security_by_symbol, find_supported_securities
@@ -66,7 +67,7 @@ class MockTradingProvider:
             "9988.HK": (74.95, 73.25),
             "2800.HK": (18.62, 18.48),
         }
-        self._positions: dict[str, dict[str, object]] = {}
+        self._positions: dict[str, dict[str, Any]] = {}
         self._orders: list[TradingOrder] = []
         self._executions: list[TradingExecution] = []
         self._cash_flows: list[TradingCashFlow] = []
@@ -282,7 +283,7 @@ class MockTradingProvider:
         )
         self._orders.append(order)
 
-        fill_price = reference_price if request.order_type == TradingOrderType.MARKET else float(request.submitted_price)
+        fill_price = reference_price if request.order_type == TradingOrderType.MARKET else (request.submitted_price or 0.0)
         should_fill = request.order_type == TradingOrderType.MARKET or (
             request.side == TradingOrderSide.BUY and fill_price >= reference_price
         ) or (

@@ -13,7 +13,7 @@ import httpx
 from loguru import logger
 
 from quantpilot_common.data.fetchers.base import BaseDataFetcher
-from quantpilot_common.data.models import OHLCVBar, SymbolInfo
+from quantpilot_common.data.models import AssetType, Exchange, OHLCVBar, SymbolInfo
 
 OKX_REST_URL = "https://www.okx.com"
 
@@ -206,16 +206,16 @@ class OKXFetcher(BaseDataFetcher):
         q = query.upper().replace("/", "-").replace(" ", "")
         matched = [
             SymbolInfo(
-                symbol=sym, name=name, exchange="OKX",
-                asset_type="crypto", currency="USDT",
+                symbol=sym, name=name, exchange=Exchange.OKX,
+                asset_type=AssetType.CRYPTO, currency="USDT",
             )
             for sym, name in POPULAR_PAIRS
             if q in sym or q in name.upper()
         ]
         return matched or [
             SymbolInfo(
-                symbol=sym, name=name, exchange="OKX",
-                asset_type="crypto", currency="USDT",
+                symbol=sym, name=name, exchange=Exchange.OKX,
+                asset_type=AssetType.CRYPTO, currency="USDT",
             )
             for sym, name in POPULAR_PAIRS[:8]
         ]
