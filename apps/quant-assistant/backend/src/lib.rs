@@ -2,7 +2,9 @@
 //!
 //! Phase B 起：纯 Rust 库 + axum binary。
 //! Phase A seed 的 PyO3 binding 已移除（功能函数保留为普通 Rust）。
+//! Phase C.1 起：runtime 子模块提供 Rhai 策略 DSL 引擎.
 
+pub mod runtime;
 pub mod schemas;
 
 /// 当前 crate 版本（从 Cargo.toml 读取）.
@@ -82,6 +84,67 @@ pub fn sharpe_ratio(returns: &[f64], risk_free_rate: f64, periods_per_year: f64)
 
     let daily_risk_free = risk_free_rate / periods_per_year;
     (mean - daily_risk_free) / std_dev * periods_per_year.sqrt()
+}
+
+/// MA crossover 回测，但**通过 Rhai 策略**做 long/flat/hold 决策.
+///
+/// 算法步骤与 [`run_ma_crossover_backtest`] 相同；
+/// 区别仅在每根 K 线调 `strategies/<script>.rhai` 中的 `fn signal(fast, slow)`
+/// 决定方向，而不是 Rust 内嵌 `if fast > slow {...}`。
+///
+/// 用于验证 Rhai 引擎不引入数值误差（结果应与硬编码版 bit-equivalent）.
+pub fn run_rhai_ma_crossover_backtest<P: AsRef<std::path::Path>>(
+    closes: &[f64],
+    strategy_path: P,
+    fast_period: usize,
+    slow_period: usize,
+    initial_cash: f64,
+) -> Result<Vec<f64>, String> {
+    let n = closes.len();
+    if n < slow_period {
+        return Err(format!(
+            "数据长度不足：需要至少 {} 个数据点，实际 {}",
+            slow_period, n
+        ));
+    }
+
+    let engine = runtime::RhaiEngine::new();
+    let strategy = engine.compile_file(strategy_path)?;
+
+    let mut portfolio_values = vec![initial_cash; n];
+    let mut position: f64 = 0.0;
+    let mut cash: f64 = initial_cash;
+
+    for i in slow_period..n {
+        let fast_sum: f64 = closes[(i - fast_period)..i].iter().sum();
+        let fast_ma = fast_sum / fast_period as f64;
+
+        let slow_sum: f64 = closes[(i - slow_period)..i].iter().sum();
+        let slow_ma = slow_sum / slow_period as f64;
+
+        let price = closes[i];
+        let signal = engine.call_signal(&strategy, fast_ma, slow_ma)?;
+
+        match signal {
+            runtime::Signal::Long if position == 0.0 && cash > 0.0 => {
+                position = cash / price;
+                cash = 0.0;
+            }
+            runtime::Signal::Flat if position > 0.0 => {
+                cash = position * price;
+                position = 0.0;
+            }
+            _ => {}
+        }
+
+        portfolio_values[i] = cash + position * price;
+    }
+
+    for value in portfolio_values.iter_mut().take(slow_period) {
+        *value = initial_cash;
+    }
+
+    Ok(portfolio_values)
 }
 
 /// 计算最大回撤.
