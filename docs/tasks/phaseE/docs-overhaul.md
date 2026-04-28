@@ -20,7 +20,7 @@ Phase A–E 已完成（monorepo 拆分 + Rust 量化后端 + API 模块化 + �
 2. **更新 `README.md`**：反映当前 monorepo 布局，删除对旧 backend/、rust_core/ 的引用
 3. **更新 `CLAUDE.md`**：添加 Phase D 四个端点、确认 quant 前端端口 5175
 4. **追加 `docs/MIGRATION.md`**：Step 4（quant-py 删除）+ Phase D + Phase E
-5. **小改 `docs/protocols/duckdb-write-discipline.md`**：添加 results.duckdb 说明
+5. **小改 `docs/protocols/duckdb-write-discipline.md`**：添加 results.duckdb 说明（同时清理其中的 quant-assistant-py 引用）
 6. **小改 `docs/conventions/acceptance-process.md`**：NEEDS-REVISION 解决路径说明
 7. **新建 `docs/architecture/quant-assistant-api.md`**：Rust 5 个端点完整参考
 8. **新建 `docs/architecture/frontend-routing.md`**：Vite proxy 路由表
@@ -35,11 +35,14 @@ Phase A–E 已完成（monorepo 拆分 + Rust 量化后端 + API 模块化 + �
 
 ## 验收标准
 
-- [ ] **AC-1**: `grep -r "quant-assistant-py\|rust_core\|apps/backend" docs/ README.md CLAUDE.md` 在 MIGRATION.md 之外无命中（MIGRATION.md 中的引用是历史记录，允许）
-- [ ] **AC-2**: `test -f docs/architecture/quant-assistant-api.md` 且文件包含 `/api/backtest/run`、`/api/walk-forward`、`/api/optimize`、`/api/indicators`、`/healthz`（`grep -c "api/" docs/architecture/quant-assistant-api.md` >= 4）
+- [ ] **AC-1**: 以下文件中不含 `quant-assistant-py`、`rust_core`、`apps/backend` 的活跃引用：
+  `grep -r "quant-assistant-py\|rust_core\|apps/backend" docs/DESIGN.md docs/protocols/ docs/conventions/ README.md CLAUDE.md`
+  返回无命中（允许 docs/MIGRATION.md 中的历史记录，但上述路径必须干净）
+- [ ] **AC-2**: `test -f docs/architecture/quant-assistant-api.md` 且文件包含 `/api/backtest/run`、`/api/walk-forward`、`/api/optimize`、`/api/indicators`、`/healthz`（`grep -c "api/\|/healthz" docs/architecture/quant-assistant-api.md` >= 5）
 - [ ] **AC-3**: `test -f docs/architecture/frontend-routing.md` 且文件包含 `8001` 和 `8002`
 - [ ] **AC-4**: `grep -c "api/backtest\|api/walk-forward\|api/optimize\|api/indicators" CLAUDE.md` >= 4
-- [ ] **AC-5**: `grep -c "apps/stock-assistant\|apps/quant-assistant" docs/DESIGN.md` >= 2 且 `grep -c "8001\|8002" docs/DESIGN.md` >= 2
+- [ ] **AC-5**: `grep -c "apps/stock-assistant\|apps/quant-assistant" docs/DESIGN.md` >= 4 且 `grep -c "8001\|8002" docs/DESIGN.md` >= 4
+- [ ] **AC-6**: `grep -c "Phase D\|Phase E\|Step 4" docs/MIGRATION.md` >= 3
 
 ---
 
