@@ -55,10 +55,14 @@ phaseD.api-expand 完成后，Rust quant-assistant 后端暴露了完整的 HTTP
 - apps/quant-assistant/frontend/vite.config.ts
 - apps/quant-assistant/frontend/src/App.tsx
 - apps/quant-assistant/frontend/src/components/BacktestPanel.tsx
+- apps/quant-assistant/frontend/src/main.tsx（添加 index.css import）
+- apps/quant-assistant/frontend/tsconfig.json（添加 paths + include 调整）
+- package-lock.json（新增依赖后 npm install 自动更新）
 
 新建：
 - apps/quant-assistant/frontend/src/components/OptimizationPanel.tsx
+- apps/quant-assistant/frontend/src/components/guides/FeatureGuideButton.tsx（存根）
 - apps/quant-assistant/frontend/src/lib/utils.ts（cn 函数）
-- apps/quant-assistant/frontend/tailwind.config.ts
-- apps/quant-assistant/frontend/src/index.css
+- apps/quant-assistant/frontend/src/index.css（Tailwind 入口）
+  注：tailwind.config.ts 不需要（@tailwindcss/vite 4.x 零配置）
 ```
