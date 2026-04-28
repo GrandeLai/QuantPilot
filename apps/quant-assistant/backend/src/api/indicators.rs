@@ -1,6 +1,8 @@
 //! POST /api/indicators — SMA/EMA 指标计算端点.
 
-use axum::{http::StatusCode, response::IntoResponse, Json};
+use axum::{http::StatusCode, Json};
+
+use super::ApiError;
 use serde::{Deserialize, Serialize};
 
 use crate::indicators::{ema, sma};
@@ -25,13 +27,6 @@ pub struct IndicatorsResponse {
     pub period: usize,
     /// None 表示热身期（数据不足）
     pub values: Vec<Option<f64>>,
-}
-
-pub struct ApiError(pub StatusCode, pub String);
-impl IntoResponse for ApiError {
-    fn into_response(self) -> axum::response::Response {
-        (self.0, Json(serde_json::json!({"error": self.1}))).into_response()
-    }
 }
 
 pub async fn compute_indicators(

@@ -11,7 +11,21 @@ pub mod indicators;
 pub mod optimize;
 pub mod walk_forward;
 
-use axum::{routing::post, Router};
+use axum::{http::StatusCode, response::IntoResponse, routing::post, Json, Router};
+
+// ── 共享错误类型 ──────────────────────────────────────────────────────────────
+
+/// 统一 HTTP API 错误类型.
+/// 构造方式：`ApiError(StatusCode::BAD_REQUEST, "描述".into())`
+pub struct ApiError(pub StatusCode, pub String);
+
+impl IntoResponse for ApiError {
+    fn into_response(self) -> axum::response::Response {
+        (self.0, Json(serde_json::json!({"error": self.1}))).into_response()
+    }
+}
+
+// ── 路由 ──────────────────────────────────────────────────────────────────────
 
 /// 构建所有 API 路由，挂载在 `/api` 前缀下.
 pub fn router() -> Router {

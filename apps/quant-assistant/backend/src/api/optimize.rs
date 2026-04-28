@@ -1,6 +1,8 @@
 //! POST /api/optimize — 网格搜索参数优化端点.
 
-use axum::{http::StatusCode, response::IntoResponse, Json};
+use axum::{http::StatusCode, Json};
+
+use super::ApiError;
 use serde::{Deserialize, Serialize};
 
 use crate::optimizer::{grid_search_ma_crossover, GridSearchConfig, OptimizeResult};
@@ -28,13 +30,6 @@ fn default_periods() -> f64 {
 pub struct OptimizeResponse {
     pub total_combinations: usize,
     pub results: Vec<OptimizeResult>,
-}
-
-pub struct ApiError(pub StatusCode, pub String);
-impl IntoResponse for ApiError {
-    fn into_response(self) -> axum::response::Response {
-        (self.0, Json(serde_json::json!({"error": self.1}))).into_response()
-    }
 }
 
 pub async fn run_optimize(

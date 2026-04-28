@@ -1,6 +1,8 @@
 //! POST /api/backtest/run — MA crossover 回测端点.
 
-use axum::{http::StatusCode, response::IntoResponse, Json};
+use axum::{http::StatusCode, Json};
+
+use super::ApiError;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -68,16 +70,6 @@ pub struct BacktestRunResponse {
     pub bars_processed: usize,
     pub equity_curve: Vec<f64>,
     pub metrics: BacktestMetrics,
-}
-
-// ── 错误类型 ──────────────────────────────────────────────────────────────────
-
-pub struct ApiError(pub StatusCode, pub String);
-
-impl IntoResponse for ApiError {
-    fn into_response(self) -> axum::response::Response {
-        (self.0, Json(serde_json::json!({"error": self.1}))).into_response()
-    }
 }
 
 // ── 处理器 ────────────────────────────────────────────────────────────────────
