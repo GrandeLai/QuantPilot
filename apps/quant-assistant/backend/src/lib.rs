@@ -4,6 +4,7 @@
 //! Phase A seed 的 PyO3 binding 已移除（功能函数保留为普通 Rust）。
 //! Phase C.1 起：runtime 子模块提供 Rhai 策略 DSL 引擎.
 
+pub mod indicators;
 pub mod runtime;
 pub mod schemas;
 

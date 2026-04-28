@@ -13,7 +13,9 @@
 
 use std::path::Path;
 
-use rhai::{Engine, AST};
+use rhai::{Dynamic, Engine, AST};
+
+use crate::indicators::{ema_rhai, sma_rhai};
 
 /// 策略信号（最简化 MVP；Phase C.x 扩 strength/reason 等）.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -44,6 +46,22 @@ impl CompiledStrategy {
     pub fn name(&self) -> &str {
         &self.name
     }
+
+    /// 暴露内部 rhai::AST（测试/高级用途）.
+    pub fn ast(&self) -> &rhai::AST {
+        &self.ast
+    }
+}
+
+/// 将 Rhai Dynamic 值转为 f64；整数自动提升，其他类型返回 NaN.
+fn dynamic_to_float(d: &Dynamic) -> f64 {
+    if let Ok(f) = d.as_float() {
+        f
+    } else if let Ok(i) = d.as_int() {
+        i as f64
+    } else {
+        f64::NAN
+    }
 }
 
 /// Rhai 引擎封装，承载共享配置 + 注册的内置函数.
@@ -52,12 +70,40 @@ pub struct RhaiEngine {
 }
 
 impl RhaiEngine {
-    /// 创建默认配置的引擎.
+    /// 创建默认配置的引擎，并注册内置指标函数.
+    ///
+    /// 注册的 Rhai 函数：
+    /// - `sma(closes: Array, period: int) -> Array` — 简单移动平均，warmup 期为 NaN
+    /// - `ema(closes: Array, period: int) -> Array` — 指数移动平均，warmup 期为 NaN
     pub fn new() -> Self {
         let mut engine = Engine::new();
-        // Phase C.1 仅设默认 limits；C.x 扩注册 sma/ema 等内置 indicator
         engine.set_max_expr_depths(64, 32);
         engine.set_max_call_levels(32);
+
+        // ── 注册 sma ──────────────────────────────────────────────────────────
+        engine.register_fn(
+            "sma",
+            |closes: rhai::Array, period: i64| -> rhai::Array {
+                let v: Vec<f64> = closes.iter().map(dynamic_to_float).collect();
+                sma_rhai(v, period)
+                    .into_iter()
+                    .map(Dynamic::from_float)
+                    .collect()
+            },
+        );
+
+        // ── 注册 ema ──────────────────────────────────────────────────────────
+        engine.register_fn(
+            "ema",
+            |closes: rhai::Array, period: i64| -> rhai::Array {
+                let v: Vec<f64> = closes.iter().map(dynamic_to_float).collect();
+                ema_rhai(v, period)
+                    .into_iter()
+                    .map(Dynamic::from_float)
+                    .collect()
+            },
+        );
+
         Self { engine }
     }
 
@@ -88,6 +134,11 @@ impl RhaiEngine {
             ast,
             name: name.to_string(),
         })
+    }
+
+    /// 暴露内部 rhai::Engine（测试/高级用途）.
+    pub fn engine(&self) -> &rhai::Engine {
+        &self.engine
     }
 
     /// 调 Rhai 策略的 `signal(fast, slow)` 函数，返回 Signal 枚举.
