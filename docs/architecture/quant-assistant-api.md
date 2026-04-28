@@ -31,10 +31,19 @@ Liveness check. Returns immediately with no dependencies.
 
 ### Response `200 OK`
 
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | `string` | Always `"ok"` when the process is up |
+| `service` | `string` | Service name — always `"quant-assistant"` |
+| `version` | `string` | Crate version string (e.g. `"0.1.0"`) |
+| `started_at` | `string` | RFC 3339 timestamp of when the health check was called |
+
 ```json
 {
   "status": "ok",
-  "timestamp": "2026-04-28T10:00:00Z"
+  "service": "quant-assistant",
+  "version": "0.1.0",
+  "started_at": "2026-04-28T10:00:00Z"
 }
 ```
 
