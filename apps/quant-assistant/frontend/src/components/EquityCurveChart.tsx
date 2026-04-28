@@ -2,7 +2,7 @@
  * EquityCurveChart — 纯 SVG 权益曲线折线图.
  * 无外部图表依赖；响应式 viewBox 布局.
  */
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface EquityCurveChartProps {
@@ -18,7 +18,6 @@ function formatMoney(v: number): string {
 }
 
 export default function EquityCurveChart({ data, initialCash, className }: EquityCurveChartProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
 
   // constants
@@ -75,7 +74,7 @@ export default function EquityCurveChart({ data, initialCash, className }: Equit
   ];
 
   return (
-    <div ref={containerRef} className={cn("relative", className)}>
+    <div className={cn("relative", className)}>
       <svg
         viewBox={`0 0 ${W} ${H}`}
         width="100%"
@@ -96,8 +95,8 @@ export default function EquityCurveChart({ data, initialCash, className }: Equit
         <polyline points={points} fill="none" stroke={lineColor} strokeWidth="1.5" strokeLinejoin="round" />
 
         {/* Y-axis labels */}
-        {yLabels.map(({ v, y }) => (
-          <text key={v} x={PAD.l - 6} y={y} textAnchor="end" dominantBaseline="middle"
+        {yLabels.map(({ v, y }, i) => (
+          <text key={i} x={PAD.l - 6} y={y} textAnchor="end" dominantBaseline="middle"
             fontSize="9" fill="#8b949e" fontFamily="monospace">
             {formatMoney(v)}
           </text>
@@ -120,7 +119,7 @@ export default function EquityCurveChart({ data, initialCash, className }: Equit
       {/* tooltip */}
       {hoverIdx !== null && (() => {
         const v = data[hoverIdx];
-        const pnl = ((v - initialCash) / initialCash) * 100;
+        const pnl = initialCash !== 0 ? ((v - initialCash) / initialCash) * 100 : 0;
         return (
           <div
             className="absolute top-0 pointer-events-none bg-[#161b22] border border-[#30363d] rounded-lg px-2 py-1.5 text-[10px] font-mono"
