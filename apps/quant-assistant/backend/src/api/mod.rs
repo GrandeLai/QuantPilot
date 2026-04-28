@@ -8,6 +8,7 @@
 
 pub mod backtest;
 pub mod indicators;
+pub mod ml_predict;
 pub mod optimize;
 pub mod walk_forward;
 
@@ -34,4 +35,5 @@ pub fn router() -> Router {
         .route("/api/walk-forward", post(walk_forward::run_walk_forward))
         .route("/api/optimize", post(optimize::run_optimize))
         .route("/api/indicators", post(indicators::compute_indicators))
+        .route("/api/ml/predict", post(ml_predict::predict))
 }

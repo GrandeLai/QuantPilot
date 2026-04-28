@@ -7,6 +7,7 @@
 //! - POST /api/walk-forward    → Walk-Forward CV
 //! - POST /api/optimize        → 网格搜索参数优化
 //! - POST /api/indicators      → SMA/EMA 指标计算
+//! - POST /api/ml/predict      → ONNX 模型推理
 
 use std::net::SocketAddr;
 
@@ -48,6 +49,7 @@ async fn root() -> Json<serde_json::Value> {
             "POST /api/walk-forward",
             "POST /api/optimize",
             "POST /api/indicators",
+            "POST /api/ml/predict",
         ],
     }))
 }
@@ -140,5 +142,6 @@ mod tests {
         assert!(body_str.contains("/api/walk-forward"));
         assert!(body_str.contains("/api/optimize"));
         assert!(body_str.contains("/api/indicators"));
+        assert!(body_str.contains("/api/ml/predict"));
     }
 }
