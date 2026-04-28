@@ -13,6 +13,7 @@
 
 | 日期 | Task ID | Verdict | 报告 |
 |---|---|---|---|
+| 2026-04-28 | phaseC.6.reports | ✅ PASS — 回测报告全套指标 + golden 等价验证（1e-9 容差）+ 全 57 Rust 测试通过 | [c6-reports.md](phaseC/c6-reports.md) |
 | 2026-04-28 | phaseC.5.optimize | ✅ PASS — MA crossover 网格搜索 + golden 等价验证（1e-9 容差）+ 全 46 Rust 测试通过 | [c5-optimize.md](phaseC/c5-optimize.md) |
 | 2026-04-28 | phaseC.4.onnx | ✅ PASS — ONNX tract 推理 + Rhai ml_predict_from_dir 集成 + 精度验证全部通过 | [c4-onnx.md](phaseC/c4-onnx.md) |
 | 2026-04-28 | phaseC.3.walk_forward | ✅ PASS — Walk-Forward 窗口切割 bit-identical + MA 回测链式拼接 + golden 等价验证 | [c3-walk-forward.md](phaseC/c3-walk-forward.md) |
