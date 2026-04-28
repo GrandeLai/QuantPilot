@@ -77,11 +77,16 @@ Phase B/C 已实现 Rust 量化库（indicators、walk_forward、optimizer、rep
 - apps/quant-assistant/backend/src/api/indicators.rs
 - apps/quant-assistant/backend/src/api/optimize.rs
 - apps/quant-assistant/backend/src/api/walk_forward.rs
-- apps/quant-assistant/backend/tests/api_test.rs
+  注：各模块内嵌 #[cfg(test)] 测试（Rust 惯用写法），不新建独立 tests/api_test.rs
 
 修改：
 - apps/quant-assistant/backend/src/main.rs  （精简为启动逻辑）
-- apps/quant-assistant/backend/src/lib.rs   （添加 trade tracking 函数）
+- apps/quant-assistant/backend/src/lib.rs   （添加 Trade/TradeStats 及 run_ma_crossover_backtest_with_stats）
+- apps/quant-assistant/backend/src/optimizer.rs（为 OptimizeResult 添加 Serialize，API 层编译所需）
+
+文档（同步新建）：
+- docs/tasks/phaseD/api-expand.md（本文件）
+- docs/tasks/phaseE/frontend-wired.md（Phase E 任务预写）
 ```
 
 ---
