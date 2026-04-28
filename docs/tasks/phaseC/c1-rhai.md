@@ -1,8 +1,9 @@
 # Task phaseC.1.rhai: Rhai DSL engine + 第一个用户策略 + cross-impl equivalence
 
 **Phase**: C
-**Status**: pending
-**Implementation PR**: <pending>
+**Status**: passed
+**Implementation PR**: commit `3761e88`
+**Acceptance**: [docs/acceptance/phaseC/c1-rhai.md](../../acceptance/phaseC/c1-rhai.md) — ✅ PASS (2026-04-28)
 **Created**: 2026-04-28
 **Owner-agent**: implementation-agent
 **Reviewer-agent**: acceptance-agent

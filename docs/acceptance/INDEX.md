@@ -13,6 +13,7 @@
 
 | 日期 | Task ID | Verdict | 报告 |
 |---|---|---|---|
+| 2026-04-28 | phaseC.1.rhai | ✅ PASS — Rhai DSL 引擎接入 | [c1-rhai.md](phaseC/c1-rhai.md) |
 | 2026-04-28 | phaseB.mvp.backtest | ✅ PASS — **Phase B MVP 完工** | [mvp-backtest.md](phaseB/mvp-backtest.md) |
 | 2026-04-27 | phaseB.mvp.healthz | ✅ PASS — **Phase B 起步** | [mvp-healthz.md](phaseB/mvp-healthz.md) |
 | 2026-04-27 | phaseA.pr-7-scripts-ci-docs | ✅ PASS — **Phase A 完工** | [pr-7-scripts-ci-docs.md](phaseA/pr-7-scripts-ci-docs.md) |
