@@ -1,8 +1,9 @@
 # Task phaseB.mvp.backtest: Rust /backtest endpoint + cross-language equivalence
 
 **Phase**: B
-**Status**: pending
-**Implementation PR**: <pending>
+**Status**: passed
+**Implementation PR**: commit `6c3c8de`
+**Acceptance**: [docs/acceptance/phaseB/mvp-backtest.md](../../acceptance/phaseB/mvp-backtest.md) — ✅ PASS (2026-04-28)
 **Created**: 2026-04-27
 **Owner-agent**: implementation-agent
 **Reviewer-agent**: acceptance-agent
