@@ -180,3 +180,50 @@ quant frontend (port 5175)
 ### 构建验证
 
 `(cd apps/quant-assistant/frontend && npm run build)` 通过，1744 modules transformed，dist 248 KB JS + 16 KB CSS。
+
+---
+
+## Phase E 后续（A1–A3 + B1 + B4）：2026-04-28
+
+### A1：BacktestPanel 权益曲线折线图
+
+**Task**: `docs/tasks/phaseE/equity-curve-chart.md` · **Verdict**: ✅ PASS
+
+- 新建 `apps/quant-assistant/frontend/src/components/EquityCurveChart.tsx`
+- 纯 SVG 折线图，无新 npm 依赖；响应式 `viewBox="0 0 600 160" width="100%"`
+- 修复 `divide-by-zero`（`initialCash === 0`）、React key 碰撞、dead `useRef`
+
+### A2：Walk-Forward 验证面板
+
+**Task**: `docs/tasks/phaseE/walk-forward-panel.md` · **Verdict**: ✅ PASS (v2)
+
+| 文件 | 变更 |
+|---|---|
+| `apps/quant-assistant/frontend/src/components/WalkForwardPanel.tsx` | 新建：调 `/api/walk-forward`；AbortController 取消；参数前置校验 |
+| `apps/quant-assistant/frontend/src/App.tsx` | 添加第三 Tab "Walk-Forward" |
+
+### A3：POST /api/ml/predict ONNX 推理端点
+
+**Task**: `docs/tasks/phaseE/ml-predict-endpoint.md` · **Verdict**: ✅ PASS
+
+| 文件 | 变更 |
+|---|---|
+| `apps/quant-assistant/backend/src/api/ml_predict.rs` | 新建：HTTP handler；path traversal guard；3 单元测试 |
+| `apps/quant-assistant/backend/src/api/mod.rs` | 注册 `/api/ml/predict` 路由 |
+| `apps/quant-assistant/frontend/vite.config.ts` | 添加 `/api/ml` → 8002 proxy |
+
+### B1：ApiError DRY
+
+**Task**: `docs/tasks/phaseE/api-error-dry.md` · **Verdict**: ✅ PASS
+
+- 4 个模块中重复的 `pub struct ApiError` + `impl IntoResponse` 定义提取到 `api/mod.rs`
+- 各子模块改用 `use super::ApiError`
+
+### B4：mypy 类型覆盖
+
+**Task**: `docs/tasks/phaseE/mypy-type-coverage.md` · **Verdict**: ✅ PASS (v2)
+
+- `common/python` 和 `apps/stock-assistant/backend` 各添加 `[tool.mypy]` 配置
+- 修复 `plugins/spec.py` hookspec 方法、redis stubs ignores、`git_manager._repo()` 返回类型、`okx_fetcher.py` 枚举使用
+- 修复 `broker/mock.py` 持仓 `dict[str, Any]`、`broker/futu.py` union-attr + MappingProxyType
+- 最终：`mypy` 报告 0 errors（common/python: 37 文件；stock-assistant: 73 文件）

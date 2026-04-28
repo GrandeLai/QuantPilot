@@ -22,6 +22,7 @@ This frontend talks to **two** backends:
 | `/api/walk-forward` | `http://localhost:8002` | Walk-forward validation |
 | `/api/optimize` | `http://localhost:8002` | MA parameter grid search |
 | `/api/indicators` | `http://localhost:8002` | SMA/EMA computation |
+| `/api/ml/*` | `http://localhost:8002` | ONNX model inference (`/api/ml/predict`) |
 
 ### Why two backends?
 
@@ -39,11 +40,9 @@ See also: [quant-assistant-api.md](quant-assistant-api.md) for the full Rust API
 
 | URL pattern | Target | Purpose |
 |-------------|--------|---------|
-| `/api/*` | `http://127.0.0.1:8000` | All stock-assistant API calls (rewrite strips `/api` prefix) |
+| `/api/*` | `http://127.0.0.1:8001` | All stock-assistant API calls (rewrite strips `/api` prefix) |
 
-> **Note:** The vite.config.ts rewrites `/api` → `` (empty) before forwarding, so the backend sees paths without the `/api` prefix. The dev script starts the stock-assistant backend on port **8001**; ensure the vite config target port matches your local setup.
->
-> **Warning:** The actual `vite.config.ts` targets port 8000, but the stock-assistant backend canonical port is 8001 (see `scripts/dev-stock.sh` and CLAUDE.md). The `vite.config.ts` likely contains a stale port value and may need updating.
+> **Note:** The vite.config.ts rewrites `/api` → `` (empty) before forwarding, so the backend sees paths without the `/api` prefix.
 
 ---
 

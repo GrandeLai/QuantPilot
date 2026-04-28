@@ -173,3 +173,4 @@ common/schemas/*.schema.json  （源，手写）
 | A2 | ✅ 2026-04-28 | Walk-Forward 验证面板（第三 Tab） |
 | A3 | ✅ 2026-04-28 | POST /api/ml/predict ONNX 推理端点 |
 | B1 | ✅ 2026-04-28 | 提取共享 ApiError 到 api/mod.rs（DRY） |
+| B4 | ✅ 2026-04-28 | mypy 类型覆盖：common/python + stock-assistant 各 0 错误 |
