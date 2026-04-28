@@ -13,6 +13,7 @@
 
 | 日期 | Task ID | Verdict | 报告 |
 |---|---|---|---|
+| 2026-04-28 | phaseC.3.walk_forward | ✅ PASS — Walk-Forward 窗口切割 bit-identical + MA 回测链式拼接 + golden 等价验证 | [c3-walk-forward.md](phaseC/c3-walk-forward.md) |
 | 2026-04-28 | phaseC.2.factor.sma | ✅ PASS — SMA/EMA 指标移植 + Rhai 注册 + golden 等价验证 | [c2-factor-sma.md](phaseC/c2-factor-sma.md) |
 | 2026-04-28 | phaseC.1.rhai | ✅ PASS — Rhai DSL 引擎接入 | [c1-rhai.md](phaseC/c1-rhai.md) |
 | 2026-04-28 | phaseB.mvp.backtest | ✅ PASS — **Phase B MVP 完工** | [mvp-backtest.md](phaseB/mvp-backtest.md) |
