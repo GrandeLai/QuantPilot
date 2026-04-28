@@ -72,3 +72,5 @@
 - `common/python/quantpilot_common/data/fetchers/okx_fetcher.py`
 - `apps/stock-assistant/backend/pyproject.toml`
 - `apps/stock-assistant/backend/src/quantpilot_stock/broker/mock.py`
+- `apps/stock-assistant/backend/src/quantpilot_stock/broker/futu.py`（futu SDK union-attr + MappingProxyType 修复，为达到 0 errors 所需）
+- `common/python/quantpilot_common/plugins/spec.py`（hookspec 方法 type: ignore[empty-body]，为达到 0 errors 所需）
