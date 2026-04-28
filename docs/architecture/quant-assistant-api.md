@@ -22,6 +22,7 @@ All request/response bodies are JSON. Errors are returned as `{"error": "<messag
 | POST | `/api/walk-forward` | Walk-forward validation splits |
 | POST | `/api/optimize` | Grid search over MA parameter combinations |
 | POST | `/api/indicators` | SMA/EMA computation over price series |
+| POST | `/api/ml/predict` | ONNX model inference (single sample) |
 
 ---
 
@@ -383,6 +384,60 @@ curl -s -X POST http://localhost:8002/api/indicators \
 
 ---
 
+## POST /api/ml/predict
+
+Single-sample ONNX model inference. Loads the model from `common/data-store/models/<model_id>/`.
+
+### Request Body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `model_id` | `string` | yes | Model directory name under `common/data-store/models/`; must not contain `/` or `..` |
+| `features` | `f64[]` | yes | Input feature vector; length must match `meta.json` `input_shape[-1]` |
+
+### Response Body `200 OK`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `model_id` | `string` | Echoed from request |
+| `n_features` | `usize` | Number of features provided |
+| `predictions` | `f64[]` | Model output vector (typically length 1 for regression, n_classes for classification) |
+
+### Example
+
+```bash
+curl -s -X POST http://localhost:8002/api/ml/predict \
+  -H "Content-Type: application/json" \
+  -d '{"model_id": "test_linear", "features": [1.0, 2.0]}'
+```
+
+```json
+{
+  "model_id": "test_linear",
+  "n_features": 2,
+  "predictions": [1.2000001]
+}
+```
+
+### Error conditions
+
+| Status | Cause |
+|--------|-------|
+| `400 Bad Request` | `model_id` contains `/` or `..`, model directory not found, `meta.json` parse error, `model.onnx` load failure, or feature count mismatch |
+| `422 Unprocessable Entity` | Missing required fields or wrong types |
+
+### Model directory convention
+
+```
+common/data-store/models/<model_id>/
+├── model.onnx    # ONNX model file
+└── meta.json     # MlModelMeta — see ml_model_meta.schema.json
+```
+
+`meta.json` key fields: `model_id`, `features[]` (name + dtype), `input_shape`, `output_shape`.
+
+---
+
 ## Frontend Proxy
 
 In development mode, the quant-assistant frontend (Vite, port 5175) proxies API calls to the appropriate backend so the browser never needs to make cross-origin requests directly.
@@ -392,6 +447,6 @@ Browser → Vite dev server (5175) → [proxy] → 8001 or 8002
 ```
 
 - `/api/data/*` routes to **port 8001** (stock-assistant) for market data
-- All `/api/backtest/*`, `/api/walk-forward`, `/api/optimize`, `/api/indicators` routes go to **port 8002** (quant-assistant Rust backend)
+- All `/api/backtest/*`, `/api/walk-forward`, `/api/optimize`, `/api/indicators`, `/api/ml/predict` routes go to **port 8002** (quant-assistant Rust backend)
 
 For full proxy routing tables across all three frontends, see [frontend-routing.md](frontend-routing.md).

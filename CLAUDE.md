@@ -89,6 +89,7 @@ POST /api/backtest/run      # MA crossover 回测（bars + fast/slow period）
 POST /api/walk-forward      # Walk-forward 验证窗口切分
 POST /api/optimize          # 网格搜索最优参数（top-N by Sharpe）
 POST /api/indicators        # SMA / EMA 指标计算
+POST /api/ml/predict        # ONNX 模型推理（model_id + features）
 ```
 
 详细 request/response schema 见 `docs/architecture/quant-assistant-api.md`。

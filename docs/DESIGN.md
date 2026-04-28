@@ -1,7 +1,7 @@
 # QuantPilot — 设计文档
 
-> **文档版本**：v0.3.0
-> **最后更新**：2026-04-28（Phase A–E 完工）
+> **文档版本**：v0.4.0
+> **最后更新**：2026-04-28（A1–A3 + B1 完工）
 > **作者**：赖俊金
 > **状态**：Active
 
@@ -22,6 +22,7 @@
 | v0.1.0 | 2026-04-07 | 初始版本 |
 | v0.2.0 | 2026-04-27 | Phase A 拆分完成；双产品 + 共享包结构 |
 | v0.3.0 | 2026-04-28 | Phase A–E 完工；Rust 量化后端全 API + 前端接线；删除 Python 量化临时后端 |
+| v0.4.0 | 2026-04-28 | A1–A3 + B1：equity curve 图表、Walk-Forward 面板、/api/ml/predict 端点、ApiError DRY |
 
 ---
 
@@ -168,7 +169,7 @@ common/schemas/*.schema.json  （源，手写）
 | C | ✅ (Phase D) | Walk-forward / optimize / indicators API |
 | D | ✅ 2026-04-28 | src/api/ 模块化 + trade tracking |
 | E | ✅ 2026-04-28 | 前端 wire-up（BacktestPanel + OptimizationPanel） |
-| A1 | 🔜 待做 | BacktestPanel 加 equity curve 图表 |
-| A2 | 🔜 待做 | Walk-Forward 面板 |
-| A3 | 🔜 待做 | POST /api/ml/predict ONNX 推理端点 |
-| B1 | 🔜 待做 | 提取共享 ApiError（DRY 重构） |
+| A1 | ✅ 2026-04-28 | BacktestPanel 权益曲线折线图（纯 SVG） |
+| A2 | ✅ 2026-04-28 | Walk-Forward 验证面板（第三 Tab） |
+| A3 | ✅ 2026-04-28 | POST /api/ml/predict ONNX 推理端点 |
+| B1 | ✅ 2026-04-28 | 提取共享 ApiError 到 api/mod.rs（DRY） |
