@@ -8,6 +8,12 @@ from quantpilot_stock.risk.kelly import (
     kelly_fraction_binary,
     kelly_fraction_from_returns,
 )
+from quantpilot_stock.risk.sharpe_decay import (
+    analyze_strategy_decay,
+    decay_alert_level,
+    rolling_sharpe,
+    sharpe_z_score,
+)
 from quantpilot_stock.risk.vol_target import (
     realized_volatility,
     regime_classify,
@@ -16,12 +22,16 @@ from quantpilot_stock.risk.vol_target import (
 )
 
 __all__ = [
+    "analyze_strategy_decay",
     "capped_kelly",
+    "decay_alert_level",
     "fractional_kelly",
     "kelly_fraction_binary",
     "kelly_fraction_from_returns",
     "realized_volatility",
     "regime_classify",
+    "rolling_sharpe",
+    "sharpe_z_score",
     "vol_target_position_size",
     "vol_target_recommendation",
 ]
