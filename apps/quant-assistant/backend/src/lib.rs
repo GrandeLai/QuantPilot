@@ -7,6 +7,7 @@
 pub mod indicators;
 pub mod runtime;
 pub mod schemas;
+pub mod walk_forward;
 
 /// 当前 crate 版本（从 Cargo.toml 读取）.
 pub fn version() -> &'static str {
