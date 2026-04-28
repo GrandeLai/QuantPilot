@@ -28,7 +28,7 @@ quant-assistant 前端目前有两个 Tab：回测（BacktestPanel）和参数�
    - Test Size（测试窗口 bar 数，数字输入）
 
    **调用流程**（同 BacktestPanel）：
-   1. `GET /api/data/klines?symbol=...&timeframe=...&limit=500` 从 stock-assistant（8001）拉 K 线
+   1. `GET /api/data/bars?symbol=...&timeframe=...&limit=500` 从 stock-assistant（8001）拉 K 线
    2. 提取 `close` 数组
    3. `POST /api/walk-forward` 发送请求
 

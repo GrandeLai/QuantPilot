@@ -2,7 +2,7 @@
  * Walk-Forward 验证面板 — 滚动窗口样本外测试（接 POST /api/walk-forward）.
  * 流程: 配置参数 → 拉 K 线（stock-assistant）→ POST /api/walk-forward（Rust）→ 展示结果
  */
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { GitBranch, Play, RefreshCw, ShieldAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
 import EquityCurveChart from "@/components/EquityCurveChart";
@@ -46,18 +46,33 @@ export default function WalkForwardPanel() {
   const [status, setStatus] = useState<"idle" | "fetchingBars" | "running" | "done" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [result, setResult] = useState<WalkForwardResponse | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   // ── 执行 walk-forward
   const runWalkForward = async () => {
+    // 客户端参数校验
+    if (fastPeriod >= slowPeriod) {
+      setErrorMsg("快线周期必须小于慢线周期");
+      setStatus("error");
+      return;
+    }
+    if (trainSize <= slowPeriod) {
+      setErrorMsg(`训练窗口 (${trainSize}) 必须大于慢线周期 (${slowPeriod})，否则无法计算 MA`);
+      setStatus("error");
+      return;
+    }
+
     setRunning(true);
     setStatus("fetchingBars");
     setErrorMsg("");
     setResult(null);
+    abortRef.current = new AbortController();
 
     try {
       // Step 1: 获取 K 线数据（stock-assistant proxy）
       const barsRes = await fetch(
         `/api/data/bars?symbol=${encodeURIComponent(symbol)}&timeframe=${encodeURIComponent(timeframe)}&limit=500`,
+        { signal: abortRef.current.signal },
       );
       if (!barsRes.ok) throw new Error(`获取 K 线失败: ${await barsRes.text()}`);
 
@@ -83,6 +98,7 @@ export default function WalkForwardPanel() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(req),
+        signal: abortRef.current.signal,
       });
 
       if (!wfRes.ok) throw new Error(`Walk-Forward 验证失败: ${await wfRes.text()}`);
@@ -91,6 +107,7 @@ export default function WalkForwardPanel() {
       setResult(data);
       setStatus("done");
     } catch (e: unknown) {
+      if (e instanceof DOMException && e.name === "AbortError") return;
       setErrorMsg(e instanceof Error ? e.message : String(e));
       setStatus("error");
     } finally {
@@ -209,7 +226,7 @@ export default function WalkForwardPanel() {
         </div>
 
         {/* 运行按钮 */}
-        <div className="p-6 border-t border-[#30363d]">
+        <div className="p-6 border-t border-[#30363d] space-y-3">
           <button
             onClick={() => void runWalkForward()}
             disabled={running}
@@ -227,6 +244,14 @@ export default function WalkForwardPanel() {
               </>
             )}
           </button>
+          {running && (
+            <button
+              onClick={() => abortRef.current?.abort()}
+              className="w-full h-8 text-xs text-[#8b949e] hover:text-white border border-[#30363d] rounded-lg transition-colors"
+            >
+              取消
+            </button>
+          )}
         </div>
       </aside>
 
