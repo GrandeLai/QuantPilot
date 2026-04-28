@@ -172,34 +172,12 @@ def correlation_matrix() -> dict[str, Any]:
 
 @router.get("/available-strategies")
 def available_strategies() -> dict[str, Any]:
-    """返回可运行策略目录（模板策略 + 用户策略）.
+    """返回可运行策略目录（用户策略）.
 
-    Phase A 下 templates + load_strategy_class 在 quant-assistant-py 进程中。
-    Stock-assistant 本地仅返回用户策略；模板列表通过 HTTP 代理 quant-py
-    （Phase B+ 时整体改 HTTP-based）。这里先返回 stock 本地用户策略，
-    模板列表通过 lazy import quant 模块（仅当同一进程时可用，否则空列表）。
+    模板策略由 Rust quant-assistant 通过独立 HTTP API 提供。
+    Stock-assistant 本地仅返回用户自定义策略（由 StrategyStorage 持久化）。
     """
     strategies: list[dict[str, Any]] = []
-
-    try:
-        from quantpilot_quant.strategy.loader import load_strategy_class  # noqa: F401
-        from quantpilot_quant.strategy.templates import TEMPLATE_STRATEGIES
-
-        strategies.extend(
-            {
-                "id": sid,
-                "name": cls.name,
-                "description": cls.description,
-                "default_params": cls.default_params,
-                "version": getattr(cls, "version", "1.0.0"),
-                "source": "template",
-            }
-            for sid, cls in TEMPLATE_STRATEGIES.items()
-        )
-    except ImportError:
-        # quantpilot_quant 不可用（运行在 stock-assistant 独立进程）—— 模板列表暂空
-        # Phase B+ 时通过 HTTP 调 quant-py 的 /api/strategy/templates 拉取
-        pass
 
     # 用户策略可独立列出（StrategyStorage 在 common 中）
     storage = StrategyStorage(get_settings().strategy_dir)

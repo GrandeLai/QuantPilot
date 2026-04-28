@@ -1,6 +1,6 @@
 # quantpilot-common (Python)
 
-Shared Python infrastructure for QuantPilot products. Imported by both `apps/stock-assistant` and `apps/quant-assistant-py` (during Phase A).
+Shared Python infrastructure for QuantPilot products. Imported by `apps/stock-assistant`.
 
 ## Modules
 

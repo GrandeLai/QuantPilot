@@ -1,21 +1,19 @@
 [project]
 name = "quantpilot-monorepo"
 version = "0.0.0"
-description = "QuantPilot monorepo workspace root (containers stock-assistant, quant-assistant-py, common, tools)"
+description = "QuantPilot monorepo workspace root (stock-assistant, quant-assistant Rust, common, tools)"
 requires-python = ">=3.12"
 dependencies = []
 
 [tool.uv.workspace]
-# Members are added incrementally as Phase A PRs land:
-#   PR 3: common/python ✅
-#   PR 4: apps/stock-assistant/backend ✅
-#   PR 5: apps/quant-assistant-py/backend ✅
-#   PR 7: tools/golden-generator
+# Members:
+#   common/python ✅
+#   apps/stock-assistant/backend ✅
+#   tools/golden-generator ✅
 #   ml-trainer: tools/ml-trainer (Phase B)
 members = [
     "common/python",
     "apps/stock-assistant/backend",
-    "apps/quant-assistant-py/backend",
     "tools/golden-generator",
 ]
 

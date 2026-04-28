@@ -2,13 +2,12 @@
 
 ## 项目简介
 
-QuantPilot — 本地优先的个人量化交易平台。**Phase A 已完成仓库拆分**，现在是三 app + 共享包的 monorepo：
+QuantPilot — 本地优先的个人量化交易平台。**Phase A+C 已完成**，现在是两 app + 共享包的 monorepo：
 
 ```
 apps/
 ├── stock-assistant/       # Python: 股票/期权/加密的人决策交易（端口 8001）
-├── quant-assistant-py/    # Python 临时态: 自动化研究 + 规则化执行（端口 8002，Step 4 删除）
-└── quant-assistant/       # Rust: Phase B+ 替代 quant-assistant-py
+└── quant-assistant/       # Rust: 自动化研究 + 规则化执行（端口 8002）
 common/                    # 共享：schemas / 数据 / 共享 Python 设施 / 共享前端组件
 tools/                     # ml-trainer (Phase B+) / golden-generator
 ```
@@ -33,7 +32,7 @@ tools/                     # ml-trainer (Phase B+) / golden-generator
 
 ## 不变式（**强制**）
 
-- `apps/stock-assistant/` 与 `apps/quant-assistant*/` **互不 import 对方源码**
+- `apps/stock-assistant/` 与 `apps/quant-assistant/` **互不 import 对方源码**
 - `common/` 不反向 import `apps/*`
 - 跨语言类型只能在 `common/schemas/*.schema.json` 定义；其他位置的类型由 `common/schemas/codegen.sh` 生成
 - `common/data-store/market.duckdb` 仅 stock-assistant 可写；其他 read-only
@@ -49,25 +48,21 @@ tools/                     # ml-trainer (Phase B+) / golden-generator
 # → http://localhost:5173 (workbench)
 # → http://localhost:5174 (assistant)
 
-# 量化助手 Python 临时态
-./scripts/dev-quant-py.sh
+# 量化助手 Rust
+./scripts/dev-quant.sh
 # → http://localhost:8002 (API)
 # → http://localhost:5175 (research frontend)
-
-# 量化助手 Rust（Phase B+ 起真正可用，Phase A 占位）
-./scripts/dev-quant.sh
 ```
 
 ### 测试
 
 ```bash
-# 三个独立测试套件
+# Python 测试套件
 (cd common/python && uv run --group dev pytest tests/)
 (cd apps/stock-assistant/backend && uv run pytest tests/)
-(cd apps/quant-assistant-py/backend && uv run pytest tests/)
 
-# Rust check
-(cd apps/quant-assistant/backend && cargo check)
+# Rust 测试（含 golden 集）
+(cd apps/quant-assistant/backend && cargo test)
 ```
 
 ### 前端 build
@@ -93,7 +88,8 @@ bash common/schemas/codegen.sh   # 改 schema 后必跑
 (cd apps/stock-assistant/backend && uv run mypy src/)
 (cd apps/stock-assistant/backend && uv run ruff format src/ tests/)
 
-# quant-py / common 同形
+# common 同形
+(cd common/python && uv run ruff check quantpilot_common/ tests/)
 ```
 
 ## 编码规范

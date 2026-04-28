@@ -1,5 +1,5 @@
 """QuantPilot shared Python infrastructure.
 
-This package contains code reused across the stock-assistant and
-quant-assistant-py applications during the Phase A repo split.
+This package contains code reused by the stock-assistant application.
+Quantitative research and execution is handled by the Rust quant-assistant.
 """
