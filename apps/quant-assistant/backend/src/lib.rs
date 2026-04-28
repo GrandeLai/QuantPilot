@@ -6,6 +6,7 @@
 
 pub mod indicators;
 pub mod ml_runner;
+pub mod optimizer;
 pub mod runtime;
 pub mod schemas;
 pub mod walk_forward;
