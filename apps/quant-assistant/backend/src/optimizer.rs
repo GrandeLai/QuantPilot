@@ -5,6 +5,8 @@
 //!
 //! 等价于 Python `quantpilot_quant.optimize.engine.OptimizationEngine.grid_search`。
 
+use serde::Serialize;
+
 use crate::{max_drawdown, run_ma_crossover_backtest, sharpe_ratio};
 
 /// 网格搜索参数配置.
@@ -17,7 +19,7 @@ pub struct GridSearchConfig {
 }
 
 /// 单次参数组合的回测优化结果.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct OptimizeResult {
     pub fast_period: usize,
     pub slow_period: usize,
