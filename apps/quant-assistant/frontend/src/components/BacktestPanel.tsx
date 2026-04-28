@@ -14,6 +14,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import EquityCurveChart from "@/components/EquityCurveChart";
 
 // ── 数据类型 ──────────────────────────────────────────────────────────────────
 
@@ -317,6 +318,19 @@ export default function BacktestPanel({ onResult }: BacktestPanelProps = {}) {
                 className="text-xs text-[#8b949e] hover:text-white border border-[#30363d] rounded-lg px-3 py-2 transition-colors">
                 重新配置
               </button>
+            </div>
+
+            {/* 权益曲线 */}
+            <div className="bg-[#161b22] border border-[#30363d] rounded-xl overflow-hidden">
+              <div className="px-6 py-3 border-b border-[#30363d]">
+                <h3 className="text-[10px] font-bold text-[#8b949e] uppercase tracking-wider">权益曲线</h3>
+              </div>
+              <div className="px-4 py-3">
+                <EquityCurveChart
+                  data={result.equity_curve}
+                  initialCash={result.metrics.initial_cash}
+                />
+              </div>
             </div>
 
             {/* 核心指标 */}
