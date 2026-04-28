@@ -416,3 +416,103 @@ export async function getPipelineJob(jobId: string): Promise<PipelineJobState> {
   if (!r.ok) throw new Error(await r.text());
   return r.json() as Promise<PipelineJobState>;
 }
+
+// ── Risk Engine（phaseF.1.5）─────────────────────────────────────────────────
+
+export type VolRegime = "low" | "normal" | "high" | "crisis";
+export type DecayAlertLevel = "green" | "yellow" | "red";
+export type VarMethod = "historical" | "parametric" | "both";
+
+export interface VolTargetResult {
+  realized_vol: number;
+  target_vol: number;
+  scale_factor: number;
+  regime: VolRegime;
+}
+
+export interface SharpeDecayResult {
+  recent_sharpe: number;
+  baseline_mean: number;
+  baseline_std: number;
+  z_score: number;
+  alert_level: DecayAlertLevel;
+  n_baseline_samples: number;
+}
+
+export interface VarResult {
+  n_samples: number;
+  worst_loss: number;
+  method: VarMethod;
+  var_95?: number;
+  var_99?: number;
+  cvar_95?: number;
+  cvar_99?: number;
+  parametric_var_95?: number;
+  parametric_var_99?: number;
+}
+
+export interface RiskSummaryResult {
+  n_samples: number;
+  vol_target: VolTargetResult;
+  sharpe_decay: SharpeDecayResult | null;
+  var: VarResult;
+}
+
+export interface KellyResult {
+  full_kelly: number;
+  fractional_kelly: number;
+  capped_kelly: number;
+  mode: "binary" | "returns";
+  fraction: number;
+  cap: number;
+}
+
+async function postRisk<T>(path: string, body: unknown): Promise<T> {
+  const r = await fetch(`${BASE}/risk/${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<T>;
+}
+
+export function fetchRiskSummary(returns: number[]): Promise<RiskSummaryResult> {
+  return postRisk<RiskSummaryResult>("summary", { returns });
+}
+
+export function fetchRiskKellyBinary(
+  winRate: number,
+  payoffRatio: number,
+  fraction = 0.25,
+  cap = 0.25,
+): Promise<KellyResult> {
+  return postRisk<KellyResult>("kelly", {
+    mode: "binary",
+    win_rate: winRate,
+    payoff_ratio: payoffRatio,
+    fraction,
+    cap,
+  });
+}
+
+export function fetchRiskKellyFromReturns(
+  returns: number[],
+  fraction = 0.25,
+  cap = 0.25,
+): Promise<KellyResult> {
+  return postRisk<KellyResult>("kelly", {
+    mode: "returns",
+    returns,
+    fraction,
+    cap,
+  });
+}

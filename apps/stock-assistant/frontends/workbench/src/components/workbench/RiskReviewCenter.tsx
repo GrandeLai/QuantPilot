@@ -1,10 +1,12 @@
 import BacktestPanel from "../BacktestPanel";
 import CryptoPanel from "../CryptoPanel";
 import PortfolioPanel from "../PortfolioPanel";
+import RiskMetricsPanel from "../RiskMetricsPanel";
 
 export default function RiskReviewCenter() {
   return (
     <div className="space-y-6">
+      <RiskMetricsPanel />
       <PortfolioPanel />
       <BacktestPanel />
       <CryptoPanel allowedTabs={["portfolio", "orders"]} defaultTab="portfolio" />
