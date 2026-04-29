@@ -1993,6 +1993,51 @@ export async function fetchPutCallRatio(ticker: string): Promise<PCRData> {
   return r.json() as Promise<PCRData>;
 }
 
+// ── Max Pain Calculator (F.29) ────────────────────────────────────────────
+
+export type MaxPainSignal =
+  | "pin_zone"
+  | "bullish_pull"
+  | "bearish_pull"
+  | "weak_pull"
+  | "unknown";
+
+export interface ExpiryMaxPain {
+  expiry: string;
+  dte: number;
+  max_pain_strike: number;
+  current_price: number;
+  distance_pct: number;
+  total_call_oi: number;
+  total_put_oi: number;
+  signal: MaxPainSignal;
+}
+
+export interface MaxPainData {
+  ticker: string;
+  current_price: number | null;
+  expiries: ExpiryMaxPain[];
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchMaxPain(ticker: string): Promise<MaxPainData> {
+  const r = await fetch(
+    `${BASE}/max-pain?ticker=${encodeURIComponent(ticker)}`
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<MaxPainData>;
+}
+
 // ── Dividend Analysis (F.28) ───────────────────────────────────────────────
 
 export type DividendSafety =

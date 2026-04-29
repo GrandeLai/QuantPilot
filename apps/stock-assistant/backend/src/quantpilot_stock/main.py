@@ -152,6 +152,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(macro_dashboard_router)
     from quantpilot_stock.api.dividend_analysis import router as dividend_analysis_router
     include_with_api_alias(dividend_analysis_router)
+    from quantpilot_stock.api.max_pain import router as max_pain_router
+    include_with_api_alias(max_pain_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)

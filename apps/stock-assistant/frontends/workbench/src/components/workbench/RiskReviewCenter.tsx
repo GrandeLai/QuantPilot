@@ -29,6 +29,7 @@ import EarningsCalendarPanel from "../EarningsCalendarPanel";
 import PutCallRatioPanel from "../PutCallRatioPanel";
 import MacroDashboardPanel from "../MacroDashboardPanel";
 import DividendAnalysisPanel from "../DividendAnalysisPanel";
+import MaxPainPanel from "../MaxPainPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -55,6 +56,7 @@ export default function RiskReviewCenter() {
       <PutCallRatioPanel />
       <MacroDashboardPanel />
       <DividendAnalysisPanel />
+      <MaxPainPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />
