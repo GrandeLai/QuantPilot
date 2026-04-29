@@ -2355,3 +2355,48 @@ export async function fetchADXTrend(ticker: string): Promise<ADXData> {
   }
   return r.json() as Promise<ADXData>;
 }
+
+// ── F.36 Moving Average Alignment Score ──────────────────────────────────────
+
+export type MASignal =
+  | "full_bull"
+  | "partial_bull"
+  | "neutral"
+  | "partial_bear"
+  | "full_bear"
+  | "no_data";
+
+export interface MAAlignmentData {
+  ticker: string;
+  price: number | null;
+  sma20: number | null;
+  sma50: number | null;
+  sma200: number | null;
+  dist_from_20: number | null;
+  dist_from_50: number | null;
+  dist_from_200: number | null;
+  ma_score: number;
+  golden_cross: boolean;
+  full_bull_align: boolean;
+  full_bear_align: boolean;
+  signal: MASignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchMAAlignment(ticker: string): Promise<MAAlignmentData> {
+  const r = await fetch(
+    `${BASE}/ma-alignment?ticker=${encodeURIComponent(ticker)}`
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<MAAlignmentData>;
+}
