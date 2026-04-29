@@ -1499,3 +1499,45 @@ export async function fetchUnusualOptions(
   }
   return r.json() as Promise<UnusualOptionsData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.17 Pre-Earnings Expected Move
+// ---------------------------------------------------------------------------
+
+export type EarningsMoveGrade =
+  | "large_expected"
+  | "medium_expected"
+  | "small_expected"
+  | "no_data";
+
+export interface EarningsMoveData {
+  ticker: string;
+  next_earnings_date: string | null;
+  days_to_earnings: number | null;
+  expected_move_pct: number | null;   // ±% options-implied move
+  atm_strike: number | null;
+  straddle_price: number | null;
+  current_price: number | null;
+  grade: EarningsMoveGrade;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchEarningsMove(
+  ticker: string,
+): Promise<EarningsMoveData> {
+  const r = await fetch(
+    `${BASE}/earnings-move/?ticker=${encodeURIComponent(ticker)}`,
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<EarningsMoveData>;
+}
