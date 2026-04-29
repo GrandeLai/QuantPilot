@@ -14,11 +14,27 @@ from quantpilot_stock.crypto_derivs.collector import (
     fetch_okx_funding_history,
     fetch_okx_open_interest,
 )
-from quantpilot_stock.crypto_derivs.models import FundingRate, OpenInterest
+from quantpilot_stock.crypto_derivs.etf_flow import (
+    BTC_SPOT_ETF_TICKERS,
+    ETH_SPOT_ETF_TICKERS,
+    aggregate_daily_flows,
+    flow_aum_velocity,
+    flow_extreme_signal,
+    flow_zscore,
+)
+from quantpilot_stock.crypto_derivs.models import (
+    ETFFlowSnapshot,
+    FundingRate,
+    OpenInterest,
+)
 
 __all__ = [
+    "BTC_SPOT_ETF_TICKERS",
+    "ETFFlowSnapshot",
+    "ETH_SPOT_ETF_TICKERS",
     "FundingRate",
     "OpenInterest",
+    "aggregate_daily_flows",
     "compute_basis",
     "fetch_aggregated_derivs",
     "fetch_binance_funding",
@@ -27,6 +43,9 @@ __all__ = [
     "fetch_okx_funding",
     "fetch_okx_funding_history",
     "fetch_okx_open_interest",
+    "flow_aum_velocity",
+    "flow_extreme_signal",
+    "flow_zscore",
     "funding_extreme_signal",
     "funding_percentile_stats",
     "oi_momentum",

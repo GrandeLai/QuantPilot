@@ -1,7 +1,7 @@
-"""Pydantic models for crypto derivatives data (funding rate / OI)."""
+"""Pydantic models for crypto derivatives data (funding rate / OI / ETF flow)."""
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -31,3 +31,12 @@ class OpenInterest(BaseModel):
         default=None, description="美元计价（OKX 直接给，Binance 需另算）"
     )
     timestamp: datetime
+
+
+class ETFFlowSnapshot(BaseModel):
+    """加密现货 ETF 单日净流入快照."""
+
+    date: date
+    ticker: str = Field(..., description="ETF 代码，如 IBIT / FBTC / ETHA（外部源喂入，区分大小写无关）")
+    net_flow_usd: float = Field(..., description=">0 净申购，<0 净赎回")
+    aum_usd: float | None = Field(default=None, description="当日 AUM（美元），可选")
