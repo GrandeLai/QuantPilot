@@ -24,6 +24,7 @@ import EarningsQualityPanel from "../EarningsQualityPanel";
 import InsiderTradingPanel from "../InsiderTradingPanel";
 import SmartMoneyPanel from "../SmartMoneyPanel";
 import IndexRebalancePanel from "../IndexRebalancePanel";
+import IVRankPanel from "../IVRankPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -45,6 +46,7 @@ export default function RiskReviewCenter() {
       <InsiderTradingPanel />
       <SmartMoneyPanel />
       <IndexRebalancePanel />
+      <IVRankPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />

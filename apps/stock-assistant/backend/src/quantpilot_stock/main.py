@@ -142,6 +142,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(smart_money_router)
     from quantpilot_stock.api.index_rebalance import router as index_rebalance_router
     include_with_api_alias(index_rebalance_router)
+    from quantpilot_stock.api.iv_rank import router as iv_rank_router
+    include_with_api_alias(iv_rank_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)

@@ -1810,3 +1810,48 @@ export async function fetchIndexRebalance(
   }
   return r.json() as Promise<IndexRebalanceData>;
 }
+
+// ── F.24 IV Rank & Volatility Monitor ──────────────────────────────────────
+
+export type IVSignal =
+  | "buy_options"
+  | "sell_options"
+  | "neutral"
+  | "no_data";
+
+export interface TermStructurePoint {
+  expiry: string;
+  days_to_expiry: number;
+  atm_iv: number; // percentage, e.g. 25.5 means 25.5%
+}
+
+export interface IVRankData {
+  ticker: string;
+  current_iv: number | null;   // ATM IV, percentage
+  iv_rank: number | null;      // 0–100
+  iv_percentile: number | null; // 0–100
+  hv10: number | null;
+  hv20: number | null;
+  hv30: number | null;
+  hv60: number | null;
+  put_call_skew: number | null; // pp
+  term_structure: TermStructurePoint[];
+  iv_signal: IVSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchIVRank(ticker: string): Promise<IVRankData> {
+  const r = await fetch(`${BASE}/iv-rank?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<IVRankData>;
+}
