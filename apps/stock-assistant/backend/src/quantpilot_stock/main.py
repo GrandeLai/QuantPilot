@@ -146,6 +146,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(iv_rank_router)
     from quantpilot_stock.api.earnings_calendar import router as earnings_calendar_router
     include_with_api_alias(earnings_calendar_router)
+    from quantpilot_stock.api.put_call_ratio import router as put_call_ratio_router
+    include_with_api_alias(put_call_ratio_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)

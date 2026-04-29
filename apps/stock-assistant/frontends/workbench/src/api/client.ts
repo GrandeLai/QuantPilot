@@ -1901,3 +1901,55 @@ export async function fetchIVRank(ticker: string): Promise<IVRankData> {
   }
   return r.json() as Promise<IVRankData>;
 }
+
+// ── F.26 Put/Call Ratio & Options Sentiment ────────────────────────────────
+
+export type PCRSentiment =
+  | "extreme_bearish"
+  | "bearish"
+  | "neutral"
+  | "bullish"
+  | "extreme_bullish"
+  | "unknown";
+
+export interface ExpiryPCR {
+  expiry: string;
+  days_to_expiry: number;
+  call_volume: number;
+  put_volume: number;
+  volume_pcr: number | null;
+  call_oi: number;
+  put_oi: number;
+  oi_pcr: number | null;
+}
+
+export interface PCRData {
+  ticker: string;
+  volume_pcr: number | null;
+  oi_pcr: number | null;
+  total_call_volume: number;
+  total_put_volume: number;
+  total_call_oi: number;
+  total_put_oi: number;
+  expiry_breakdown: ExpiryPCR[];
+  sentiment: PCRSentiment;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchPutCallRatio(ticker: string): Promise<PCRData> {
+  const r = await fetch(
+    `${BASE}/put-call-ratio?ticker=${encodeURIComponent(ticker)}`
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<PCRData>;
+}
