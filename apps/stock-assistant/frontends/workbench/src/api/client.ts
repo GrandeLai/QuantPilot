@@ -1716,3 +1716,48 @@ export async function fetchInsiderTrading(
   }
   return r.json() as Promise<InsiderTradingData>;
 }
+
+// ── Smart Money Flow (F.22) ───────────────────────────────────────────────────
+
+export type SmartMoneySignal =
+  | "smart_money_buy"
+  | "smart_money_sell"
+  | "accumulation"
+  | "distribution"
+  | "neutral"
+  | "no_data";
+
+export interface DailyFlowItem {
+  date: string;
+  large_buy_usd: number;
+  large_sell_usd: number;
+  buy_pressure_pct: number;
+  total_large_usd: number;
+  large_bar_count: number;
+}
+
+export interface SmartMoneyData {
+  ticker: string;
+  signal: SmartMoneySignal;
+  today_buy_pressure_pct: number | null;
+  avg_5d_buy_pressure_pct: number | null;
+  large_threshold_usd: number | null;
+  daily_flows: DailyFlowItem[];
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchSmartMoney(ticker: string): Promise<SmartMoneyData> {
+  const r = await fetch(`${BASE}/smart-money/?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<SmartMoneyData>;
+}

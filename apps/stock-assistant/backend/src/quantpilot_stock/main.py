@@ -138,6 +138,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(earnings_quality_router)
     from quantpilot_stock.api.insider_trading import router as insider_trading_router
     include_with_api_alias(insider_trading_router)
+    from quantpilot_stock.api.smart_money import router as smart_money_router
+    include_with_api_alias(smart_money_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)
