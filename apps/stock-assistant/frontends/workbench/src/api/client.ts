@@ -1443,3 +1443,59 @@ export async function fetchSocialSentiment(
   }
   return r.json() as Promise<SocialSentimentData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.16 Unusual Options Activity (UOA)
+// ---------------------------------------------------------------------------
+
+export type OptionsGrade =
+  | "bullish_unusual"
+  | "bearish_unusual"
+  | "mixed_unusual"
+  | "neutral";
+
+export interface UnusualContractData {
+  ticker: string;
+  expiry: string;
+  strike: number;
+  option_type: "call" | "put";
+  volume: number;
+  open_interest: number;
+  volume_oi_ratio: number;
+  implied_volatility: number;
+  in_the_money: boolean;
+  is_unusual: boolean;
+}
+
+export interface UnusualOptionsData {
+  ticker: string;
+  total_unusual_calls: number;
+  total_unusual_puts: number;
+  total_call_volume: number;
+  total_put_volume: number;
+  put_call_ratio: number;
+  grade: OptionsGrade;
+  top_unusual: UnusualContractData[];
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchUnusualOptions(
+  ticker: string,
+): Promise<UnusualOptionsData> {
+  // Always returns 200; data_available=false when yfinance options unavailable
+  const r = await fetch(
+    `${BASE}/unusual-options/?ticker=${encodeURIComponent(ticker)}`,
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<UnusualOptionsData>;
+}

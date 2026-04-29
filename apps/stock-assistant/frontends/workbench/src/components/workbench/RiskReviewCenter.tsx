@@ -16,6 +16,7 @@ import WhaleMonitorPanel from "../WhaleMonitorPanel";
 import PEADPanel from "../PEADPanel";
 import MomentumPanel from "../MomentumPanel";
 import SocialSentimentPanel from "../SocialSentimentPanel";
+import UnusualOptionsPanel from "../UnusualOptionsPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -29,6 +30,7 @@ export default function RiskReviewCenter() {
       <PEADPanel />
       <MomentumPanel />
       <SocialSentimentPanel />
+      <UnusualOptionsPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />
