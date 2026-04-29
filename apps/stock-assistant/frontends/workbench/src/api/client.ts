@@ -1624,3 +1624,46 @@ export async function fetchAnalystConsensus(
   }
   return r.json() as Promise<AnalystConsensusData>;
 }
+
+// ── Earnings Quality (F.20) ───────────────────────────────────────────────────
+
+export type EarningsQualityGrade =
+  | "high_quality"
+  | "average_quality"
+  | "low_quality"
+  | "manipulator_risk";
+
+export type FScoreGrade = "very_strong" | "strong" | "average" | "weak";
+
+export type AccrualQuality = "high" | "medium" | "low";
+
+export interface EarningsQualityData {
+  ticker: string;
+  f_score: number | null;
+  f_score_grade: FScoreGrade | null;
+  f_score_components: Record<string, boolean>;
+  m_score: number | null;
+  manipulation_risk: boolean;
+  accrual_ratio: number | null;
+  accrual_quality: AccrualQuality | null;
+  quality_grade: EarningsQualityGrade;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchEarningsQuality(
+  ticker: string
+): Promise<EarningsQualityData> {
+  const r = await fetch(`${BASE}/earnings-quality/?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<EarningsQualityData>;
+}
