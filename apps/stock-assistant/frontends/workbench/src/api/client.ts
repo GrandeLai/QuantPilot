@@ -2314,3 +2314,44 @@ export async function fetchReversalSignal(
   }
   return r.json() as Promise<ReversalData>;
 }
+
+// ── F.35 ADX Trend Strength ───────────────────────────────────────────────────
+
+export type TrendSignal =
+  | "strong_uptrend"
+  | "uptrend"
+  | "ranging"
+  | "downtrend"
+  | "strong_downtrend"
+  | "no_data";
+
+export type TrendStrength = "strong" | "moderate" | "weak" | "none";
+
+export interface ADXData {
+  ticker: string;
+  adx: number | null;
+  plus_di: number | null;
+  minus_di: number | null;
+  atr: number | null;
+  signal: TrendSignal;
+  trend_strength: TrendStrength;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchADXTrend(ticker: string): Promise<ADXData> {
+  const r = await fetch(
+    `${BASE}/adx-trend?ticker=${encodeURIComponent(ticker)}`
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<ADXData>;
+}

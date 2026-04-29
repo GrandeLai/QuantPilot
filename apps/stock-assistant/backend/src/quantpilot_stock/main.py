@@ -164,6 +164,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(relative_strength_router)
     from quantpilot_stock.api.reversal_signal import router as reversal_signal_router
     include_with_api_alias(reversal_signal_router)
+    from quantpilot_stock.api.adx_trend import router as adx_trend_router
+    include_with_api_alias(adx_trend_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)
