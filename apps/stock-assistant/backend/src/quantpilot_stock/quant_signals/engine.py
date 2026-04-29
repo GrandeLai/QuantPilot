@@ -1,4 +1,4 @@
-"""Quant signals engine — Beneish M-Score + Russell rebalancing preview.
+"""Quant signals engine — Beneish M-Score + Russell rebalancing preview + Sloan Accruals.
 
 Beneish M-Score:
     8 financial ratios that detect earnings manipulation.
@@ -404,4 +404,155 @@ def estimate_russell_membership(
 
     except Exception as exc:
         logger.error(f"[Russell] {ticker} error: {exc}")
+        return None
+
+
+# ---------------------------------------------------------------------------
+# Sloan Accruals (earnings quality)
+# ---------------------------------------------------------------------------
+
+SloanGrade = Literal["low_accrual", "normal", "elevated_accrual", "high_accrual"]
+
+
+@dataclass
+class SloanAccruals:
+    """Sloan Accrual Ratio — earnings quality / sustainability signal.
+
+    Formula (Sloan 1996):
+        accrual_ratio = (net_income - operating_cash_flow) / avg_total_assets
+
+    High accruals (>0.10) indicate earnings are driven by accounting adjustments
+    rather than cash, predicting future earnings reversal.
+    """
+
+    ticker: str
+    accrual_ratio: float              # in roughly [-0.5, 0.5]
+    grade: SloanGrade                 # low_accrual / normal / elevated_accrual / high_accrual
+    net_income: float
+    operating_cash_flow: float
+    avg_total_assets: float
+    interpretation: str
+    as_of_date: date
+
+
+def _sloan_grade(ratio: float) -> SloanGrade:
+    if ratio < -0.10:
+        return "low_accrual"
+    if ratio < 0.05:
+        return "normal"
+    if ratio < 0.10:
+        return "elevated_accrual"
+    return "high_accrual"
+
+
+def _sloan_interpretation(ratio: float, grade: SloanGrade) -> str:
+    msgs: dict[SloanGrade, str] = {
+        "low_accrual": (
+            f"应计率 {ratio:.3f} < -0.10：现金盈利质量高，营收以现金为主导，历史上此区间股票未来表现优于市场。"
+        ),
+        "normal": (
+            f"应计率 {ratio:.3f}：正常区间，盈利质量健康。"
+        ),
+        "elevated_accrual": (
+            f"应计率 {ratio:.3f} ∈ [0.05, 0.10)：应计项目偏高，建议关注应收账款和库存变化。"
+        ),
+        "high_accrual": (
+            f"应计率 {ratio:.3f} > 0.10：⚠ 高应计项目！盈利依赖非现金会计调整，Sloan（1996）研究显示"
+            "此区间股票后续 12 个月平均跑输市场 10.4%。"
+        ),
+    }
+    return msgs[grade]
+
+
+def compute_sloan_accruals(ticker: str) -> SloanAccruals | None:
+    """Compute Sloan Accrual Ratio for earnings quality assessment.
+
+    Returns None if insufficient data.
+
+    Formula:
+        accrual_ratio = (net_income - operating_CF) / avg_total_assets
+    """
+    try:
+        t = yf.Ticker(ticker)
+        income = t.financials
+        balance = t.balance_sheet
+        cashflow = t.cashflow
+
+        if income is None or income.empty:
+            return None
+        if balance is None or balance.empty:
+            return None
+        if cashflow is None or cashflow.empty:
+            return None
+        if balance.shape[1] < 2:
+            return None
+
+        def _get(df, key: str, col: int) -> float | None:
+            try:
+                # Try exact key first
+                if key in df.index:
+                    val = df.loc[key].iloc[col]
+                    if val is not None and math.isfinite(float(val)):
+                        return float(val)
+                # Case-insensitive fallback
+                lk = key.lower()
+                for idx in df.index:
+                    if str(idx).lower() == lk:
+                        val = df.loc[idx].iloc[col]
+                        if val is not None and math.isfinite(float(val)):
+                            return float(val)
+            except Exception:
+                pass
+            return None
+
+        # Retrieve values
+        ni = _get(income, "Net Income", 0)
+        if ni is None:
+            # Try "Net Income Common Stockholders"
+            ni = _get(income, "Net Income Common Stockholders", 0)
+        if ni is None:
+            logger.warning(f"[Sloan] {ticker}: no net income")
+            return None
+
+        cfo = _get(cashflow, "Operating Cash Flow", 0)
+        if cfo is None:
+            cfo = _get(cashflow, "Cash Flow From Continuing Operating Activities", 0)
+        if cfo is None:
+            logger.warning(f"[Sloan] {ticker}: no operating cash flow")
+            return None
+
+        ta_t = _get(balance, "Total Assets", 0)
+        ta_t1 = _get(balance, "Total Assets", 1)
+        if ta_t is None or ta_t1 is None or ta_t <= 0:
+            logger.warning(f"[Sloan] {ticker}: no total assets")
+            return None
+
+        avg_ta = (ta_t + ta_t1) / 2.0
+        if avg_ta <= 0:
+            return None
+
+        ratio = round((ni - cfo) / avg_ta, 4)
+        grade = _sloan_grade(ratio)
+        interp = _sloan_interpretation(ratio, grade)
+
+        # as_of_date from most recent income column
+        try:
+            col_date = income.columns[0]
+            as_of = col_date.date() if hasattr(col_date, "date") else date.today()
+        except Exception:
+            as_of = date.today()
+
+        return SloanAccruals(
+            ticker=ticker.upper(),
+            accrual_ratio=ratio,
+            grade=grade,
+            net_income=round(ni, 0),
+            operating_cash_flow=round(cfo, 0),
+            avg_total_assets=round(avg_ta, 0),
+            interpretation=interp,
+            as_of_date=as_of,
+        )
+
+    except Exception as exc:
+        logger.error(f"[Sloan] {ticker} error: {exc}")
         return None

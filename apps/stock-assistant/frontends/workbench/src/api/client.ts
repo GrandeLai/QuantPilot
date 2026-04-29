@@ -924,10 +924,28 @@ export interface RussellMembershipData {
     | "unknown";
 }
 
+export type SloanGrade =
+  | "low_accrual"
+  | "normal"
+  | "elevated_accrual"
+  | "high_accrual";
+
+export interface SloanAccrualsData {
+  ticker: string;
+  accrual_ratio: number;
+  grade: SloanGrade;
+  net_income: number;
+  operating_cash_flow: number;
+  avg_total_assets: number;
+  interpretation: string;
+  as_of_date: string;
+}
+
 export interface QuantSignalsSummary {
   ticker: string;
   beneish: BeneishMScoreData | null;
   russell: RussellMembershipData | null;
+  sloan: SloanAccrualsData | null;
 }
 
 export async function fetchQuantSignalsSummary(

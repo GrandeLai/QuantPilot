@@ -12,6 +12,7 @@ import {
   type BeneishMScoreData,
   type QuantSignalsSummary,
   type RussellMembershipData,
+  type SloanAccrualsData,
   fetchQuantSignalsSummary,
 } from "../api/client";
 
@@ -370,6 +371,241 @@ function RussellSection({ r }: { r: RussellMembershipData }) {
 }
 
 // ---------------------------------------------------------------------------
+// 工具函数：Sloan 应计率
+// ---------------------------------------------------------------------------
+
+type SloanGrade = SloanAccrualsData["grade"];
+
+function gradeColor(grade: SloanGrade): string {
+  if (grade === "low_accrual") return "#00C087";
+  if (grade === "normal") return "#3b82f6";
+  if (grade === "elevated_accrual") return "#f59e0b";
+  return "#ef4444"; // high_accrual
+}
+
+function gradeLabel(grade: SloanGrade): string {
+  const labels: Record<SloanGrade, string> = {
+    low_accrual: "低应计 ✓",
+    normal: "正常区间",
+    elevated_accrual: "偏高应计 ⚠",
+    high_accrual: "高应计 ⚠⚠",
+  };
+  return labels[grade];
+}
+
+function formatBillion(n: number): string {
+  if (Math.abs(n) >= 1e12) return `${(n / 1e12).toFixed(2)}T`;
+  if (Math.abs(n) >= 1e9) return `${(n / 1e9).toFixed(2)}B`;
+  if (Math.abs(n) >= 1e6) return `${(n / 1e6).toFixed(1)}M`;
+  return n.toLocaleString();
+}
+
+// ---------------------------------------------------------------------------
+// 子组件：Sloan 应计率区块
+// ---------------------------------------------------------------------------
+
+function SloanSection({ s }: { s: SloanAccrualsData }) {
+  const gc = gradeColor(s.grade);
+  const gl = gradeLabel(s.grade);
+
+  // Map accrual_ratio to 0-1 for gauge bar; clamp to [-0.30, +0.30]
+  const CLAMP = 0.3;
+  const clamped = Math.max(-CLAMP, Math.min(CLAMP, s.accrual_ratio));
+  const pct = ((clamped + CLAMP) / (2 * CLAMP)) * 100; // 0% = -0.30, 50% = 0, 100% = +0.30
+
+  return (
+    <div
+      style={{
+        background: "#151619",
+        border: "1px solid #2a2d35",
+        borderRadius: 8,
+        padding: "12px 14px",
+        marginTop: 10,
+      }}
+    >
+      {/* 小标题 */}
+      <div
+        style={{
+          fontSize: 12,
+          fontWeight: 700,
+          color: "#94a3b8",
+          marginBottom: 10,
+          textTransform: "uppercase",
+          letterSpacing: 1,
+        }}
+      >
+        Sloan 应计率 — 盈利质量检测
+      </div>
+
+      {/* 应计率 + 等级 */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 10,
+        }}
+      >
+        <div>
+          <span style={{ fontSize: 30, fontWeight: 700, color: gc }}>
+            {(s.accrual_ratio * 100).toFixed(2)}%
+          </span>
+          <span
+            style={{
+              marginLeft: 10,
+              fontSize: 12,
+              padding: "2px 10px",
+              borderRadius: 4,
+              background: gc + "22",
+              color: gc,
+              fontWeight: 700,
+            }}
+          >
+            {gl}
+          </span>
+        </div>
+        <div
+          style={{
+            fontSize: 11,
+            color: "#64748b",
+            maxWidth: 220,
+            textAlign: "right",
+            lineHeight: 1.4,
+          }}
+        >
+          {s.interpretation}
+        </div>
+      </div>
+
+      {/* 应计率仪表条 */}
+      <div style={{ marginBottom: 12 }}>
+        <div
+          style={{
+            fontSize: 10,
+            color: "#475569",
+            marginBottom: 4,
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          <span style={{ color: "#00C087" }}>低应计 −30%</span>
+          <span>0%</span>
+          <span style={{ color: "#ef4444" }}>高应计 +30%</span>
+        </div>
+        {/* Track */}
+        <div
+          style={{
+            position: "relative",
+            height: 8,
+            background: "#2a2d35",
+            borderRadius: 4,
+          }}
+        >
+          {/* Zero center line */}
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: 0,
+              bottom: 0,
+              width: 1,
+              background: "#475569",
+            }}
+          />
+          {/* Indicator */}
+          <div
+            style={{
+              position: "absolute",
+              left: `${pct}%`,
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 14,
+              height: 14,
+              borderRadius: "50%",
+              background: gc,
+              boxShadow: `0 0 6px ${gc}88`,
+              transition: "left 0.3s ease",
+            }}
+          />
+        </div>
+        {/* Threshold annotations */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            fontSize: 9,
+            color: "#475569",
+            marginTop: 3,
+          }}
+        >
+          <span>−10% 低应计线</span>
+          <span>+5% 偏高线</span>
+          <span>+10% 高应计线</span>
+        </div>
+      </div>
+
+      {/* 财务数据三格 */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr 1fr",
+          gap: 6,
+          marginBottom: 10,
+        }}
+      >
+        {[
+          { label: "净利润", value: s.net_income, color: "#00C087" },
+          { label: "经营现金流", value: s.operating_cash_flow, color: "#3b82f6" },
+          { label: "平均总资产", value: s.avg_total_assets, color: "#94a3b8" },
+        ].map(({ label, value, color }) => (
+          <div
+            key={label}
+            style={{
+              background: "#0E1014",
+              border: "1px solid #2a2d35",
+              borderRadius: 5,
+              padding: "6px 8px",
+              textAlign: "center",
+            }}
+          >
+            <div style={{ fontSize: 11, fontWeight: 700, color }}>
+              ${formatBillion(value)}
+            </div>
+            <div style={{ fontSize: 9, color: "#475569", marginTop: 2 }}>
+              {label}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 阈值说明 */}
+      <div
+        style={{
+          background: "#0E1014",
+          border: "1px solid #2a2d35",
+          borderRadius: 6,
+          padding: "6px 10px",
+          fontSize: 10,
+          color: "#475569",
+          lineHeight: 1.6,
+        }}
+      >
+        <div>
+          Sloan (1996)：应计率 = (净利润 − 经营现金流) / 平均总资产
+        </div>
+        <div>
+          低应计(&lt;−10%) → 现金质量高；高应计(&gt;10%) → 应计项目可能反转，未来盈利承压
+        </div>
+      </div>
+
+      <div style={{ marginTop: 8, fontSize: 10, color: "#475569" }}>
+        数据日期：{s.as_of_date}　│　来源：yfinance　│　不构成投资建议
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // 主组件
 // ---------------------------------------------------------------------------
 
@@ -430,7 +666,7 @@ export default function QuantSignalsPanel() {
           alignItems: "center",
         }}
       >
-        <span>量化信号（Beneish M-Score + Russell 调仓预览）</span>
+        <span>量化信号（Beneish M-Score + Russell 调仓预览 + Sloan 应计率）</span>
         <span style={{ fontSize: 10, color: "#475569", fontWeight: 400 }}>
           数据来源：yfinance
         </span>
@@ -517,11 +753,30 @@ export default function QuantSignalsPanel() {
                 border: "1px solid #2a2d35",
                 borderRadius: 8,
                 padding: "10px 14px",
+                marginBottom: 10,
                 fontSize: 12,
                 color: "#64748b",
               }}
             >
               Russell 归属：暂无市值数据
+            </div>
+          )}
+
+          {result.sloan ? (
+            <SloanSection s={result.sloan} />
+          ) : (
+            <div
+              style={{
+                background: "#151619",
+                border: "1px solid #2a2d35",
+                borderRadius: 8,
+                padding: "10px 14px",
+                marginTop: 10,
+                fontSize: 12,
+                color: "#64748b",
+              }}
+            >
+              Sloan 应计率：暂无财务数据（需净利润、经营现金流、总资产）
             </div>
           )}
         </>
@@ -537,7 +792,7 @@ export default function QuantSignalsPanel() {
             padding: "20px 0",
           }}
         >
-          输入股票代码后点击"查询"，获取 Beneish M-Score 和 Russell 调仓预览
+          输入股票代码后点击「查询」，获取 Beneish M-Score、Russell 调仓预览和 Sloan 应计率
         </div>
       )}
     </div>
