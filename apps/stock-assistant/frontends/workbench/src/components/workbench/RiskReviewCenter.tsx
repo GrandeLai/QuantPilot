@@ -18,6 +18,7 @@ import MomentumPanel from "../MomentumPanel";
 import SocialSentimentPanel from "../SocialSentimentPanel";
 import UnusualOptionsPanel from "../UnusualOptionsPanel";
 import EarningsMovePanel from "../EarningsMovePanel";
+import SectorMomentumPanel from "../SectorMomentumPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -33,6 +34,7 @@ export default function RiskReviewCenter() {
       <SocialSentimentPanel />
       <UnusualOptionsPanel />
       <EarningsMovePanel />
+      <SectorMomentumPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />

@@ -130,6 +130,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(unusual_options_router)
     from quantpilot_stock.api.earnings_move import router as earnings_move_router
     include_with_api_alias(earnings_move_router)
+    from quantpilot_stock.api.sector_momentum import router as sector_momentum_router
+    include_with_api_alias(sector_momentum_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)

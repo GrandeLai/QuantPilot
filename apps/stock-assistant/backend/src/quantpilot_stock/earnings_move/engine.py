@@ -87,7 +87,7 @@ def _interpretation(
         return (
             f"财报前期权隐含摆幅 ±{pct:.1f}%（{days_str}）。"
             "中等程度的预期波动，期权 premium 已部分定价财报风险。"
-            "期权买方需要超过 {pct:.1f}% 的实际波动才能盈利。"
+            f"期权买方需要超过 {pct:.1f}% 的实际波动才能盈利。"
         )
     return (
         f"财报前期权隐含摆幅 ±{pct:.1f}%（{days_str}）。"

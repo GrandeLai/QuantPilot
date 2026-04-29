@@ -1541,3 +1541,40 @@ export async function fetchEarningsMove(
   }
   return r.json() as Promise<EarningsMoveData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.18 Sector Momentum Heatmap
+// ---------------------------------------------------------------------------
+
+export interface SectorReturnData {
+  ticker: string;
+  sector_name: string;
+  return_1m: number;
+  return_3m: number;
+  return_6m: number;
+  vs_spy_1m: number;
+  grade: "leading" | "in_line" | "lagging";
+}
+
+export interface SectorMomentumData {
+  sectors: SectorReturnData[];
+  top3: SectorReturnData[];
+  bottom3: SectorReturnData[];
+  spy_return_1m: number;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchSectorMomentum(): Promise<SectorMomentumData> {
+  const r = await fetch(`${BASE}/sector-momentum/`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<SectorMomentumData>;
+}
