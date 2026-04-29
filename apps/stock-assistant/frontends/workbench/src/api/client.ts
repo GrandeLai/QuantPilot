@@ -2272,3 +2272,45 @@ export async function fetchRelativeStrength(
   }
   return r.json() as Promise<RSData>;
 }
+
+// ── F.34 Short-Term Reversal Signal ──────────────────────────────────────────
+
+export type ReversalSignal =
+  | "strong_reversal_up"
+  | "reversal_up"
+  | "neutral"
+  | "reversal_down"
+  | "strong_reversal_down"
+  | "no_data";
+
+export interface ReversalData {
+  ticker: string;
+  ret_1w: number | null;
+  ret_4w: number | null;
+  rel_1w: number | null;
+  rel_4w: number | null;
+  vol_ratio: number | null;
+  reversal_score: number;
+  signal: ReversalSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchReversalSignal(
+  ticker: string
+): Promise<ReversalData> {
+  const r = await fetch(
+    `${BASE}/reversal-signal?ticker=${encodeURIComponent(ticker)}`
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<ReversalData>;
+}

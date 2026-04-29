@@ -34,6 +34,7 @@ import TechnicalScorePanel from "../TechnicalScorePanel";
 import BetaCorrelationPanel from "../BetaCorrelationPanel";
 import SeasonalityPanel from "../SeasonalityPanel";
 import RelativeStrengthPanel from "../RelativeStrengthPanel";
+import ReversalSignalPanel from "../ReversalSignalPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -65,6 +66,7 @@ export default function RiskReviewCenter() {
       <BetaCorrelationPanel />
       <SeasonalityPanel />
       <RelativeStrengthPanel />
+      <ReversalSignalPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />

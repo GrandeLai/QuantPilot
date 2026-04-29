@@ -162,6 +162,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(seasonality_router)
     from quantpilot_stock.api.relative_strength import router as relative_strength_router
     include_with_api_alias(relative_strength_router)
+    from quantpilot_stock.api.reversal_signal import router as reversal_signal_router
+    include_with_api_alias(reversal_signal_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)
