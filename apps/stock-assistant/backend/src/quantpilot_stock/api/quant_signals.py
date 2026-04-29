@@ -1,4 +1,4 @@
-"""Quant signals API — Beneish M-Score + Russell rebalancing preview + Sloan Accruals."""
+"""Quant signals API — Beneish M-Score + Russell rebalancing preview + Sloan Accruals + Piotroski F-Score."""
 
 from __future__ import annotations
 
@@ -12,9 +12,12 @@ from pydantic import BaseModel
 
 from quantpilot_stock.quant_signals.engine import (
     BeneishMScore,
+    PiotroskiCriteria,
+    PiotroskiScore,
     RussellMembership,
     SloanAccruals,
     compute_beneish_mscore,
+    compute_piotroski_score,
     compute_sloan_accruals,
     estimate_russell_membership,
 )
@@ -58,11 +61,36 @@ class SloanAccrualsResponse(BaseModel):
     as_of_date: date
 
 
+class PiotroskiCriteriaResponse(BaseModel):
+    # Profitability
+    roa_positive: bool
+    cfo_positive: bool
+    roa_improving: bool
+    accruals_ok: bool
+    # Leverage / Liquidity
+    leverage_ok: bool
+    liquidity_ok: bool
+    no_dilution: bool
+    # Operating Efficiency
+    margin_ok: bool
+    turnover_ok: bool
+
+
+class PiotroskiScoreResponse(BaseModel):
+    ticker: str
+    f_score: int   # 0-9
+    grade: str     # "strong" | "neutral" | "weak"
+    criteria: PiotroskiCriteriaResponse
+    interpretation: str
+    as_of_date: date
+
+
 class QuantSignalsSummaryResponse(BaseModel):
     ticker: str
     beneish: BeneishMScoreResponse | None
     russell: RussellMembershipResponse | None
     sloan: SloanAccrualsResponse | None
+    piotroski: PiotroskiScoreResponse | None
 
 
 # ---------------------------------------------------------------------------
@@ -102,6 +130,28 @@ def _sloan_to_response(s: SloanAccruals) -> SloanAccrualsResponse:
         avg_total_assets=s.avg_total_assets,
         interpretation=s.interpretation,
         as_of_date=s.as_of_date,
+    )
+
+
+def _piotroski_to_response(p: PiotroskiScore) -> PiotroskiScoreResponse:
+    c = p.criteria
+    return PiotroskiScoreResponse(
+        ticker=p.ticker,
+        f_score=p.f_score,
+        grade=p.grade,
+        criteria=PiotroskiCriteriaResponse(
+            roa_positive=c.roa_positive,
+            cfo_positive=c.cfo_positive,
+            roa_improving=c.roa_improving,
+            accruals_ok=c.accruals_ok,
+            leverage_ok=c.leverage_ok,
+            liquidity_ok=c.liquidity_ok,
+            no_dilution=c.no_dilution,
+            margin_ok=c.margin_ok,
+            turnover_ok=c.turnover_ok,
+        ),
+        interpretation=p.interpretation,
+        as_of_date=p.as_of_date,
     )
 
 
@@ -161,11 +211,28 @@ async def get_sloan_accruals(
     return _sloan_to_response(result)
 
 
+@router.get("/piotroski", response_model=PiotroskiScoreResponse)
+async def get_piotroski_score(
+    ticker: str = Query(..., description="Stock ticker symbol, e.g. AAPL"),
+) -> Any:
+    """Compute Piotroski F-Score (0-9) for financial health and earnings quality."""
+    ticker = ticker.strip().upper()
+    loop = asyncio.get_event_loop()
+    result = await loop.run_in_executor(_executor, compute_piotroski_score, ticker)
+    if result is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Unable to compute Piotroski F-Score for {ticker}. "
+                   "Requires ≥2 years of income, balance sheet, and cash flow data.",
+        )
+    return _piotroski_to_response(result)
+
+
 @router.get("/summary", response_model=QuantSignalsSummaryResponse)
 async def get_quant_signals_summary(
     ticker: str = Query(..., description="Stock ticker symbol, e.g. AAPL"),
 ) -> Any:
-    """Return Beneish M-Score, Russell membership, and Sloan Accruals for a ticker.
+    """Return Beneish M-Score, Russell membership, Sloan Accruals, and Piotroski F-Score.
 
     Any component may be None if data is unavailable; the endpoint
     never raises 404 for summary requests.
@@ -173,17 +240,19 @@ async def get_quant_signals_summary(
     ticker = ticker.strip().upper()
     loop = asyncio.get_event_loop()
 
-    beneish_fut = loop.run_in_executor(_executor, compute_beneish_mscore, ticker)
-    russell_fut = loop.run_in_executor(_executor, estimate_russell_membership, ticker)
-    sloan_fut   = loop.run_in_executor(_executor, compute_sloan_accruals, ticker)
+    beneish_fut    = loop.run_in_executor(_executor, compute_beneish_mscore, ticker)
+    russell_fut    = loop.run_in_executor(_executor, estimate_russell_membership, ticker)
+    sloan_fut      = loop.run_in_executor(_executor, compute_sloan_accruals, ticker)
+    piotroski_fut  = loop.run_in_executor(_executor, compute_piotroski_score, ticker)
 
-    beneish_result, russell_result, sloan_result = await asyncio.gather(
-        beneish_fut, russell_fut, sloan_fut, return_exceptions=True
+    beneish_result, russell_result, sloan_result, piotroski_result = await asyncio.gather(
+        beneish_fut, russell_fut, sloan_fut, piotroski_fut, return_exceptions=True
     )
 
-    beneish_resp: BeneishMScoreResponse | None = None
-    russell_resp: RussellMembershipResponse | None = None
-    sloan_resp:   SloanAccrualsResponse | None = None
+    beneish_resp:   BeneishMScoreResponse | None   = None
+    russell_resp:   RussellMembershipResponse | None = None
+    sloan_resp:     SloanAccrualsResponse | None   = None
+    piotroski_resp: PiotroskiScoreResponse | None  = None
 
     if isinstance(beneish_result, BeneishMScore):
         beneish_resp = _beneish_to_response(beneish_result)
@@ -194,9 +263,13 @@ async def get_quant_signals_summary(
     if isinstance(sloan_result, SloanAccruals):
         sloan_resp = _sloan_to_response(sloan_result)
 
+    if isinstance(piotroski_result, PiotroskiScore):
+        piotroski_resp = _piotroski_to_response(piotroski_result)
+
     return QuantSignalsSummaryResponse(
         ticker=ticker,
         beneish=beneish_resp,
         russell=russell_resp,
         sloan=sloan_resp,
+        piotroski=piotroski_resp,
     )

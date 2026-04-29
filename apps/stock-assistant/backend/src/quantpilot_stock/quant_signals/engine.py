@@ -556,3 +556,246 @@ def compute_sloan_accruals(ticker: str) -> SloanAccruals | None:
     except Exception as exc:
         logger.error(f"[Sloan] {ticker} error: {exc}")
         return None
+
+
+# ===========================================================================
+# Piotroski F-Score  (Piotroski 2000)
+# ===========================================================================
+# 9 binary criteria → score 0-9.
+# Strong (7-9): historically +23% annual return vs. market.
+# Weak   (0-3): significant negative alpha, avoid / short.
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class PiotroskiCriteria:
+    """9 binary financial health criteria."""
+
+    # Profitability
+    roa_positive: bool     # F1: ROA = NI / avg_TA > 0
+    cfo_positive: bool     # F2: Operating Cash Flow > 0
+    roa_improving: bool    # F3: ROA(t) > ROA(t-1)
+    accruals_ok: bool      # F4: CFO/avg_TA > ROA  (cash earnings > accrual earnings)
+    # Leverage / Liquidity
+    leverage_ok: bool      # F5: LT debt ratio (LTD/avg_TA) decreased
+    liquidity_ok: bool     # F6: Current ratio (CA/CL) increased
+    no_dilution: bool      # F7: Shares outstanding not increased
+    # Operating Efficiency
+    margin_ok: bool        # F8: Gross margin improved
+    turnover_ok: bool      # F9: Asset turnover (Revenue/avg_TA) improved
+
+
+PiotroskiGrade = Literal["strong", "neutral", "weak"]
+
+
+@dataclass
+class PiotroskiScore:
+    """Piotroski F-Score earnings quality and financial health signal."""
+
+    ticker: str
+    f_score: int           # 0-9 (sum of 9 binary criteria)
+    grade: PiotroskiGrade  # strong (7-9) | neutral (4-6) | weak (0-3)
+    criteria: PiotroskiCriteria
+    interpretation: str
+    as_of_date: date
+
+
+def _piotroski_grade(score: int) -> PiotroskiGrade:
+    if score >= 7:
+        return "strong"
+    if score >= 4:
+        return "neutral"
+    return "weak"
+
+
+def _piotroski_interpretation(score: int, grade: PiotroskiGrade) -> str:
+    msgs: dict[PiotroskiGrade, str] = {
+        "strong": (
+            f"F-Score {score}/9（强）：公司财务健康度高，盈利以现金为主、资产负债表改善、运营效率提升。"
+            "Piotroski（2000）研究显示此档股票年化超额约 +23%。"
+        ),
+        "neutral": (
+            f"F-Score {score}/9（中性）：财务状况一般，部分指标改善但整体无明显趋势。"
+            "建议结合行业背景判断。"
+        ),
+        "weak": (
+            f"F-Score {score}/9（弱）：⚠ 财务健康度低！盈利质量差、债务上升或运营恶化。"
+            "Piotroski 研究显示此档股票表现显著低于市场均值，需谨慎。"
+        ),
+    }
+    return msgs[grade]
+
+
+def compute_piotroski_score(ticker: str) -> PiotroskiScore | None:  # noqa: C901
+    """Compute Piotroski F-Score for a given ticker.
+
+    Returns None if insufficient financial data (requires 2 years of statements).
+    Never raises.
+    """
+    try:
+        t = yf.Ticker(ticker)
+        income = t.financials
+        balance = t.balance_sheet
+        cashflow = t.cashflow
+        info = t.info or {}
+
+        # Need at least 2 periods for all "improving" checks
+        if (
+            income is None or income.empty or income.shape[1] < 2
+            or balance is None or balance.empty or balance.shape[1] < 2
+            or cashflow is None or cashflow.empty or cashflow.shape[1] < 1
+        ):
+            logger.warning(f"[Piotroski] {ticker}: insufficient data")
+            return None
+
+        def _get(df, key: str, col: int) -> float | None:
+            """Retrieve a scalar from a yfinance wide-format statement DataFrame."""
+            try:
+                if key in df.index:
+                    val = df.loc[key].iloc[col]
+                    if val is not None and not math.isnan(float(val)):
+                        return float(val)
+                lk = key.lower()
+                for idx in df.index:
+                    if str(idx).lower() == lk:
+                        val = df.loc[idx].iloc[col]
+                        if val is not None and not math.isnan(float(val)):
+                            return float(val)
+            except Exception:
+                pass
+            return None
+
+        # ── Balance sheet items ───────────────────────────────────────────────
+        ta_t   = _get(balance, "Total Assets", 0)
+        ta_t1  = _get(balance, "Total Assets", 1)
+        if ta_t is None or ta_t1 is None or ta_t <= 0 or ta_t1 <= 0:
+            return None
+        avg_ta = (ta_t + ta_t1) / 2.0
+
+        ltd_t  = _get(balance, "Long Term Debt", 0) or 0.0
+        ltd_t1 = _get(balance, "Long Term Debt", 1) or 0.0
+        ca_t   = _get(balance, "Current Assets", 0)
+        ca_t1  = _get(balance, "Current Assets", 1)
+        cl_t   = _get(balance, "Current Liabilities", 0)
+        cl_t1  = _get(balance, "Current Liabilities", 1)
+
+        # ── Income statement items ────────────────────────────────────────────
+        ni_t  = _get(income, "Net Income", 0)
+        if ni_t is None:
+            ni_t = _get(income, "Net Income Common Stockholders", 0)
+        ni_t1 = _get(income, "Net Income", 1)
+        if ni_t1 is None:
+            ni_t1 = _get(income, "Net Income Common Stockholders", 1)
+        if ni_t is None or ni_t1 is None:
+            return None
+
+        rev_t   = _get(income, "Total Revenue", 0)
+        rev_t1  = _get(income, "Total Revenue", 1)
+        gp_t    = _get(income, "Gross Profit", 0)
+        gp_t1   = _get(income, "Gross Profit", 1)
+
+        # ── Cash flow items ───────────────────────────────────────────────────
+        cfo_t = _get(cashflow, "Operating Cash Flow", 0)
+        if cfo_t is None:
+            cfo_t = _get(cashflow, "Cash Flow From Continuing Operating Activities", 0)
+        if cfo_t is None:
+            return None
+
+        # ── Shares outstanding ────────────────────────────────────────────────
+        # yfinance: sharesOutstanding is current; we compare vs. prior-year filing.
+        # Use "Common Stock Shares Outstanding" from balance sheet when available.
+        shares_t  = (
+            _get(balance, "Common Stock Shares Outstanding", 0)
+            or info.get("sharesOutstanding")
+        )
+        shares_t1 = _get(balance, "Common Stock Shares Outstanding", 1)
+
+        # ── Compute 9 criteria ────────────────────────────────────────────────
+
+        # F1: ROA(t) > 0
+        roa_t   = ni_t  / avg_ta
+        # ROA for prior year — use avg of t-1 and t-2 if we have t-2, else use t-1/ta_t1
+        # For simplicity use prior-year ROA = NI(t-1) / TA(t-1) (1-year lag is standard)
+        roa_t1  = ni_t1 / ta_t1 if ta_t1 > 0 else 0.0
+        f1 = roa_t > 0
+
+        # F2: CFO > 0
+        f2 = cfo_t > 0
+
+        # F3: ROA improving
+        f3 = roa_t > roa_t1
+
+        # F4: Accruals — CFO/avg_TA > ROA (Sloan quality check)
+        f4 = (cfo_t / avg_ta) > roa_t
+
+        # F5: Long-term debt ratio decreased
+        ltd_ratio_t  = ltd_t  / avg_ta
+        ltd_ratio_t1 = ltd_t1 / ta_t1 if ta_t1 > 0 else 0.0
+        f5 = ltd_ratio_t <= ltd_ratio_t1
+
+        # F6: Current ratio improved
+        if ca_t is not None and cl_t is not None and cl_t != 0 and ca_t1 is not None and cl_t1 is not None and cl_t1 != 0:
+            cr_t  = ca_t  / cl_t
+            cr_t1 = ca_t1 / cl_t1
+            f6 = cr_t > cr_t1
+        else:
+            f6 = False  # not enough data → conservative False
+
+        # F7: No dilution (shares not increased)
+        if shares_t is not None and shares_t1 is not None and shares_t1 > 0:
+            f7 = float(shares_t) <= float(shares_t1) * 1.005  # 0.5% tolerance for rounding
+        else:
+            f7 = True  # unknown → conservative True (most companies don't massively dilute)
+
+        # F8: Gross margin improved
+        if rev_t and gp_t and rev_t > 0 and rev_t1 and gp_t1 and rev_t1 > 0:
+            gm_t  = gp_t  / rev_t
+            gm_t1 = gp_t1 / rev_t1
+            f8 = gm_t > gm_t1
+        else:
+            f8 = False
+
+        # F9: Asset turnover improved
+        if rev_t is not None and rev_t1 is not None and rev_t1 > 0:
+            ta_t1_for_prior = _get(balance, "Total Assets", 1) or ta_t1
+            avg_ta_t1 = (ta_t1 + ta_t1_for_prior) / 2.0 if ta_t1 > 0 else ta_t1
+            at_t  = rev_t  / avg_ta       if avg_ta > 0       else 0.0
+            at_t1 = rev_t1 / avg_ta_t1    if avg_ta_t1 > 0    else 0.0
+            f9 = at_t > at_t1
+        else:
+            f9 = False
+
+        criteria = PiotroskiCriteria(
+            roa_positive=f1,
+            cfo_positive=f2,
+            roa_improving=f3,
+            accruals_ok=f4,
+            leverage_ok=f5,
+            liquidity_ok=f6,
+            no_dilution=f7,
+            margin_ok=f8,
+            turnover_ok=f9,
+        )
+        score = sum([f1, f2, f3, f4, f5, f6, f7, f8, f9])
+        grade = _piotroski_grade(score)
+        interp = _piotroski_interpretation(score, grade)
+
+        # as_of_date from most recent income column
+        try:
+            col_date = income.columns[0]
+            as_of = col_date.date() if hasattr(col_date, "date") else date.today()
+        except Exception:
+            as_of = date.today()
+
+        return PiotroskiScore(
+            ticker=ticker.upper(),
+            f_score=score,
+            grade=grade,
+            criteria=criteria,
+            interpretation=interp,
+            as_of_date=as_of,
+        )
+
+    except Exception as exc:
+        logger.error(f"[Piotroski] {ticker} error: {exc}")
+        return None

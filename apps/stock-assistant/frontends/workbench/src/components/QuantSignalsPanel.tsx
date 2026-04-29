@@ -10,6 +10,8 @@
 import React, { useState } from "react";
 import {
   type BeneishMScoreData,
+  type PiotroskiCriteriaData,
+  type PiotroskiScoreData,
   type QuantSignalsSummary,
   type RussellMembershipData,
   type SloanAccrualsData,
@@ -606,6 +608,240 @@ function SloanSection({ s }: { s: SloanAccrualsData }) {
 }
 
 // ---------------------------------------------------------------------------
+// 工具函数：Piotroski F-Score
+// ---------------------------------------------------------------------------
+
+type PiotroskiGrade = PiotroskiScoreData["grade"];
+
+function piotroskiGradeColor(grade: PiotroskiGrade): string {
+  if (grade === "strong") return "#00C087";
+  if (grade === "neutral") return "#f59e0b";
+  return "#ef4444"; // weak
+}
+
+function piotroskiGradeLabel(grade: PiotroskiGrade): string {
+  const labels: Record<PiotroskiGrade, string> = {
+    strong: "强 ✓✓",
+    neutral: "中性",
+    weak: "弱 ⚠",
+  };
+  return labels[grade];
+}
+
+// ---------------------------------------------------------------------------
+// 子组件：Piotroski F-Score 区块
+// ---------------------------------------------------------------------------
+
+const CRITERIA_META: { key: keyof PiotroskiCriteriaData; label: string; group: string }[] = [
+  { key: "roa_positive",  label: "F1: ROA > 0（净资产回报率正）",     group: "盈利能力" },
+  { key: "cfo_positive",  label: "F2: 经营现金流 > 0",                group: "盈利能力" },
+  { key: "roa_improving", label: "F3: ROA 同比改善",                  group: "盈利能力" },
+  { key: "accruals_ok",   label: "F4: 现金盈利 > 应计盈利",           group: "盈利能力" },
+  { key: "leverage_ok",   label: "F5: 长期负债率下降",                group: "偿债能力" },
+  { key: "liquidity_ok",  label: "F6: 流动比率改善",                  group: "偿债能力" },
+  { key: "no_dilution",   label: "F7: 未增发股份（不稀释）",          group: "偿债能力" },
+  { key: "margin_ok",     label: "F8: 毛利率改善",                    group: "运营效率" },
+  { key: "turnover_ok",   label: "F9: 总资产周转率改善",              group: "运营效率" },
+];
+
+function PiotroskiSection({ p }: { p: PiotroskiScoreData }) {
+  const gc = piotroskiGradeColor(p.grade);
+  const gl = piotroskiGradeLabel(p.grade);
+
+  // Score bar: 0-9 → 0-100%
+  const pct = (p.f_score / 9) * 100;
+
+  const groups = ["盈利能力", "偿债能力", "运营效率"];
+
+  return (
+    <div
+      style={{
+        background: "#151619",
+        border: "1px solid #2a2d35",
+        borderRadius: 8,
+        padding: "12px 14px",
+        marginTop: 10,
+      }}
+    >
+      {/* 小标题 */}
+      <div
+        style={{
+          fontSize: 12,
+          fontWeight: 700,
+          color: "#94a3b8",
+          marginBottom: 10,
+          textTransform: "uppercase",
+          letterSpacing: 1,
+        }}
+      >
+        Piotroski F-Score — 财务健康评分
+      </div>
+
+      {/* F-Score + 等级 */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 10,
+        }}
+      >
+        <div>
+          <span style={{ fontSize: 30, fontWeight: 700, color: gc }}>
+            {p.f_score}
+            <span style={{ fontSize: 16, color: "#475569" }}>/9</span>
+          </span>
+          <span
+            style={{
+              marginLeft: 10,
+              fontSize: 12,
+              padding: "2px 10px",
+              borderRadius: 4,
+              background: gc + "22",
+              color: gc,
+              fontWeight: 700,
+            }}
+          >
+            {gl}
+          </span>
+        </div>
+        <div
+          style={{
+            fontSize: 11,
+            color: "#64748b",
+            maxWidth: 220,
+            textAlign: "right",
+            lineHeight: 1.4,
+          }}
+        >
+          {p.interpretation}
+        </div>
+      </div>
+
+      {/* 分数进度条 */}
+      <div style={{ marginBottom: 12 }}>
+        <div
+          style={{
+            fontSize: 10,
+            color: "#475569",
+            marginBottom: 4,
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          <span style={{ color: "#ef4444" }}>弱 0</span>
+          <span>中性 4-6</span>
+          <span style={{ color: "#00C087" }}>强 7-9</span>
+        </div>
+        <div
+          style={{
+            height: 8,
+            background: "#2a2d35",
+            borderRadius: 4,
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              width: `${pct}%`,
+              height: "100%",
+              background: gc,
+              borderRadius: 4,
+              transition: "width 0.3s ease",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* 9 标准分组展示 */}
+      {groups.map((group) => {
+        const items = CRITERIA_META.filter((m) => m.group === group);
+        return (
+          <div key={group} style={{ marginBottom: 8 }}>
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                color: "#64748b",
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+                marginBottom: 4,
+              }}
+            >
+              {group}
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 4,
+              }}
+            >
+              {items.map(({ key, label }) => {
+                const passed = p.criteria[key] as boolean;
+                return (
+                  <div
+                    key={key}
+                    style={{
+                      background: "#0E1014",
+                      border: `1px solid ${passed ? "#00C08744" : "#ef444433"}`,
+                      borderRadius: 4,
+                      padding: "4px 8px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 13,
+                        color: passed ? "#00C087" : "#ef4444",
+                        lineHeight: 1,
+                      }}
+                    >
+                      {passed ? "✓" : "✗"}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 10,
+                        color: passed ? "#94a3b8" : "#64748b",
+                        lineHeight: 1.3,
+                      }}
+                    >
+                      {label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+
+      {/* 规则说明 */}
+      <div
+        style={{
+          background: "#0E1014",
+          border: "1px solid #2a2d35",
+          borderRadius: 6,
+          padding: "6px 10px",
+          fontSize: 10,
+          color: "#475569",
+          lineHeight: 1.6,
+          marginTop: 4,
+        }}
+      >
+        <div>Piotroski (2000)：9 个二元财务标准，强 (7-9) 年化超额 +23%；弱 (0-3) 显著负 alpha</div>
+      </div>
+
+      <div style={{ marginTop: 8, fontSize: 10, color: "#475569" }}>
+        数据日期：{p.as_of_date}　│　来源：yfinance　│　不构成投资建议
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // 主组件
 // ---------------------------------------------------------------------------
 
@@ -666,7 +902,7 @@ export default function QuantSignalsPanel() {
           alignItems: "center",
         }}
       >
-        <span>量化信号（Beneish M-Score + Russell 调仓预览 + Sloan 应计率）</span>
+        <span>量化信号（Beneish · Russell · Sloan · Piotroski）</span>
         <span style={{ fontSize: 10, color: "#475569", fontWeight: 400 }}>
           数据来源：yfinance
         </span>
@@ -779,6 +1015,24 @@ export default function QuantSignalsPanel() {
               Sloan 应计率：暂无财务数据（需净利润、经营现金流、总资产）
             </div>
           )}
+
+          {result.piotroski ? (
+            <PiotroskiSection p={result.piotroski} />
+          ) : (
+            <div
+              style={{
+                background: "#151619",
+                border: "1px solid #2a2d35",
+                borderRadius: 8,
+                padding: "10px 14px",
+                marginTop: 10,
+                fontSize: 12,
+                color: "#64748b",
+              }}
+            >
+              Piotroski F-Score：暂无财务数据（需 ≥2 年财务报表）
+            </div>
+          )}
         </>
       )}
 
@@ -792,7 +1046,7 @@ export default function QuantSignalsPanel() {
             padding: "20px 0",
           }}
         >
-          输入股票代码后点击「查询」，获取 Beneish M-Score、Russell 调仓预览和 Sloan 应计率
+          输入股票代码后点击「查询」，获取 Beneish M-Score、Russell 调仓预览、Sloan 应计率和 Piotroski F-Score
         </div>
       )}
     </div>

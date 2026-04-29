@@ -941,11 +941,38 @@ export interface SloanAccrualsData {
   as_of_date: string;
 }
 
+export interface PiotroskiCriteriaData {
+  // Profitability
+  roa_positive: boolean;
+  cfo_positive: boolean;
+  roa_improving: boolean;
+  accruals_ok: boolean;
+  // Leverage / Liquidity
+  leverage_ok: boolean;
+  liquidity_ok: boolean;
+  no_dilution: boolean;
+  // Operating Efficiency
+  margin_ok: boolean;
+  turnover_ok: boolean;
+}
+
+export type PiotroskiGrade = "strong" | "neutral" | "weak";
+
+export interface PiotroskiScoreData {
+  ticker: string;
+  f_score: number;   // 0-9
+  grade: PiotroskiGrade;
+  criteria: PiotroskiCriteriaData;
+  interpretation: string;
+  as_of_date: string;
+}
+
 export interface QuantSignalsSummary {
   ticker: string;
   beneish: BeneishMScoreData | null;
   russell: RussellMembershipData | null;
   sloan: SloanAccrualsData | null;
+  piotroski: PiotroskiScoreData | null;
 }
 
 export async function fetchQuantSignalsSummary(
