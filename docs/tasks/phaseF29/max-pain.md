@@ -31,7 +31,7 @@ docs/tasks/phaseF29/max-pain.md
 
 ### AC-1 数据模型
 
-- `MaxPainSignal` = Literal["pin_zone","near_pin","bullish_pull","bearish_pull","unknown"]
+- `MaxPainSignal` = Literal["pin_zone","bullish_pull","bearish_pull","weak_pull","unknown"]
 - `ExpiryMaxPain` dataclass：expiry, dte, max_pain_strike, current_price,
   distance_pct, total_call_oi, total_put_oi, signal
 - `MaxPainData` dataclass：ticker, current_price, as_of_date, data_available,
@@ -46,7 +46,7 @@ docs/tasks/phaseF29/max-pain.md
   - |distance| < 2% → pin_zone
   - distance > 0 and 2-5% → bullish_pull (price below max pain → up pull)
   - distance < 0 and 2-5% → bearish_pull (price above max pain → down pull)
-  - |distance| ≥ 5% → near_pin (weakening magnet)
+  - |distance| ≥ 5% → weak_pull (weakening magnet)
   - 无数据 → unknown
 - 取最近 4 个到期日（DTE 1-45）
 

@@ -2091,3 +2091,48 @@ export async function fetchDividendAnalysis(
   }
   return r.json() as Promise<DividendAnalysisData>;
 }
+
+// ── Technical Momentum Score (F.30) ──────────────────────────────────────
+
+export type TechSignal =
+  | "strong_buy"
+  | "buy"
+  | "neutral"
+  | "sell"
+  | "strong_sell"
+  | "no_data";
+
+export interface TechnicalScoreData {
+  ticker: string;
+  current_price: number | null;
+  rsi14: number | null;
+  macd_line: number | null;
+  macd_signal: number | null;
+  macd_histogram: number | null;
+  bb_position: number | null;
+  volume_ratio: number | null;
+  week52_position: number | null;
+  composite_score: number | null;
+  signal: TechSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchTechnicalScore(
+  ticker: string
+): Promise<TechnicalScoreData> {
+  const r = await fetch(
+    `${BASE}/technical-score?ticker=${encodeURIComponent(ticker)}`
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<TechnicalScoreData>;
+}

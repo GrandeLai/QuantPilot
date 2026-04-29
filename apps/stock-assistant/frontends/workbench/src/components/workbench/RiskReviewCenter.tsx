@@ -30,6 +30,7 @@ import PutCallRatioPanel from "../PutCallRatioPanel";
 import MacroDashboardPanel from "../MacroDashboardPanel";
 import DividendAnalysisPanel from "../DividendAnalysisPanel";
 import MaxPainPanel from "../MaxPainPanel";
+import TechnicalScorePanel from "../TechnicalScorePanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -57,6 +58,7 @@ export default function RiskReviewCenter() {
       <MacroDashboardPanel />
       <DividendAnalysisPanel />
       <MaxPainPanel />
+      <TechnicalScorePanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />
