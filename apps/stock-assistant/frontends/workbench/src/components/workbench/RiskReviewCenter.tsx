@@ -27,6 +27,7 @@ import IndexRebalancePanel from "../IndexRebalancePanel";
 import IVRankPanel from "../IVRankPanel";
 import EarningsCalendarPanel from "../EarningsCalendarPanel";
 import PutCallRatioPanel from "../PutCallRatioPanel";
+import MacroDashboardPanel from "../MacroDashboardPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -51,6 +52,7 @@ export default function RiskReviewCenter() {
       <IVRankPanel />
       <EarningsCalendarPanel />
       <PutCallRatioPanel />
+      <MacroDashboardPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />

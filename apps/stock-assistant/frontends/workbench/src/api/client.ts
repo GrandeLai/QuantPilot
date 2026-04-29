@@ -1938,6 +1938,45 @@ export interface PCRData {
   data_available: boolean;
 }
 
+// ── F.27 Macro Dashboard ───────────────────────────────────────────────────
+
+export type MacroRegime =
+  | "risk_on"
+  | "neutral"
+  | "risk_off"
+  | "extreme_risk_off"
+  | "unknown";
+
+export interface MacroDashboardData {
+  vix: number | null;
+  vix_pct_52w: number | null;
+  yield_10y: number | null;
+  yield_3m: number | null;
+  yield_spread: number | null;
+  yield_curve_inverted: boolean;
+  dxy: number | null;
+  gold: number | null;
+  oil: number | null;
+  regime: MacroRegime;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchMacroDashboard(): Promise<MacroDashboardData> {
+  const r = await fetch(`${BASE}/macro-dashboard`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<MacroDashboardData>;
+}
+
 export async function fetchPutCallRatio(ticker: string): Promise<PCRData> {
   const r = await fetch(
     `${BASE}/put-call-ratio?ticker=${encodeURIComponent(ticker)}`
