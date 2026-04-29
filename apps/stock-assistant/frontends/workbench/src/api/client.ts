@@ -2356,6 +2356,48 @@ export async function fetchADXTrend(ticker: string): Promise<ADXData> {
   return r.json() as Promise<ADXData>;
 }
 
+// ── F.37 MACD Signal ─────────────────────────────────────────────────────────
+
+export type MACDSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface MACDData {
+  ticker: string;
+  macd: number | null;
+  signal_line: number | null;
+  histogram: number | null;
+  prev_histogram: number | null;
+  histogram_expanding: boolean;
+  recent_crossover: boolean;
+  crossover_direction: string;
+  macd_score: number;
+  signal: MACDSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchMACD(ticker: string): Promise<MACDData> {
+  const r = await fetch(
+    `${BASE}/macd?ticker=${encodeURIComponent(ticker)}`
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<MACDData>;
+}
+
 // ── F.36 Moving Average Alignment Score ──────────────────────────────────────
 
 export type MASignal =

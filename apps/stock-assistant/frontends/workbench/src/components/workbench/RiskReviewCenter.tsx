@@ -37,6 +37,7 @@ import RelativeStrengthPanel from "../RelativeStrengthPanel";
 import ReversalSignalPanel from "../ReversalSignalPanel";
 import ADXTrendPanel from "../ADXTrendPanel";
 import MAAlignmentPanel from "../MAAlignmentPanel";
+import MACDPanel from "../MACDPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -71,6 +72,7 @@ export default function RiskReviewCenter() {
       <ReversalSignalPanel />
       <ADXTrendPanel />
       <MAAlignmentPanel />
+      <MACDPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />
