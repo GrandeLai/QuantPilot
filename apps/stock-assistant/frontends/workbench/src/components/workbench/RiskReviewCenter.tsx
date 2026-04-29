@@ -28,6 +28,7 @@ import IVRankPanel from "../IVRankPanel";
 import EarningsCalendarPanel from "../EarningsCalendarPanel";
 import PutCallRatioPanel from "../PutCallRatioPanel";
 import MacroDashboardPanel from "../MacroDashboardPanel";
+import DividendAnalysisPanel from "../DividendAnalysisPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -53,6 +54,7 @@ export default function RiskReviewCenter() {
       <EarningsCalendarPanel />
       <PutCallRatioPanel />
       <MacroDashboardPanel />
+      <DividendAnalysisPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />

@@ -1992,3 +1992,57 @@ export async function fetchPutCallRatio(ticker: string): Promise<PCRData> {
   }
   return r.json() as Promise<PCRData>;
 }
+
+// ── Dividend Analysis (F.28) ───────────────────────────────────────────────
+
+export type DividendSafety =
+  | "safe"
+  | "watch"
+  | "danger"
+  | "no_dividend";
+
+export type DividendCaptureSignal =
+  | "capture_opportunity"
+  | "not_applicable"
+  | "unknown";
+
+export interface DividendAnnualEntry {
+  year: number;
+  total: number;
+}
+
+export interface DividendAnalysisData {
+  ticker: string;
+  dividend_yield: number | null;
+  annual_dividend: number | null;
+  payout_ratio: number | null;
+  ex_dividend_date: string | null;
+  days_to_ex_date: number | null;
+  dividend_frequency: number | null;
+  five_yr_growth_rate: number | null;
+  consecutive_growth_years: number;
+  safety: DividendSafety;
+  capture_signal: DividendCaptureSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+  historical_annual: DividendAnnualEntry[];
+}
+
+export async function fetchDividendAnalysis(
+  ticker: string
+): Promise<DividendAnalysisData> {
+  const r = await fetch(
+    `${BASE}/dividend-analysis?ticker=${encodeURIComponent(ticker)}`
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<DividendAnalysisData>;
+}
