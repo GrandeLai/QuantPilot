@@ -14,6 +14,7 @@ import DCFPanel from "../DCFPanel";
 import ShortInterestPanel from "../ShortInterestPanel";
 import WhaleMonitorPanel from "../WhaleMonitorPanel";
 import PEADPanel from "../PEADPanel";
+import MomentumPanel from "../MomentumPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -25,6 +26,7 @@ export default function RiskReviewCenter() {
       <QuantSignalsPanel />
       <EPSRevisionPanel />
       <PEADPanel />
+      <MomentumPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />

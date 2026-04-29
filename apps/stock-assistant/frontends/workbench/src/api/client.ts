@@ -1336,7 +1336,9 @@ export interface PEADSignalData {
   as_of_date: string;
 }
 
-export async function fetchPEADSignal(ticker: string): Promise<PEADSignalData> {
+export async function fetchPEADSignal(
+  ticker: string,
+): Promise<PEADSignalData> {
   const r = await fetch(
     `${BASE}/pead/?ticker=${encodeURIComponent(ticker)}`,
   );
@@ -1350,4 +1352,48 @@ export async function fetchPEADSignal(ticker: string): Promise<PEADSignalData> {
     }
   }
   return r.json() as Promise<PEADSignalData>;
+}
+
+// ---------------------------------------------------------------------------
+// Price Momentum Signal — Jegadeesh-Titman (Phase F.14)
+// ---------------------------------------------------------------------------
+
+export type MomentumGrade =
+  | "strong_momentum"
+  | "momentum"
+  | "neutral"
+  | "reversal_risk"
+  | "strong_reversal";
+
+export interface MomentumSignalData {
+  ticker: string;
+  momentum_12_1: number;     // 12-1 month return %
+  return_1m: number;
+  return_3m: number;
+  return_6m: number;
+  high_52w: number;
+  low_52w: number;
+  current_price: number;
+  proximity_52w_high: number; // 0-1, 1 = at 52w high
+  grade: MomentumGrade;
+  interpretation: string;
+  as_of_date: string;
+}
+
+export async function fetchMomentumSignal(
+  ticker: string,
+): Promise<MomentumSignalData> {
+  const r = await fetch(
+    `${BASE}/momentum/?ticker=${encodeURIComponent(ticker)}`,
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<MomentumSignalData>;
 }
