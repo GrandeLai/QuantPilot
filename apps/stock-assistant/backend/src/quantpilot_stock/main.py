@@ -61,9 +61,11 @@ def create_app() -> FastAPI:
         app.include_router(router)
         app.include_router(router, prefix="/api")
 
+    from quantpilot_stock.api.advisor import router as advisor_router
     from quantpilot_stock.api.alerts import router as alerts_router
     from quantpilot_stock.api.crypto import router as crypto_router
     from quantpilot_stock.api.crypto_derivs import router as crypto_derivs_router
+    from quantpilot_stock.api.crypto_research import router as crypto_research_router
     from quantpilot_stock.api.data import router as data_router
     from quantpilot_stock.api.insights import router as insights_router
     from quantpilot_stock.api.llm import router as llm_router
@@ -94,6 +96,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(crypto_router)
     include_with_api_alias(risk_router)
     include_with_api_alias(crypto_derivs_router)
+    include_with_api_alias(advisor_router)
+    include_with_api_alias(crypto_research_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)
