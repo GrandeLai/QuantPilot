@@ -947,3 +947,107 @@ export async function fetchQuantSignalsSummary(
   }
   return r.json() as Promise<QuantSignalsSummary>;
 }
+
+// ---------------------------------------------------------------------------
+// EPS Revision Momentum — analyst estimate revisions (Phase F.6)
+// ---------------------------------------------------------------------------
+
+export type RevisionDirection =
+  | "strong_upgrade"
+  | "upgrade"
+  | "neutral"
+  | "downgrade"
+  | "strong_downgrade";
+
+export interface EpsRevisionPeriodData {
+  period: string;
+  period_label: string;
+  up_7d: number;
+  down_7d: number;
+  up_30d: number;
+  down_30d: number;
+  revision_score_7d: number;
+  revision_score_30d: number;
+  direction: RevisionDirection;
+}
+
+export interface AnalystTargetsData {
+  current_price: number | null;
+  target_mean: number | null;
+  target_median: number | null;
+  target_high: number | null;
+  target_low: number | null;
+  upside_pct: number | null;
+}
+
+export interface EpsRevisionMomentumData {
+  ticker: string;
+  periods: EpsRevisionPeriodData[];
+  targets: AnalystTargetsData | null;
+  overall_direction: RevisionDirection;
+  as_of_date: string;
+}
+
+export async function fetchEpsRevisionSummary(
+  ticker: string,
+): Promise<EpsRevisionMomentumData> {
+  const r = await fetch(
+    `${BASE}/eps-revision/summary?ticker=${encodeURIComponent(ticker)}`,
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<EpsRevisionMomentumData>;
+}
+
+// ---------------------------------------------------------------------------
+// Token Unlock Calendar — crypto vesting unlock events (Phase F.7)
+// ---------------------------------------------------------------------------
+
+export type UnlockSignal =
+  | "high_risk"
+  | "moderate_risk"
+  | "low_risk"
+  | "post_unlock_rebound";
+
+export interface TokenUnlockEventData {
+  protocol: string;
+  symbol: string;
+  unlock_date: string;
+  days_until_unlock: number;
+  unlock_tokens: number;
+  unlock_usd: number | null;
+  unlock_pct_circulating: number;
+  category: string;
+  sell_pressure_score: number;
+  signal: UnlockSignal;
+}
+
+export interface TokenUnlockCalendarData {
+  as_of_date: string;
+  events: TokenUnlockEventData[];
+  total_events: number;
+  high_risk_count: number;
+}
+
+export async function fetchTokenUnlocks(
+  days = 30,
+): Promise<TokenUnlockCalendarData> {
+  const r = await fetch(`${BASE}/token-unlocks/upcoming?days=${days}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<TokenUnlockCalendarData>;
+}

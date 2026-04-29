@@ -68,6 +68,8 @@ def create_app() -> FastAPI:
     from quantpilot_stock.api.execution import router as execution_router
     from quantpilot_stock.api.fundamental import router as fundamental_router
     from quantpilot_stock.api.quant_signals import router as quant_signals_router
+    from quantpilot_stock.api.eps_revision import router as eps_revision_router
+    from quantpilot_stock.api.token_unlock import router as token_unlock_router
     from quantpilot_stock.api.alerts import router as alerts_router
     from quantpilot_stock.api.crypto import router as crypto_router
     from quantpilot_stock.api.crypto_derivs import router as crypto_derivs_router
@@ -110,6 +112,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(execution_router)
     include_with_api_alias(fundamental_router)
     include_with_api_alias(quant_signals_router)
+    include_with_api_alias(eps_revision_router)
+    include_with_api_alias(token_unlock_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)

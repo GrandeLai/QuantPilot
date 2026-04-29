@@ -8,6 +8,8 @@ import SECEventsPanel from "../SECEventsPanel";
 import FundamentalPanel from "../FundamentalPanel";
 import TLHPanel from "../TLHPanel";
 import QuantSignalsPanel from "../QuantSignalsPanel";
+import EPSRevisionPanel from "../EPSRevisionPanel";
+import TokenUnlockPanel from "../TokenUnlockPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -17,6 +19,8 @@ export default function RiskReviewCenter() {
       <TLHPanel />
       <FundamentalPanel />
       <QuantSignalsPanel />
+      <EPSRevisionPanel />
+      <TokenUnlockPanel />
       <RiskMetricsPanel />
       <CryptoDerivsPanel />
       <PortfolioPanel />
