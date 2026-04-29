@@ -690,3 +690,81 @@ export function fetchGEXLevels(
 ): Promise<GEXLevels> {
   return getGex<GEXLevels>("levels", { ticker, max_dte: maxDte, min_oi: minOi });
 }
+
+// ── SEC 事件流（8-K diff + Form 4 集群）────────────────────────────────────
+
+export interface SECEightKItem {
+  item_number: string;
+  item_title: string;
+  text_snippet: string;
+}
+
+export interface SECParagraphDiff {
+  diff_type: "added" | "removed" | "modified" | "unchanged";
+  old_text: string | null;
+  new_text: string | null;
+  similarity: number;
+}
+
+export interface SECItemDiff {
+  item_number: string;
+  item_title: string;
+  has_material_change: boolean;
+  change_score: number;
+  paragraphs: SECParagraphDiff[];
+}
+
+export interface SECDiffSummary {
+  has_diff: boolean;
+  has_material_change?: boolean;
+  overall_change_score?: number;
+  changed_items?: string[];
+}
+
+export interface SECInsiderTransaction {
+  insider_name: string;
+  insider_title: string;
+  transaction_date: string;
+  transaction_type: string;
+  shares: number;
+  price_per_share: number;
+  total_value: number;
+  is_10b5_1_plan: boolean;
+}
+
+export interface SECInsiderCluster {
+  window_start: string;
+  window_end: string;
+  insider_count: number;
+  total_value: number;
+  avg_price: number;
+  signal_strength: number;
+  key_roles: string[];
+  transactions: SECInsiderTransaction[];
+}
+
+export interface SECSummary {
+  ticker: string;
+  generated_at: string;
+  latest_8k: {
+    filed_date?: string;
+    accession_number?: string;
+    items?: SECEightKItem[];
+  };
+  "8k_diff": SECDiffSummary;
+  insider_clusters: SECInsiderCluster[];
+}
+
+export async function fetchSECSummary(ticker: string): Promise<SECSummary> {
+  const r = await fetch(`${BASE}/sec/summary?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<SECSummary>;
+}
