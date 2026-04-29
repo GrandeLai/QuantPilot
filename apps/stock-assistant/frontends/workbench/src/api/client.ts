@@ -1051,3 +1051,135 @@ export async function fetchTokenUnlocks(
   }
   return r.json() as Promise<TokenUnlockCalendarData>;
 }
+
+// ---------------------------------------------------------------------------
+// DCF + Monte Carlo Valuation (Phase F.8)
+// ---------------------------------------------------------------------------
+
+export interface WACCData {
+  cost_of_equity: number;
+  cost_of_debt: number;
+  tax_rate: number;
+  debt_weight: number;
+  equity_weight: number;
+  wacc: number;
+  beta: number;
+  risk_free_rate: number;
+}
+
+export type ValuationLabel =
+  | "deep_value"
+  | "undervalued"
+  | "fair"
+  | "overvalued"
+  | "overheated";
+
+export interface DCFResultData {
+  ticker: string;
+  current_price: number;
+  fair_value_p5: number;
+  fair_value_p50: number;
+  fair_value_p95: number;
+  wacc_components: WACCData;
+  base_fcf: number;
+  npv_fcf: number;
+  terminal_value_pv: number;
+  margin_of_safety: number;
+  valuation: ValuationLabel;
+  projected_fcfs: number[];
+  as_of_date: string;
+}
+
+export async function fetchDCFValuation(ticker: string): Promise<DCFResultData> {
+  const r = await fetch(
+    `${BASE}/dcf/valuation?ticker=${encodeURIComponent(ticker)}`,
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<DCFResultData>;
+}
+
+export async function fetchWACC(ticker: string): Promise<WACCData> {
+  const r = await fetch(
+    `${BASE}/dcf/wacc?ticker=${encodeURIComponent(ticker)}`,
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<WACCData>;
+}
+
+// ---------------------------------------------------------------------------
+// Short Interest + Squeeze Risk (Phase F.9)
+// ---------------------------------------------------------------------------
+
+export type SqueezeSignal =
+  | "squeeze_setup"
+  | "high_short"
+  | "moderate"
+  | "low_short";
+
+export interface ShortInterestData {
+  ticker: string;
+  short_pct_float: number | null;
+  short_ratio: number | null;
+  shares_short: number | null;
+  shares_short_prior_month: number | null;
+  short_change_pct: number | null;
+  float_shares: number | null;
+  avg_daily_volume: number | null;
+  price_vs_52w_high: number | null;
+  squeeze_risk_score: number;
+  signal: SqueezeSignal;
+  as_of_date: string;
+}
+
+export async function fetchShortInterestSummary(
+  ticker: string,
+): Promise<ShortInterestData> {
+  const r = await fetch(
+    `${BASE}/short-interest/summary?ticker=${encodeURIComponent(ticker)}`,
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<ShortInterestData>;
+}
+
+export async function fetchSqueezeScan(
+  tickers: string[],
+): Promise<ShortInterestData[]> {
+  const param = tickers.map(encodeURIComponent).join(",");
+  const r = await fetch(
+    `${BASE}/short-interest/squeeze-scan?tickers=${param}`,
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<ShortInterestData[]>;
+}

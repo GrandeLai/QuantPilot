@@ -10,6 +10,8 @@ import TLHPanel from "../TLHPanel";
 import QuantSignalsPanel from "../QuantSignalsPanel";
 import EPSRevisionPanel from "../EPSRevisionPanel";
 import TokenUnlockPanel from "../TokenUnlockPanel";
+import DCFPanel from "../DCFPanel";
+import ShortInterestPanel from "../ShortInterestPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -21,6 +23,8 @@ export default function RiskReviewCenter() {
       <QuantSignalsPanel />
       <EPSRevisionPanel />
       <TokenUnlockPanel />
+      <DCFPanel />
+      <ShortInterestPanel />
       <RiskMetricsPanel />
       <CryptoDerivsPanel />
       <PortfolioPanel />
