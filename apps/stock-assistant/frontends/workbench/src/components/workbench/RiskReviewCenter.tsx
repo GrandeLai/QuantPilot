@@ -5,6 +5,7 @@ import GEXPanel from "../GEXPanel";
 import PortfolioPanel from "../PortfolioPanel";
 import RiskMetricsPanel from "../RiskMetricsPanel";
 import SECEventsPanel from "../SECEventsPanel";
+import FundamentalPanel from "../FundamentalPanel";
 import TLHPanel from "../TLHPanel";
 
 export default function RiskReviewCenter() {
@@ -13,6 +14,7 @@ export default function RiskReviewCenter() {
       <GEXPanel />
       <SECEventsPanel />
       <TLHPanel />
+      <FundamentalPanel />
       <RiskMetricsPanel />
       <CryptoDerivsPanel />
       <PortfolioPanel />

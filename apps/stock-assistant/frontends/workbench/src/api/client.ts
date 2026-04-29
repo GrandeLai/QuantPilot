@@ -828,3 +828,66 @@ export async function fetchTLHScan(
   }
   return r.json() as Promise<TLHScanResponse>;
 }
+
+// ---------------------------------------------------------------------------
+// 基本面信号类型（Phase F.4 — PEAD + Piotroski）
+// ---------------------------------------------------------------------------
+
+export interface EarningsSurprise {
+  ticker: string;
+  quarter: string;
+  eps_actual: number;
+  eps_estimate: number;
+  eps_difference: number;
+  surprise_pct: number;
+}
+
+export type SurpriseMagnitude =
+  | "large_beat"
+  | "beat"
+  | "inline"
+  | "miss"
+  | "large_miss";
+
+export interface PEADSignal {
+  ticker: string;
+  surprise_magnitude: SurpriseMagnitude;
+  signal_strength: number;
+  historical_drift_7d: number | null;
+  historical_drift_30d: number | null;
+  historical_drift_60d: number | null;
+  latest_surprise: EarningsSurprise;
+}
+
+export interface PiotroskiScore {
+  ticker: string;
+  score: number;
+  grade: "strong" | "moderate" | "weak";
+  signals: Record<string, boolean>;
+  as_of_date: string;
+  interpretation: string;
+}
+
+export interface FundamentalSummary {
+  ticker: string;
+  pead: PEADSignal | null;
+  piotroski: PiotroskiScore | null;
+}
+
+export async function fetchFundamentalSummary(
+  ticker: string,
+): Promise<FundamentalSummary> {
+  const r = await fetch(
+    `${BASE}/fundamental/summary?ticker=${encodeURIComponent(ticker)}`,
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<FundamentalSummary>;
+}
