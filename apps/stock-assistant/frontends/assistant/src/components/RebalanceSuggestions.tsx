@@ -1,3 +1,4 @@
+import { Scale, Target } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import {
@@ -10,6 +11,24 @@ import {
   type AdvisorCryptoOptimizationSummary,
   type AdvisorCryptoResearchSummary,
 } from "../api/client";
+import { cn } from "../lib/utils";
+import { EmptyState, ErrorOrEmptyState, LoadingState } from "./ui/StateMessages";
+
+function ToneBadge({ type }: { type: string }) {
+  const isRisk = /risk|hazard|warning/i.test(type);
+  return (
+    <span
+      className={cn(
+        "px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase",
+        isRisk
+          ? "bg-red-500/20 text-red-400 border-red-500/40"
+          : "bg-green-500/20 text-green-400 border-green-500/40",
+      )}
+    >
+      {isRisk ? "降险" : "进取"}
+    </span>
+  );
+}
 
 /**
  * Minimal rebalance suggestion view composed from advisor cards.
@@ -17,7 +36,9 @@ import {
 export function RebalanceSuggestions() {
   const [suggestions, setSuggestions] = useState<AdvisorCard[]>([]);
   const [research, setResearch] = useState<Record<string, AdvisorCryptoResearchSummary>>({});
-  const [optimizations, setOptimizations] = useState<Record<string, AdvisorCryptoOptimizationSummary>>({});
+  const [optimizations, setOptimizations] = useState<
+    Record<string, AdvisorCryptoOptimizationSummary>
+  >({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,10 +61,16 @@ export function RebalanceSuggestions() {
           fetchCryptoRisks<{ items: AdvisorCard[] }>("ETH-USDT"),
           fetchCryptoResearchLatest<AdvisorCryptoResearchSummary>("BTC-USDT"),
           fetchCryptoResearchLatest<AdvisorCryptoResearchSummary>("ETH-USDT"),
-          fetchCryptoResearchLatestOptimization<AdvisorCryptoOptimizationSummary>("BTC-USDT", "vwap_ema_trend").catch(() =>
+          fetchCryptoResearchLatestOptimization<AdvisorCryptoOptimizationSummary>(
+            "BTC-USDT",
+            "vwap_ema_trend",
+          ).catch(() =>
             fetchCryptoResearchOptimization<AdvisorCryptoOptimizationSummary>("BTC-USDT"),
           ),
-          fetchCryptoResearchLatestOptimization<AdvisorCryptoOptimizationSummary>("ETH-USDT", "vwap_ema_trend").catch(() =>
+          fetchCryptoResearchLatestOptimization<AdvisorCryptoOptimizationSummary>(
+            "ETH-USDT",
+            "vwap_ema_trend",
+          ).catch(() =>
             fetchCryptoResearchOptimization<AdvisorCryptoOptimizationSummary>("ETH-USDT"),
           ),
         ]);
@@ -70,35 +97,84 @@ export function RebalanceSuggestions() {
   }, []);
 
   return (
-    <section aria-labelledby="rebalance-suggestions-title">
-      <h2 id="rebalance-suggestions-title">调仓建议</h2>
-      <p>基于 BTC / ETH 研究结果生成最小可执行的观察/降风险建议。</p>
-      {loading ? <p>加载中…</p> : null}
-      {error ? <p>{error}</p> : null}
-      {!loading && !error ? (
-        <ul>
+    <section aria-labelledby="rebalance-suggestions-title" className="space-y-4">
+      <div>
+        <h2
+          id="rebalance-suggestions-title"
+          className="text-white text-lg font-bold flex items-center gap-2"
+        >
+          <Scale size={18} className="text-[#00C087]" />
+          调仓建议
+        </h2>
+        <p className="text-[#8E9299] text-sm mt-1">
+          基于 BTC / ETH 研究结果生成最小可执行的观察/降风险建议。
+        </p>
+      </div>
+
+      {loading && <LoadingState />}
+      {!loading && error && <ErrorOrEmptyState error={error} />}
+      {!loading && !error && suggestions.length === 0 && (
+        <EmptyState message="当前没有调仓建议。" />
+      )}
+
+      {!loading && !error && suggestions.length > 0 && (
+        <ul className="space-y-3 list-none p-0">
           {suggestions.map((item, index) => (
-            <li key={`${item.type}-${item.subject}-${index}`} className="rounded-lg border border-[#d1d5db] p-4 mb-3">
-              <div className="font-semibold">{item.subject}</div>
-              <div>{item.recommendation} · {(item.confidence * 100).toFixed(1)}%</div>
-              <div className="text-sm text-slate-600">{item.evidence[0]?.summary}</div>
-              <div className="text-xs text-slate-500 mt-1">{item.risk_notes[0] ?? "—"}</div>
-              <div className="text-xs text-slate-500 mt-1">
-                状态：{research[item.subject]?.market_regime ?? "—"} · 推荐策略：{research[item.subject]?.recommended_strategy_ids.join(" / ") ?? "—"}
+            <li
+              key={`${item.type}-${item.subject}-${index}`}
+              className="bg-[#151619] border border-[#2A2D35] rounded-xl p-4 hover:border-[#00C087]/40 transition-colors"
+            >
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <Target size={14} className="text-[#00C087]" />
+                  <span className="text-white font-bold">{item.subject}</span>
+                </div>
+                <ToneBadge type={item.type} />
               </div>
-              <div className="text-xs text-slate-500 mt-1">
-                推荐周期：{research[item.subject]?.recommended_timeframes.join(" / ") ?? "—"} · 最优参数：{
-                  optimizations[item.subject]
-                    ? Object.entries(optimizations[item.subject].best_params)
-                        .map(([key, value]) => `${key}=${value}`)
-                        .join(", ")
-                    : "—"
-                }
+              <div className="text-white text-sm mt-2">
+                {item.recommendation}
+                <span className="text-[#8E9299] ml-2 text-xs">
+                  ({(item.confidence * 100).toFixed(1)}%)
+                </span>
               </div>
+              {item.evidence[0]?.summary && (
+                <div className="text-[#8E9299] text-xs mt-2">📌 {item.evidence[0].summary}</div>
+              )}
+              {item.risk_notes[0] && (
+                <div className="text-yellow-400/80 text-xs mt-1">⚠ {item.risk_notes[0]}</div>
+              )}
+              <div className="text-[#8E9299] text-xs mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                <span>
+                  状态:{" "}
+                  <span className="text-white">{research[item.subject]?.market_regime ?? "—"}</span>
+                </span>
+                <span>
+                  推荐策略:{" "}
+                  <span className="text-white">
+                    {research[item.subject]?.recommended_strategy_ids.join(" / ") ?? "—"}
+                  </span>
+                </span>
+                <span>
+                  推荐周期:{" "}
+                  <span className="text-white">
+                    {research[item.subject]?.recommended_timeframes.join(" / ") ?? "—"}
+                  </span>
+                </span>
+              </div>
+              {optimizations[item.subject] && (
+                <div className="text-[#8E9299] text-xs mt-1 font-mono">
+                  最优参数:{" "}
+                  <span className="text-[#00C087]">
+                    {Object.entries(optimizations[item.subject].best_params)
+                      .map(([k, v]) => `${k}=${v}`)
+                      .join(", ")}
+                  </span>
+                </div>
+              )}
             </li>
           ))}
         </ul>
-      ) : null}
+      )}
     </section>
   );
 }

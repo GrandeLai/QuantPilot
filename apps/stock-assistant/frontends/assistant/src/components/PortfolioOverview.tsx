@@ -1,6 +1,8 @@
+import { Briefcase, Coins, TrendingUp, Wallet } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { fetchOverview, type AdvisorOverviewPayload } from "../api/client";
+import { ErrorOrEmptyState, KPICard, LoadingState } from "./ui/StateMessages";
 
 /**
  * Advisor overview backed by the shared backend snapshot.
@@ -23,34 +25,93 @@ export function PortfolioOverview() {
   }, []);
 
   return (
-    <section aria-labelledby="portfolio-overview-title">
-      <h2 id="portfolio-overview-title">资产总览</h2>
-      <p>查看共享后端输出的净值、现金占比和当前持仓快照。</p>
-      {loading ? <p>加载中…</p> : null}
-      {error ? <p>{error}</p> : null}
-      {overview ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-lg border border-[#d1d5db] p-4">
-            <div className="text-sm text-slate-500">净资产</div>
-            <div className="text-2xl font-semibold">{overview.net_worth.toLocaleString("en-US", { maximumFractionDigits: 2 })}</div>
+    <section aria-labelledby="portfolio-overview-title" className="space-y-4">
+      <div>
+        <h2
+          id="portfolio-overview-title"
+          className="text-white text-lg font-bold flex items-center gap-2"
+        >
+          <Briefcase size={18} className="text-[#00C087]" />
+          资产总览
+        </h2>
+        <p className="text-[#8E9299] text-sm mt-1">
+          查看共享后端输出的净值、现金占比和当前持仓快照。
+        </p>
+      </div>
+
+      {loading && <LoadingState />}
+      {!loading && error && <ErrorOrEmptyState error={error} />}
+
+      {overview && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            <KPICard
+              title="净资产"
+              value={overview.net_worth.toLocaleString("en-US", {
+                maximumFractionDigits: 2,
+              })}
+              subValue="USD"
+            />
+            <KPICard
+              title="现金占比"
+              value={`${(overview.cash_ratio * 100).toFixed(1)}%`}
+              subValue={overview.cash_ratio >= 0.5 ? "防守偏高" : overview.cash_ratio >= 0.2 ? "均衡" : "进攻偏高"}
+            />
+            <KPICard
+              title="持仓数量"
+              value={String(overview.positions.length)}
+              subValue="标的"
+            />
+            <KPICard
+              title="资产姿态"
+              value={
+                overview.cash_ratio >= 0.5
+                  ? "防守"
+                  : overview.cash_ratio >= 0.2
+                  ? "均衡"
+                  : "进攻"
+              }
+              subValue={overview.generated_at}
+            />
           </div>
-          <div className="rounded-lg border border-[#d1d5db] p-4">
-            <div className="text-sm text-slate-500">现金占比</div>
-            <div className="text-2xl font-semibold">{(overview.cash_ratio * 100).toFixed(1)}%</div>
-          </div>
-          <div className="rounded-lg border border-[#d1d5db] p-4">
-            <div className="text-sm text-slate-500">持仓数量</div>
-            <div className="text-2xl font-semibold">{overview.positions.length}</div>
-          </div>
-          <div className="rounded-lg border border-[#d1d5db] p-4">
-            <div className="text-sm text-slate-500">资产姿态</div>
-            <div className="text-lg font-semibold">
-              {overview.cash_ratio >= 0.5 ? "防守偏高" : overview.cash_ratio >= 0.2 ? "均衡" : "进攻偏高"}
+
+          {overview.positions.length > 0 && (
+            <div className="bg-[#151619] border border-[#2A2D35] rounded-xl overflow-hidden">
+              <div className="px-4 py-2 bg-[#1C1E22] text-[#8E9299] text-[11px] font-bold uppercase flex items-center gap-2">
+                <Coins size={12} />
+                当前持仓
+              </div>
+              <div className="divide-y divide-[#2A2D35]">
+                {overview.positions.map((pos, i) => {
+                  const symbol = String(pos.symbol ?? pos.ticker ?? `position_${i}`);
+                  const value = pos.value ?? pos.market_value ?? pos.notional;
+                  return (
+                    <div
+                      key={`${symbol}-${i}`}
+                      className="px-4 py-2.5 flex items-center justify-between text-sm"
+                    >
+                      <span className="text-white font-mono">{symbol}</span>
+                      <span className="text-[#8E9299] font-mono text-xs">
+                        {value !== undefined && value !== null
+                          ? Number(value).toLocaleString("en-US", { maximumFractionDigits: 2 })
+                          : JSON.stringify(pos)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            <div className="text-xs text-slate-500 mt-1">{overview.generated_at}</div>
+          )}
+
+          <div className="flex items-center gap-2 text-[#8E9299] text-xs">
+            <TrendingUp size={12} />
+            <span>
+              <Wallet size={12} className="inline mr-1" />
+              数据来自 advisor overview 快照（非实时）
+            </span>
           </div>
         </div>
-      ) : null}
+      )}
     </section>
   );
 }
