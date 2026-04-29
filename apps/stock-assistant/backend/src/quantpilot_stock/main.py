@@ -170,6 +170,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(ma_alignment_router)
     from quantpilot_stock.api.macd import router as macd_router
     include_with_api_alias(macd_router)
+    from quantpilot_stock.api.bollinger import router as bollinger_router
+    include_with_api_alias(bollinger_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)

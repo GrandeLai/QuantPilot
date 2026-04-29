@@ -2356,6 +2356,49 @@ export async function fetchADXTrend(ticker: string): Promise<ADXData> {
   return r.json() as Promise<ADXData>;
 }
 
+// ── F.38 Bollinger Band Squeeze ───────────────────────────────────────────────
+
+export type BBSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface BollingerData {
+  ticker: string;
+  price: number | null;
+  middle: number | null;
+  upper: number | null;
+  lower: number | null;
+  bandwidth: number | null;
+  pct_b: number | null;
+  bandwidth_percentile: number | null;
+  squeeze_active: boolean;
+  bb_score: number;
+  signal: BBSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchBollinger(ticker: string): Promise<BollingerData> {
+  const r = await fetch(
+    `${BASE}/bollinger?ticker=${encodeURIComponent(ticker)}`
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<BollingerData>;
+}
+
 // ── F.37 MACD Signal ─────────────────────────────────────────────────────────
 
 export type MACDSignal =
