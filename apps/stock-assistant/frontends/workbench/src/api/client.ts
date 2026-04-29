@@ -516,3 +516,110 @@ export function fetchRiskKellyFromReturns(
     cap,
   });
 }
+
+// ── Crypto Derivatives（phaseF.1.13）────────────────────────────────────────
+
+export interface FundingRateLite {
+  exchange: "binance" | "okx";
+  symbol: string;
+  raw_symbol: string;
+  funding_rate: number;
+  next_funding_time: string | null;
+  timestamp: string;
+}
+
+export interface OpenInterestLite {
+  exchange: "binance" | "okx";
+  symbol: string;
+  raw_symbol: string;
+  open_interest: number;
+  open_interest_value: number | null;
+  timestamp: string;
+}
+
+export interface CryptoDerivsSnapshot {
+  asset: string;
+  timestamp: string;
+  funding: { binance: FundingRateLite | null; okx: FundingRateLite | null };
+  open_interest: { binance: OpenInterestLite | null; okx: OpenInterestLite | null };
+  errors: Record<string, string>;
+}
+
+export interface FundingStats {
+  mean: number;
+  std: number;
+  p5: number;
+  p25: number;
+  p50: number;
+  p75: number;
+  p95: number;
+}
+
+export interface FundingExtremeSignal {
+  z_score: number;
+  percentile: number;
+  signal: "contrarian_short" | "contrarian_long" | "neutral";
+}
+
+export interface FundingStatsResult {
+  stats: FundingStats;
+  n_samples: number;
+  signal: FundingExtremeSignal | null;
+}
+
+export interface ETFFlowExtremeSignal {
+  z_score: number;
+  percentile: number;
+  signal: "large_inflow" | "large_outflow" | "neutral";
+}
+
+export interface ETFFlowStatsResult {
+  stats: FundingStats & { n_samples: number };
+  signal: ETFFlowExtremeSignal | null;
+}
+
+async function postCryptoDerivs<T>(path: string, body: unknown): Promise<T> {
+  const r = await fetch(`${BASE}/crypto-derivs/${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<T>;
+}
+
+export function fetchCryptoDerivsSnapshot(asset = "BTC"): Promise<CryptoDerivsSnapshot> {
+  return postCryptoDerivs<CryptoDerivsSnapshot>("snapshot", { asset });
+}
+
+export function fetchFundingStats(
+  history: number[],
+  current: number | null = null,
+  zThreshold = 2.0,
+): Promise<FundingStatsResult> {
+  return postCryptoDerivs<FundingStatsResult>("funding-stats", {
+    history,
+    current,
+    z_threshold: zThreshold,
+  });
+}
+
+export function fetchETFFlowStats(
+  history: number[],
+  current: number | null = null,
+  zThreshold = 2.0,
+): Promise<ETFFlowStatsResult> {
+  return postCryptoDerivs<ETFFlowStatsResult>("etf-flow-stats", {
+    history,
+    current,
+    z_threshold: zThreshold,
+  });
+}
