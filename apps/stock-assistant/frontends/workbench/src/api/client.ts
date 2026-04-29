@@ -1761,3 +1761,52 @@ export async function fetchSmartMoney(ticker: string): Promise<SmartMoneyData> {
   }
   return r.json() as Promise<SmartMoneyData>;
 }
+
+// ── Index Rebalance (F.23) ────────────────────────────────────────────────────
+
+export type IndexStatus = "member" | "non_member" | "unknown";
+
+export type RebalanceRisk =
+  | "high_addition_risk"
+  | "moderate_addition_risk"
+  | "stable"
+  | "moderate_deletion_risk"
+  | "high_deletion_risk"
+  | "unknown";
+
+export interface IndexMembershipItem {
+  index_name: string;
+  status: IndexStatus;
+  market_cap_rank: number | null;
+  market_cap_pct: number | null;
+  rebalance_risk: RebalanceRisk;
+}
+
+export interface IndexRebalanceData {
+  ticker: string;
+  market_cap: number | null;
+  market_cap_b: number | null;
+  float_shares: number | null;
+  price: number | null;
+  eps_ttm: number | null;
+  indices: IndexMembershipItem[];
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchIndexRebalance(
+  ticker: string
+): Promise<IndexRebalanceData> {
+  const r = await fetch(`${BASE}/index-rebalance/?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<IndexRebalanceData>;
+}
