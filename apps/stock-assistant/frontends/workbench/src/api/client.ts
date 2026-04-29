@@ -1183,3 +1183,80 @@ export async function fetchSqueezeScan(
   }
   return r.json() as Promise<ShortInterestData[]>;
 }
+
+// ---------------------------------------------------------------------------
+// Crypto Whale / CEX Inflow Monitor (Phase F.10)
+// ---------------------------------------------------------------------------
+
+export type WhaleSignal =
+  | "heavy_inflow"
+  | "elevated_inflow"
+  | "neutral"
+  | "accumulation"
+  | "heavy_accumulation";
+
+export interface WhaleTransferData {
+  tx_hash: string;
+  from_address: string;
+  to_address: string;
+  value_eth: number;
+  value_usd: number | null;
+  timestamp: string;
+  exchange_name: string;
+  direction: "inflow" | "outflow";
+}
+
+export interface CEXInflowData {
+  symbol: string;
+  hours: number;
+  min_eth: number;
+  inflow_eth: number;
+  outflow_eth: number;
+  net_flow_eth: number;
+  inflow_usd: number | null;
+  pressure_score: number;
+  signal: WhaleSignal;
+  transfer_count: number;
+  recent_transfers: WhaleTransferData[];
+  as_of_date: string;
+  api_key_missing: boolean;
+}
+
+export async function fetchCEXInflow(
+  hours = 24,
+  minEth = 100,
+): Promise<CEXInflowData> {
+  const r = await fetch(
+    `${BASE}/crypto-whale/eth-inflow?hours=${hours}&min_eth=${minEth}`,
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<CEXInflowData>;
+}
+
+export async function fetchWhaleTransfers(
+  hours = 24,
+  minEth = 100,
+  limit = 20,
+): Promise<WhaleTransferData[]> {
+  const r = await fetch(
+    `${BASE}/crypto-whale/recent-transfers?hours=${hours}&min_eth=${minEth}&limit=${limit}`,
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<WhaleTransferData[]>;
+}
