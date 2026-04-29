@@ -2177,3 +2177,53 @@ export async function fetchBetaCorrelation(
   }
   return r.json() as Promise<BetaCorrelationData>;
 }
+
+// ── F.32 Seasonality Pattern Analysis ────────────────────────────────────────
+
+export type SeasonalSignal =
+  | "strong_season"
+  | "positive_season"
+  | "neutral"
+  | "negative_season"
+  | "strong_negative"
+  | "no_data";
+
+export interface MonthStats {
+  month: number;
+  month_name: string;
+  avg_return: number;
+  median_return: number;
+  positive_rate: number;
+  sample_size: number;
+}
+
+export interface SeasonalityData {
+  ticker: string;
+  current_month: number;
+  current_month_stats: MonthStats | null;
+  all_months: MonthStats[];
+  best_month: number | null;
+  worst_month: number | null;
+  signal: SeasonalSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchSeasonality(
+  ticker: string
+): Promise<SeasonalityData> {
+  const r = await fetch(
+    `${BASE}/seasonality?ticker=${encodeURIComponent(ticker)}`
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<SeasonalityData>;
+}

@@ -158,6 +158,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(technical_score_router)
     from quantpilot_stock.api.beta_correlation import router as beta_correlation_router
     include_with_api_alias(beta_correlation_router)
+    from quantpilot_stock.api.seasonality import router as seasonality_router
+    include_with_api_alias(seasonality_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)
