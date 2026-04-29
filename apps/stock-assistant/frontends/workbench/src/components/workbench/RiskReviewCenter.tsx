@@ -15,6 +15,7 @@ import ShortInterestPanel from "../ShortInterestPanel";
 import WhaleMonitorPanel from "../WhaleMonitorPanel";
 import PEADPanel from "../PEADPanel";
 import MomentumPanel from "../MomentumPanel";
+import SocialSentimentPanel from "../SocialSentimentPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -27,6 +28,7 @@ export default function RiskReviewCenter() {
       <EPSRevisionPanel />
       <PEADPanel />
       <MomentumPanel />
+      <SocialSentimentPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />

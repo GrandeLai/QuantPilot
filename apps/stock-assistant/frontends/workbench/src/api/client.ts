@@ -1397,3 +1397,49 @@ export async function fetchMomentumSignal(
   }
   return r.json() as Promise<MomentumSignalData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.15 Social Sentiment & Pump Risk (StockTwits)
+// ---------------------------------------------------------------------------
+
+export type SentimentGrade =
+  | "very_bullish"
+  | "bullish"
+  | "neutral"
+  | "bearish"
+  | "very_bearish";
+
+export type PumpRiskLevel = "high" | "elevated" | "low";
+
+export interface SocialSentimentData {
+  ticker: string;
+  total_messages: number;
+  bullish_count: number;
+  bearish_count: number;
+  bullish_ratio: number;      // 0-1
+  sentiment_grade: SentimentGrade;
+  pump_risk_level: PumpRiskLevel;
+  pump_risk_score: number;    // 0-1
+  interpretation: string;
+  as_of_date: string;
+  api_accessible: boolean;
+}
+
+export async function fetchSocialSentiment(
+  ticker: string,
+): Promise<SocialSentimentData> {
+  // Always returns 200; api_accessible=false when StockTwits is unreachable
+  const r = await fetch(
+    `${BASE}/social-sentiment/?ticker=${encodeURIComponent(ticker)}`,
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<SocialSentimentData>;
+}

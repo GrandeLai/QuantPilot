@@ -124,6 +124,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(pead_router)
     from quantpilot_stock.api.momentum import router as momentum_router
     include_with_api_alias(momentum_router)
+    from quantpilot_stock.api.social_sentiment import router as social_sentiment_router
+    include_with_api_alias(social_sentiment_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)
