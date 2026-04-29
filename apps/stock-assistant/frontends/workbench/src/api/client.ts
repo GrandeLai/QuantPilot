@@ -623,3 +623,70 @@ export function fetchETFFlowStats(
     z_threshold: zThreshold,
   });
 }
+
+// ── GEX (Dealer Gamma Exposure) ──────────────────────────────────────────────
+
+export interface GEXByStrike {
+  strike: number;
+  call_oi: number;
+  put_oi: number;
+  call_gex: number;
+  put_gex: number;
+  net_gex: number;
+  gamma: number;
+  dte: number;
+}
+
+export interface GEXSnapshot {
+  ticker: string;
+  spot: number;
+  snapshot_time: string;
+  gex_by_strike: GEXByStrike[];
+  net_gex_total: number;
+  gamma_flip_level: number | null;
+  major_magnet: number | null;
+  high_vol_trigger: number | null;
+}
+
+export interface GEXLevels {
+  ticker: string;
+  spot: number;
+  snapshot_time: string;
+  net_gex_total: number;
+  gamma_flip_level: number | null;
+  major_magnet: number | null;
+  high_vol_trigger: number | null;
+}
+
+async function getGex<T>(path: string, params: Record<string, string | number>): Promise<T> {
+  const qs = new URLSearchParams(
+    Object.entries(params).map(([k, v]) => [k, String(v)]),
+  ).toString();
+  const r = await fetch(`${BASE}/options/gex/${path}?${qs}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<T>;
+}
+
+export function fetchGEXSnapshot(
+  ticker = "SPY",
+  maxDte = 45,
+  minOi = 10,
+): Promise<GEXSnapshot> {
+  return getGex<GEXSnapshot>("snapshot", { ticker, max_dte: maxDte, min_oi: minOi });
+}
+
+export function fetchGEXLevels(
+  ticker = "SPY",
+  maxDte = 45,
+  minOi = 10,
+): Promise<GEXLevels> {
+  return getGex<GEXLevels>("levels", { ticker, max_dte: maxDte, min_oi: minOi });
+}
