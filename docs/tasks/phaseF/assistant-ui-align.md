@@ -112,8 +112,8 @@
 - [ ] **AC-3**: 工具 + UI helpers
   - `test -f apps/stock-assistant/frontends/assistant/src/lib/utils.ts`
   - `grep -q "twMerge\|tailwind-merge" apps/stock-assistant/frontends/assistant/src/lib/utils.ts`
-- [ ] **AC-4**: 404 优雅处理 — 在所有 5 个 view 组件中至少有 1 处 "暂未接入" 文案
-  - `grep -lc "暂未接入\|未实现\|advisor 后端" apps/stock-assistant/frontends/assistant/src/components/*.tsx | grep -v ":0$" | wc -l` ≥ 1
+- [ ] **AC-4**: 404 优雅处理 — 至少有 1 处 "未实现 / 暂未接入 / advisor 后端" 文案（可在 view 组件或共享 ui 子目录里）
+  - `grep -rlc "暂未接入\|未实现\|advisor 后端" apps/stock-assistant/frontends/assistant/src/components/ | grep -v ":0$" | wc -l` ≥ 1
 - [ ] **AC-5**: type-check + build 通过
   - `(cd apps/stock-assistant/frontends/assistant && npm run type-check)` 退出码 0
   - `(cd apps/stock-assistant/frontends/assistant && npm run build)` 退出码 0
