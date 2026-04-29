@@ -1842,6 +1842,52 @@ export interface IVRankData {
   data_available: boolean;
 }
 
+// ── F.25 Earnings Calendar & Expected Move ─────────────────────────────────
+
+export type StraddleSignal =
+  | "buy_straddle"
+  | "sell_straddle"
+  | "fair"
+  | "unknown";
+
+export interface EarningsMove {
+  date: string;
+  actual_move_pct: number;
+  abs_move_pct: number;
+  beat_estimate: boolean | null;
+}
+
+export interface EarningsCalendarData {
+  ticker: string;
+  next_earnings_date: string | null;
+  days_to_earnings: number | null;
+  implied_move_pct: number | null;
+  historical_avg_move_pct: number | null;
+  historical_moves: EarningsMove[];
+  straddle_signal: StraddleSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchEarningsCalendar(
+  ticker: string
+): Promise<EarningsCalendarData> {
+  const r = await fetch(
+    `${BASE}/earnings-calendar?ticker=${encodeURIComponent(ticker)}`
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<EarningsCalendarData>;
+}
+
 export async function fetchIVRank(ticker: string): Promise<IVRankData> {
   const r = await fetch(`${BASE}/iv-rank?ticker=${encodeURIComponent(ticker)}`);
   if (!r.ok) {
