@@ -59,7 +59,7 @@ docs/tasks/phaseF29/max-pain.md
 
 - 测试总数 ≥ 16
 - 覆盖：_compute_max_pain 正常 + 空链
-- 覆盖：_classify_signal 所有档位（pin_zone / bullish_pull / bearish_pull / near_pin / unknown）
+- 覆盖：_classify_signal 所有档位（pin_zone / bullish_pull / bearish_pull / weak_pull / unknown）
 - 覆盖：compute_max_pain 正常（有期权）
 - 覆盖：无期权 → data_available=True, expiries=[]
 - 覆盖：yfinance 异常 → data_available=False

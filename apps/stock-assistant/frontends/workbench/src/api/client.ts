@@ -2136,3 +2136,44 @@ export async function fetchTechnicalScore(
   }
   return r.json() as Promise<TechnicalScoreData>;
 }
+
+// ── Beta & Correlation Monitor (F.31) ─────────────────────────────────────
+
+export type BetaSignal =
+  | "high_beta"
+  | "moderate_beta"
+  | "low_beta"
+  | "defensive"
+  | "no_data";
+
+export interface BetaCorrelationData {
+  ticker: string;
+  beta_1y: number | null;
+  beta_63d: number | null;
+  corr_spy_1y: number | null;
+  corr_qqq_1y: number | null;
+  r_squared_1y: number | null;
+  idio_vol_ann: number | null;
+  signal: BetaSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchBetaCorrelation(
+  ticker: string
+): Promise<BetaCorrelationData> {
+  const r = await fetch(
+    `${BASE}/beta-correlation?ticker=${encodeURIComponent(ticker)}`
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<BetaCorrelationData>;
+}

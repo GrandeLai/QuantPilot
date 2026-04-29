@@ -156,6 +156,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(max_pain_router)
     from quantpilot_stock.api.technical_score import router as technical_score_router
     include_with_api_alias(technical_score_router)
+    from quantpilot_stock.api.beta_correlation import router as beta_correlation_router
+    include_with_api_alias(beta_correlation_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)

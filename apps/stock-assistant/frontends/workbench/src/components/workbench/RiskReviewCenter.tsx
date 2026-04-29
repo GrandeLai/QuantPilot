@@ -31,6 +31,7 @@ import MacroDashboardPanel from "../MacroDashboardPanel";
 import DividendAnalysisPanel from "../DividendAnalysisPanel";
 import MaxPainPanel from "../MaxPainPanel";
 import TechnicalScorePanel from "../TechnicalScorePanel";
+import BetaCorrelationPanel from "../BetaCorrelationPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -59,6 +60,7 @@ export default function RiskReviewCenter() {
       <DividendAnalysisPanel />
       <MaxPainPanel />
       <TechnicalScorePanel />
+      <BetaCorrelationPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />
