@@ -2356,6 +2356,48 @@ export async function fetchADXTrend(ticker: string): Promise<ADXData> {
   return r.json() as Promise<ADXData>;
 }
 
+// ── F.39 RSI Divergence Signal ────────────────────────────────────────────────
+
+export type RSISignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface RSIData {
+  ticker: string;
+  rsi: number | null;
+  prev_rsi: number | null;
+  rsi_direction: string;
+  overbought: boolean;
+  oversold: boolean;
+  bullish_divergence: boolean;
+  bearish_divergence: boolean;
+  rsi_score: number;
+  signal: RSISignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchRSISignal(ticker: string): Promise<RSIData> {
+  const r = await fetch(
+    `${BASE}/rsi-signal?ticker=${encodeURIComponent(ticker)}`
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<RSIData>;
+}
+
 // ── F.38 Bollinger Band Squeeze ───────────────────────────────────────────────
 
 export type BBSignal =

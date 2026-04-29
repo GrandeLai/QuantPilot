@@ -172,6 +172,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(macd_router)
     from quantpilot_stock.api.bollinger import router as bollinger_router
     include_with_api_alias(bollinger_router)
+    from quantpilot_stock.api.rsi_signal import router as rsi_signal_router
+    include_with_api_alias(rsi_signal_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)
