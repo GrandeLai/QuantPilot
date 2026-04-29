@@ -2227,3 +2227,48 @@ export async function fetchSeasonality(
   }
   return r.json() as Promise<SeasonalityData>;
 }
+
+// ── F.33 Relative Strength Score ─────────────────────────────────────────────
+
+export type RSSignal =
+  | "strong_outperformer"
+  | "outperformer"
+  | "neutral"
+  | "underperformer"
+  | "strong_underperformer"
+  | "no_data";
+
+export interface PeriodRS {
+  period: string;        // "1M" | "3M" | "6M" | "12M"
+  stock_return: number;
+  spy_return: number;
+  relative_return: number;
+}
+
+export interface RSData {
+  ticker: string;
+  periods: PeriodRS[];
+  rs_score: number;
+  signal: RSSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchRelativeStrength(
+  ticker: string
+): Promise<RSData> {
+  const r = await fetch(
+    `${BASE}/relative-strength?ticker=${encodeURIComponent(ticker)}`
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<RSData>;
+}
