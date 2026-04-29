@@ -21,6 +21,7 @@ import EarningsMovePanel from "../EarningsMovePanel";
 import SectorMomentumPanel from "../SectorMomentumPanel";
 import AnalystConsensusPanel from "../AnalystConsensusPanel";
 import EarningsQualityPanel from "../EarningsQualityPanel";
+import InsiderTradingPanel from "../InsiderTradingPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -39,6 +40,7 @@ export default function RiskReviewCenter() {
       <SectorMomentumPanel />
       <AnalystConsensusPanel />
       <EarningsQualityPanel />
+      <InsiderTradingPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />

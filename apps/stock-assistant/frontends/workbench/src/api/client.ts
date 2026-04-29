@@ -1667,3 +1667,52 @@ export async function fetchEarningsQuality(
   }
   return r.json() as Promise<EarningsQualityData>;
 }
+
+// ── Insider Trading Form 4 (F.21) ─────────────────────────────────────────────
+
+export type InsiderSignal =
+  | "cluster_buy"
+  | "cluster_sell"
+  | "mixed"
+  | "neutral"
+  | "no_data";
+
+export interface InsiderTransactionItem {
+  insider_name: string;
+  title: string;
+  transaction_date: string;
+  shares: number;
+  price_per_share: number | null;
+  transaction_type: string; // "P" buy, "S" sell
+  is_10b5_plan: boolean;
+  form_url: string;
+}
+
+export interface InsiderTradingData {
+  ticker: string;
+  cik: string | null;
+  signal: InsiderSignal;
+  cluster_buy_count: number;
+  cluster_sell_count: number;
+  net_shares_90d: number;
+  transactions: InsiderTransactionItem[];
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchInsiderTrading(
+  ticker: string
+): Promise<InsiderTradingData> {
+  const r = await fetch(`${BASE}/insider-trading/?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<InsiderTradingData>;
+}
