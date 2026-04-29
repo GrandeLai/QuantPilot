@@ -891,3 +891,59 @@ export async function fetchFundamentalSummary(
   }
   return r.json() as Promise<FundamentalSummary>;
 }
+
+// ---------------------------------------------------------------------------
+// Quant Signals — Beneish M-Score + Russell Rebalancing Preview (Phase F.5)
+// ---------------------------------------------------------------------------
+
+export interface BeneishMScoreData {
+  ticker: string;
+  m_score: number;
+  risk_level: "safe" | "grey" | "manipulator";
+  ratios: Record<string, number>;
+  interpretation: string;
+  as_of_date: string;
+}
+
+export interface RussellMembershipData {
+  ticker: string;
+  market_cap_usd: number;
+  estimated_rank: number | null;
+  current_index:
+    | "Russell 1000"
+    | "Russell 2000"
+    | "Outside Russell 3000"
+    | "Unknown";
+  proximity_score: number;
+  rebalance_signal:
+    | "likely_add_1000"
+    | "likely_drop_1000"
+    | "likely_add_2000"
+    | "likely_drop_2000"
+    | "stable"
+    | "unknown";
+}
+
+export interface QuantSignalsSummary {
+  ticker: string;
+  beneish: BeneishMScoreData | null;
+  russell: RussellMembershipData | null;
+}
+
+export async function fetchQuantSignalsSummary(
+  ticker: string,
+): Promise<QuantSignalsSummary> {
+  const r = await fetch(
+    `${BASE}/quant-signals/summary?ticker=${encodeURIComponent(ticker)}`,
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<QuantSignalsSummary>;
+}
