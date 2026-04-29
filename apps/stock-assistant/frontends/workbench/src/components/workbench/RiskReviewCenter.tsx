@@ -40,6 +40,7 @@ import MAAlignmentPanel from "../MAAlignmentPanel";
 import MACDPanel from "../MACDPanel";
 import BollingerPanel from "../BollingerPanel";
 import RSISignalPanel from "../RSISignalPanel";
+import StochasticPanel from "../StochasticPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -77,6 +78,7 @@ export default function RiskReviewCenter() {
       <MACDPanel />
       <BollingerPanel />
       <RSISignalPanel />
+      <StochasticPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />

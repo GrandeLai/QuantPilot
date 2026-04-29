@@ -2356,6 +2356,50 @@ export async function fetchADXTrend(ticker: string): Promise<ADXData> {
   return r.json() as Promise<ADXData>;
 }
 
+// ── F.40 Stochastic Oscillator ───────────────────────────────────────────────
+
+export type StochasticSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface StochasticData {
+  ticker: string;
+  k: number | null;
+  d: number | null;
+  prev_k: number | null;
+  prev_d: number | null;
+  overbought: boolean;
+  oversold: boolean;
+  k_above_d: boolean;
+  recent_bull_cross: boolean;
+  recent_bear_cross: boolean;
+  stoch_score: number;
+  signal: StochasticSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchStochastic(ticker: string): Promise<StochasticData> {
+  const r = await fetch(
+    `${BASE}/stochastic?ticker=${encodeURIComponent(ticker)}`
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<StochasticData>;
+}
+
 // ── F.39 RSI Divergence Signal ────────────────────────────────────────────────
 
 export type RSISignal =
