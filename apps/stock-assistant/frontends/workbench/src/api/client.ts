@@ -1578,3 +1578,49 @@ export async function fetchSectorMomentum(): Promise<SectorMomentumData> {
   }
   return r.json() as Promise<SectorMomentumData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.19 Analyst Consensus & Price Target
+// ---------------------------------------------------------------------------
+
+export type AnalystGrade =
+  | "strong_buy"
+  | "buy"
+  | "hold"
+  | "sell"
+  | "strong_sell"
+  | "no_coverage";
+
+export interface AnalystConsensusData {
+  ticker: string;
+  recommendation_mean: number | null;   // 1-5 (1=Strong Buy)
+  recommendation_key: string | null;
+  num_analysts: number;
+  target_mean_price: number | null;
+  target_high_price: number | null;
+  target_low_price: number | null;
+  current_price: number | null;
+  upside_pct: number | null;            // (target_mean / current - 1) × 100
+  grade: AnalystGrade;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchAnalystConsensus(
+  ticker: string,
+): Promise<AnalystConsensusData> {
+  const r = await fetch(
+    `${BASE}/analyst-consensus/?ticker=${encodeURIComponent(ticker)}`,
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<AnalystConsensusData>;
+}
