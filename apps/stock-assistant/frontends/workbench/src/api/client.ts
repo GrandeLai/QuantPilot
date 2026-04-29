@@ -768,3 +768,63 @@ export async function fetchSECSummary(ticker: string): Promise<SECSummary> {
   }
   return r.json() as Promise<SECSummary>;
 }
+
+// ---------------------------------------------------------------------------
+// TLH（税务亏损收割）类型定义（Phase F.3）
+// ---------------------------------------------------------------------------
+
+export interface TaxLotInput {
+  ticker: string;
+  quantity: number;
+  cost_basis: number;
+  acquisition_date: string; // "YYYY-MM-DD"
+  lot_id?: string;
+}
+
+export interface TLHCandidate {
+  ticker: string;
+  lot_id: string;
+  quantity: number;
+  cost_basis: number;
+  acquisition_date: string;
+  current_price: number;
+  unrealized_pnl: number;
+  unrealized_pnl_pct: number;
+  holding_days: number;
+  is_long_term: boolean;
+  replacement_tickers: string[];
+  wash_sale_risk: boolean;
+}
+
+export interface TLHScanResponse {
+  candidates: TLHCandidate[];
+  estimated_tax_saving: number;
+  generated_at: string;
+}
+
+export interface TLHReplacementResponse {
+  ticker: string;
+  replacements: string[];
+}
+
+export async function fetchTLHScan(
+  lots: TaxLotInput[],
+  current_prices: Record<string, number>,
+  recent_purchases?: Record<string, string>,
+): Promise<TLHScanResponse> {
+  const r = await fetch(`${BASE}/tlh/scan`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ lots, current_prices, recent_purchases: recent_purchases ?? {} }),
+  });
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<TLHScanResponse>;
+}
