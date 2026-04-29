@@ -120,6 +120,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(dcf_router)
     include_with_api_alias(short_interest_router)
     include_with_api_alias(crypto_whale_router)
+    from quantpilot_stock.api.pead import router as pead_router
+    include_with_api_alias(pead_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)

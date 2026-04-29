@@ -1305,3 +1305,49 @@ export async function fetchWhaleTransfers(
   }
   return r.json() as Promise<WhaleTransferData[]>;
 }
+
+// ---------------------------------------------------------------------------
+// PEAD — Post-Earnings Announcement Drift (Phase F.13)
+// ---------------------------------------------------------------------------
+
+export type EarningsSurpriseGrade =
+  | "large_beat"
+  | "beat"
+  | "inline"
+  | "miss"
+  | "large_miss";
+
+export interface EarningsEventData {
+  earnings_date: string;
+  actual_eps: number;
+  estimated_eps: number;
+  surprise_pct: number;
+  grade: EarningsSurpriseGrade;
+}
+
+export interface PEADSignalData {
+  ticker: string;
+  last_earnings: EarningsEventData;
+  expected_drift_30d: number;
+  expected_drift_60d: number;
+  expected_drift_90d: number;
+  next_earnings_date: string | null;
+  interpretation: string;
+  as_of_date: string;
+}
+
+export async function fetchPEADSignal(ticker: string): Promise<PEADSignalData> {
+  const r = await fetch(
+    `${BASE}/pead/?ticker=${encodeURIComponent(ticker)}`,
+  );
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text) as { detail?: string };
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<PEADSignalData>;
+}

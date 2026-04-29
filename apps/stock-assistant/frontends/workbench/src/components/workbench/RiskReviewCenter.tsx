@@ -13,6 +13,7 @@ import TokenUnlockPanel from "../TokenUnlockPanel";
 import DCFPanel from "../DCFPanel";
 import ShortInterestPanel from "../ShortInterestPanel";
 import WhaleMonitorPanel from "../WhaleMonitorPanel";
+import PEADPanel from "../PEADPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -23,6 +24,7 @@ export default function RiskReviewCenter() {
       <FundamentalPanel />
       <QuantSignalsPanel />
       <EPSRevisionPanel />
+      <PEADPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />
