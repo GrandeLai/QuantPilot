@@ -2654,3 +2654,44 @@ export async function fetchMFI(ticker: string): Promise<MFIData> {
   }
   return r.json() as Promise<MFIData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.43 Chaikin Money Flow (CMF)
+// ---------------------------------------------------------------------------
+
+export type CMFSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface CMFData {
+  ticker: string;
+  cmf: number | null;
+  prev_cmf: number | null;
+  cmf_direction: string;
+  cmf_positive: boolean;
+  cmf_strong_bull: boolean;
+  cmf_strong_bear: boolean;
+  cmf_score: number;
+  signal: CMFSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchCMF(ticker: string): Promise<CMFData> {
+  const r = await fetch(`${BASE}/cmf?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<CMFData>;
+}
