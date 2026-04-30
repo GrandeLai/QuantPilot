@@ -2775,3 +2775,44 @@ export async function fetchCCI(ticker: string): Promise<CCIData> {
   }
   return r.json() as Promise<CCIData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.46 Average True Range (ATR)
+// ---------------------------------------------------------------------------
+
+export type ATRSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface ATRData {
+  ticker: string;
+  atr: number | null;
+  atr_pct: number | null;
+  atr_pct_rank: number | null;
+  volatility_regime: string;
+  above_sma20: boolean;
+  above_sma50: boolean;
+  atr_score: number;
+  signal: ATRSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchATR(ticker: string): Promise<ATRData> {
+  const r = await fetch(`${BASE}/atr?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<ATRData>;
+}
