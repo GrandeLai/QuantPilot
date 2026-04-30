@@ -3016,6 +3016,42 @@ export async function fetchForceIndex(ticker: string): Promise<ForceIndexData> {
   return r.json() as Promise<ForceIndexData>;
 }
 
+// ── Ultimate Oscillator ───────────────────────────────────────────────────────
+
+export type UltimateOscSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface UltimateOscData {
+  ticker: string;
+  uo_value: number | null;
+  uo_overbought: boolean;
+  uo_oversold: boolean;
+  uo_score: number;
+  signal: UltimateOscSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchUltimateOsc(ticker: string): Promise<UltimateOscData> {
+  const r = await fetch(`${BASE}/ultimate-osc?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<UltimateOscData>;
+}
+
 // ── Aroon ─────────────────────────────────────────────────────────────────────
 
 export type AroonSignal =

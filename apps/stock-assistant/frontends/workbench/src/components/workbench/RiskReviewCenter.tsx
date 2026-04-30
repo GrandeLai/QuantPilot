@@ -54,6 +54,7 @@ import { KeltnerPanel } from "../KeltnerPanel";
 import { ForceIndexPanel } from "../ForceIndexPanel";
 import { TRIXPanel } from "../TRIXPanel";
 import { AroonPanel } from "../AroonPanel";
+import { UltimateOscPanel } from "../UltimateOscPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -105,6 +106,7 @@ export default function RiskReviewCenter() {
       <ForceIndexPanel />
       <TRIXPanel />
       <AroonPanel />
+      <UltimateOscPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />
