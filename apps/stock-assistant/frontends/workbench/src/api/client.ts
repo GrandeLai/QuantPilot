@@ -3016,6 +3016,43 @@ export async function fetchForceIndex(ticker: string): Promise<ForceIndexData> {
   return r.json() as Promise<ForceIndexData>;
 }
 
+// ── Aroon ─────────────────────────────────────────────────────────────────────
+
+export type AroonSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface AroonData {
+  ticker: string;
+  aroon_up: number | null;
+  aroon_down: number | null;
+  aroon_oscillator: number | null;
+  aroon_bullish: boolean;
+  aroon_score: number;
+  signal: AroonSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchAroon(ticker: string): Promise<AroonData> {
+  const r = await fetch(`${BASE}/aroon?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<AroonData>;
+}
+
 // ── TRIX ──────────────────────────────────────────────────────────────────────
 
 export type TRIXSignal =

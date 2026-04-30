@@ -198,6 +198,10 @@ def create_app() -> FastAPI:
     include_with_api_alias(keltner_router)
     from quantpilot_stock.api.force_index import router as force_index_router
     include_with_api_alias(force_index_router)
+    from quantpilot_stock.api.trix import router as trix_router
+    include_with_api_alias(trix_router)
+    from quantpilot_stock.api.aroon import router as aroon_router
+    include_with_api_alias(aroon_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)

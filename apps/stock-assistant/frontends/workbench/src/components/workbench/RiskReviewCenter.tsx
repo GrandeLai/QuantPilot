@@ -53,6 +53,7 @@ import { VWAPPanel } from "../VWAPPanel";
 import { KeltnerPanel } from "../KeltnerPanel";
 import { ForceIndexPanel } from "../ForceIndexPanel";
 import { TRIXPanel } from "../TRIXPanel";
+import { AroonPanel } from "../AroonPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -103,6 +104,7 @@ export default function RiskReviewCenter() {
       <KeltnerPanel />
       <ForceIndexPanel />
       <TRIXPanel />
+      <AroonPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />
