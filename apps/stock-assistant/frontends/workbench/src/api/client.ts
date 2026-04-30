@@ -4001,3 +4001,31 @@ export async function fetchAO(ticker: string): Promise<AOData> {
   }
   return r.json() as Promise<AOData>;
 }
+
+// ── Choppiness Index — F.79 ───────────────────────────────────────────────────
+
+export interface CHOPData {
+  ticker: string;
+  chop_value: number | null;
+  is_trending: boolean | null;
+  price_above_sma: boolean | null;
+  chop_score: number;
+  signal: "strong_bull" | "bull" | "neutral" | "bear" | "strong_bear" | "no_data";
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchCHOP(ticker: string): Promise<CHOPData> {
+  const r = await fetch(`${BASE}/choppiness?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<CHOPData>;
+}

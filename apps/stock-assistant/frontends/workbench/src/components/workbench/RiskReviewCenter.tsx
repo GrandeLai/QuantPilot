@@ -79,6 +79,7 @@ import { DEMAPanel } from "../DEMAPanel";
 import { TEMAPanel } from "../TEMAPanel";
 import { AlligatorPanel } from "../AlligatorPanel";
 import { AwesomeOscPanel } from "../AwesomeOscPanel";
+import { ChoppinessPanel } from "../ChoppinessPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -155,6 +156,7 @@ export default function RiskReviewCenter() {
       <TEMAPanel />
       <AlligatorPanel />
       <AwesomeOscPanel />
+      <ChoppinessPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />
