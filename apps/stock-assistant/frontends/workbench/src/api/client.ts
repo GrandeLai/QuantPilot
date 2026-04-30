@@ -3349,3 +3349,38 @@ export async function fetchKST(ticker: string): Promise<KSTData> {
   }
   return r.json() as Promise<KSTData>;
 }
+
+// ── Chaikin Oscillator ───────────────────────────────────────────────────────
+
+export type ChaikinOscSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface ChaikinOscData {
+  ticker: string;
+  chaikin_osc: number | null;
+  osc_positive: boolean | null;
+  chaikin_score: number;
+  signal: ChaikinOscSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchChaikinOsc(ticker: string): Promise<ChaikinOscData> {
+  const r = await fetch(`${BASE}/chaikin_osc?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<ChaikinOscData>;
+}
