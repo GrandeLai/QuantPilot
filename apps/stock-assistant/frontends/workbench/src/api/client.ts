@@ -3422,3 +3422,40 @@ export async function fetchElderRay(ticker: string): Promise<ElderRayData> {
   }
   return r.json() as Promise<ElderRayData>;
 }
+
+// ── Vortex Indicator ─────────────────────────────────────────────────────────
+
+export type VortexSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface VortexData {
+  ticker: string;
+  vi_plus: number | null;
+  vi_minus: number | null;
+  vi_spread: number | null;
+  vi_bullish: boolean | null;
+  vortex_score: number;
+  signal: VortexSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchVortex(ticker: string): Promise<VortexData> {
+  const r = await fetch(`${BASE}/vortex?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<VortexData>;
+}
