@@ -4059,3 +4059,33 @@ export async function fetchImpulse(ticker: string): Promise<ImpulseData> {
   }
   return r.json() as Promise<ImpulseData>;
 }
+
+// ---------------------------------------------------------------------------
+// Connors RSI (F.81)
+// ---------------------------------------------------------------------------
+export interface CRSIData {
+  ticker: string;
+  crsi_value: number | null;
+  rsi3: number | null;
+  streak_rsi: number | null;
+  percent_rank: number | null;
+  crsi_score: number;
+  signal: "strong_bull" | "bull" | "neutral" | "bear" | "strong_bear" | "no_data";
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchCRSI(ticker: string): Promise<CRSIData> {
+  const r = await fetch(`${BASE}/connors_rsi?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<CRSIData>;
+}
