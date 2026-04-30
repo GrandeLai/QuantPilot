@@ -3016,6 +3016,42 @@ export async function fetchForceIndex(ticker: string): Promise<ForceIndexData> {
   return r.json() as Promise<ForceIndexData>;
 }
 
+// ── Supertrend ────────────────────────────────────────────────────────────────
+
+export type SupertrendSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface SupertrendData {
+  ticker: string;
+  supertrend_value: number | null;
+  distance_pct: number | null;
+  supertrend_bullish: boolean;
+  supertrend_score: number;
+  signal: SupertrendSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchSupertrend(ticker: string): Promise<SupertrendData> {
+  const r = await fetch(`${BASE}/supertrend?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<SupertrendData>;
+}
+
 // ── Ultimate Oscillator ───────────────────────────────────────────────────────
 
 export type UltimateOscSignal =

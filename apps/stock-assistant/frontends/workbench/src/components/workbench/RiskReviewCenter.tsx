@@ -55,6 +55,7 @@ import { ForceIndexPanel } from "../ForceIndexPanel";
 import { TRIXPanel } from "../TRIXPanel";
 import { AroonPanel } from "../AroonPanel";
 import { UltimateOscPanel } from "../UltimateOscPanel";
+import { SupertrendPanel } from "../SupertrendPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -107,6 +108,7 @@ export default function RiskReviewCenter() {
       <TRIXPanel />
       <AroonPanel />
       <UltimateOscPanel />
+      <SupertrendPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />
