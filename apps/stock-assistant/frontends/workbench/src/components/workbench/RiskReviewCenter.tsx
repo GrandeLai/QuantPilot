@@ -74,6 +74,7 @@ import { KAMAPanel } from "../KAMAPanel";
 import { STCPanel } from "../STCPanel";
 import { CKSPanel } from "../CKSPanel";
 import { PriceOscPanel } from "../PriceOscPanel";
+import { ChaikinVolPanel } from "../ChaikinVolPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -145,6 +146,7 @@ export default function RiskReviewCenter() {
       <STCPanel />
       <CKSPanel />
       <PriceOscPanel />
+      <ChaikinVolPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />

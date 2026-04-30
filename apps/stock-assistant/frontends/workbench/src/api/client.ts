@@ -3848,3 +3848,41 @@ export async function fetchPO(ticker: string): Promise<POData> {
   }
   return r.json() as Promise<POData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.74 CV — Chaikin Volatility
+// ---------------------------------------------------------------------------
+
+export type CVSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface CVData {
+  ticker: string;
+  cv_value: number | null;
+  vol_expanding: boolean | null;
+  price_above_sma: boolean | null;
+  cv_score: number;
+  signal: CVSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchCV(ticker: string): Promise<CVData> {
+  const r = await fetch(`${BASE}/chaikin_vol?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<CVData>;
+}
