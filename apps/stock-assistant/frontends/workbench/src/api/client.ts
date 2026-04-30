@@ -3973,3 +3973,31 @@ export async function fetchAlligator(ticker: string): Promise<AlligatorData> {
   }
   return r.json() as Promise<AlligatorData>;
 }
+
+// ── Awesome Oscillator — F.78 ─────────────────────────────────────────────────
+
+export interface AOData {
+  ticker: string;
+  ao_value: number | null;
+  ao_positive: boolean | null;
+  ao_rising: boolean | null;
+  ao_score: number;
+  signal: "strong_bull" | "bull" | "neutral" | "bear" | "strong_bear" | "no_data";
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchAO(ticker: string): Promise<AOData> {
+  const r = await fetch(`${BASE}/awesome_osc?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<AOData>;
+}
