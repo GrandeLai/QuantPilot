@@ -246,6 +246,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(chaikin_vol_router)
     from quantpilot_stock.api.dema import router as dema_router
     include_with_api_alias(dema_router)
+    from quantpilot_stock.api.tema import router as tema_router
+    include_with_api_alias(tema_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)
