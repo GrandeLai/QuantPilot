@@ -77,6 +77,7 @@ import { PriceOscPanel } from "../PriceOscPanel";
 import { ChaikinVolPanel } from "../ChaikinVolPanel";
 import { DEMAPanel } from "../DEMAPanel";
 import { TEMAPanel } from "../TEMAPanel";
+import { AlligatorPanel } from "../AlligatorPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -151,6 +152,7 @@ export default function RiskReviewCenter() {
       <ChaikinVolPanel />
       <DEMAPanel />
       <TEMAPanel />
+      <AlligatorPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />

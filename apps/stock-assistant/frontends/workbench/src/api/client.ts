@@ -3942,3 +3942,34 @@ export async function fetchTEMA(ticker: string): Promise<TEMAData> {
   }
   return r.json() as Promise<TEMAData>;
 }
+
+// ── Williams Alligator — F.77 ─────────────────────────────────────────────────
+
+export interface AlligatorData {
+  ticker: string;
+  jaw: number | null;
+  teeth: number | null;
+  lips: number | null;
+  lips_above_teeth: boolean | null;
+  teeth_above_jaw: boolean | null;
+  price_above_jaw: boolean | null;
+  alligator_score: number;
+  signal: "strong_bull" | "bull" | "neutral" | "bear" | "strong_bear" | "no_data";
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchAlligator(ticker: string): Promise<AlligatorData> {
+  const r = await fetch(`${BASE}/alligator?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<AlligatorData>;
+}
