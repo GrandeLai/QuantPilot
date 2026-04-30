@@ -236,6 +236,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(hma_router)
     from quantpilot_stock.api.kama import router as kama_router
     include_with_api_alias(kama_router)
+    from quantpilot_stock.api.stc import router as stc_router
+    include_with_api_alias(stc_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)

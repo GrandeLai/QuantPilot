@@ -3731,3 +3731,41 @@ export async function fetchKAMA(ticker: string): Promise<KAMAData> {
   }
   return r.json() as Promise<KAMAData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.71 STC — Schaff Trend Cycle
+// ---------------------------------------------------------------------------
+
+export type STCSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface STCData {
+  ticker: string;
+  stc_value: number | null;
+  stc_above_buy: boolean | null;
+  stc_rising: boolean | null;
+  stc_score: number;
+  signal: STCSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchSTC(ticker: string): Promise<STCData> {
+  const r = await fetch(`${BASE}/stc?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<STCData>;
+}
