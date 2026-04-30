@@ -2976,3 +2976,42 @@ export async function fetchKeltner(ticker: string): Promise<KeltnerData> {
   }
   return r.json() as Promise<KeltnerData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.51 Force Index
+// ---------------------------------------------------------------------------
+
+export type ForceIndexSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface ForceIndexData {
+  ticker: string;
+  force_index: number | null;
+  fi_positive: boolean;
+  fi_direction: string;
+  fi_normalized: number | null;
+  fi_score: number;
+  signal: ForceIndexSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchForceIndex(ticker: string): Promise<ForceIndexData> {
+  const r = await fetch(`${BASE}/force-index?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<ForceIndexData>;
+}
