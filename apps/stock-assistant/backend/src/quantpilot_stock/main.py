@@ -240,6 +240,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(stc_router)
     from quantpilot_stock.api.cks import router as cks_router
     include_with_api_alias(cks_router)
+    from quantpilot_stock.api.price_osc import router as price_osc_router
+    include_with_api_alias(price_osc_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)

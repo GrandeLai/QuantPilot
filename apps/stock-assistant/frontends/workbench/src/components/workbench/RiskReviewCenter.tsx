@@ -73,6 +73,7 @@ import { HMAPanel } from "../HMAPanel";
 import { KAMAPanel } from "../KAMAPanel";
 import { STCPanel } from "../STCPanel";
 import { CKSPanel } from "../CKSPanel";
+import { PriceOscPanel } from "../PriceOscPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -143,6 +144,7 @@ export default function RiskReviewCenter() {
       <KAMAPanel />
       <STCPanel />
       <CKSPanel />
+      <PriceOscPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />

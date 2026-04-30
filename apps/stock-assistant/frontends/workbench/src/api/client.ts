@@ -3809,3 +3809,42 @@ export async function fetchCKS(ticker: string): Promise<CKSData> {
   }
   return r.json() as Promise<CKSData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.73 PO — Price Oscillator
+// ---------------------------------------------------------------------------
+
+export type POSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface POData {
+  ticker: string;
+  po_value: number | null;
+  signal_value: number | null;
+  po_above_signal: boolean | null;
+  po_positive: boolean | null;
+  po_score: number;
+  signal: POSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchPO(ticker: string): Promise<POData> {
+  const r = await fetch(`${BASE}/price_osc?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<POData>;
+}
