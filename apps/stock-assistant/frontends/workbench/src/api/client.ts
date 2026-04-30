@@ -3769,3 +3769,43 @@ export async function fetchSTC(ticker: string): Promise<STCData> {
   }
   return r.json() as Promise<STCData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.72 CKS — Chande Kroll Stop
+// ---------------------------------------------------------------------------
+
+export type CKSSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface CKSData {
+  ticker: string;
+  stop_short: number | null;
+  stop_long: number | null;
+  close_value: number | null;
+  price_above_stop: boolean | null;
+  stop_rising: boolean | null;
+  cks_score: number;
+  signal: CKSSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchCKS(ticker: string): Promise<CKSData> {
+  const r = await fetch(`${BASE}/cks?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<CKSData>;
+}
