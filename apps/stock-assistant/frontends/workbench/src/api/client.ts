@@ -2735,3 +2735,43 @@ export async function fetchWilliamsR(ticker: string): Promise<WilliamsRData> {
   }
   return r.json() as Promise<WilliamsRData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.45 Commodity Channel Index (CCI)
+// ---------------------------------------------------------------------------
+
+export type CCISignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface CCIData {
+  ticker: string;
+  cci: number | null;
+  prev_cci: number | null;
+  cci_direction: string;
+  overbought: boolean;
+  oversold: boolean;
+  cci_score: number;
+  signal: CCISignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchCCI(ticker: string): Promise<CCIData> {
+  const r = await fetch(`${BASE}/cci?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<CCIData>;
+}
