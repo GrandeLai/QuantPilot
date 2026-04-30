@@ -4089,3 +4089,31 @@ export async function fetchCRSI(ticker: string): Promise<CRSIData> {
   }
   return r.json() as Promise<CRSIData>;
 }
+
+// ---------------------------------------------------------------------------
+// Fisher Transform (F.82)
+// ---------------------------------------------------------------------------
+export interface FisherTransformData {
+  ticker: string;
+  fisher_value: number | null;
+  fisher_signal: number | null;
+  fisher_score: number;
+  signal: "strong_bull" | "bull" | "neutral" | "bear" | "strong_bear" | "no_data";
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchFisherTransform(ticker: string): Promise<FisherTransformData> {
+  const r = await fetch(`${BASE}/fisher_transform?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<FisherTransformData>;
+}

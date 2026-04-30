@@ -82,6 +82,7 @@ import { AwesomeOscPanel } from "../AwesomeOscPanel";
 import { ChoppinessPanel } from "../ChoppinessPanel";
 import { ElderImpulsePanel } from "../ElderImpulsePanel";
 import { ConnorsRSIPanel } from "../ConnorsRSIPanel";
+import { FisherTransformPanel } from "../FisherTransformPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -161,6 +162,7 @@ export default function RiskReviewCenter() {
       <ChoppinessPanel />
       <ElderImpulsePanel />
       <ConnorsRSIPanel />
+      <FisherTransformPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />
