@@ -4029,3 +4029,33 @@ export async function fetchCHOP(ticker: string): Promise<CHOPData> {
   }
   return r.json() as Promise<CHOPData>;
 }
+
+// ── Elder Impulse System — F.80 ───────────────────────────────────────────────
+
+export interface ImpulseData {
+  ticker: string;
+  ema13: number | null;
+  macd_hist: number | null;
+  impulse_color: "green" | "red" | "blue" | null;
+  ema_rising: boolean | null;
+  hist_rising: boolean | null;
+  impulse_score: number;
+  signal: "strong_bull" | "bull" | "neutral" | "bear" | "strong_bear" | "no_data";
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchImpulse(ticker: string): Promise<ImpulseData> {
+  const r = await fetch(`${BASE}/elder_impulse?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<ImpulseData>;
+}

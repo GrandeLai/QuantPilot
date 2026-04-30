@@ -254,6 +254,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(awesome_osc_router)
     from quantpilot_stock.api.choppiness import router as choppiness_router
     include_with_api_alias(choppiness_router)
+    from quantpilot_stock.api.elder_impulse import router as elder_impulse_router
+    include_with_api_alias(elder_impulse_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)

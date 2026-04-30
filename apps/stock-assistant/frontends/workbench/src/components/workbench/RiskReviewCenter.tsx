@@ -80,6 +80,7 @@ import { TEMAPanel } from "../TEMAPanel";
 import { AlligatorPanel } from "../AlligatorPanel";
 import { AwesomeOscPanel } from "../AwesomeOscPanel";
 import { ChoppinessPanel } from "../ChoppinessPanel";
+import { ElderImpulsePanel } from "../ElderImpulsePanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -157,6 +158,7 @@ export default function RiskReviewCenter() {
       <AlligatorPanel />
       <AwesomeOscPanel />
       <ChoppinessPanel />
+      <ElderImpulsePanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />
