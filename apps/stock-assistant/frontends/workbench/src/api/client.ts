@@ -4145,3 +4145,30 @@ export async function fetchStochRSI(ticker: string): Promise<StochRSIData> {
   }
   return r.json() as Promise<StochRSIData>;
 }
+
+// ---------------------------------------------------------------------------
+// Volume Rate of Change (F.84)
+// ---------------------------------------------------------------------------
+export interface VROCData {
+  ticker: string;
+  vroc_value: number | null;
+  vroc_score: number;
+  signal: "strong_bull" | "bull" | "neutral" | "bear" | "strong_bear" | "no_data";
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchVROC(ticker: string): Promise<VROCData> {
+  const r = await fetch(`${BASE}/vroc?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<VROCData>;
+}

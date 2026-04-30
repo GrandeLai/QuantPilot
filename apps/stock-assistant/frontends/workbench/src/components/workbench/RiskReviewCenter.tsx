@@ -84,6 +84,7 @@ import { ElderImpulsePanel } from "../ElderImpulsePanel";
 import { ConnorsRSIPanel } from "../ConnorsRSIPanel";
 import { FisherTransformPanel } from "../FisherTransformPanel";
 import { StochRSIPanel } from "../StochRSIPanel";
+import { VROCPanel } from "../VROCPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -165,6 +166,7 @@ export default function RiskReviewCenter() {
       <ConnorsRSIPanel />
       <FisherTransformPanel />
       <StochRSIPanel />
+      <VROCPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />
