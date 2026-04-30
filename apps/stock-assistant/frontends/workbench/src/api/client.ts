@@ -3614,3 +3614,42 @@ export async function fetchMassIndex(ticker: string): Promise<MassIndexData> {
   }
   return r.json() as Promise<MassIndexData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.68 KVO — Klinger Volume Oscillator
+// ---------------------------------------------------------------------------
+
+export type KVOSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface KVOData {
+  ticker: string;
+  kvo_value: number | null;
+  signal_value: number | null;
+  kvo_above_signal: boolean | null;
+  kvo_positive: boolean | null;
+  kvo_score: number;
+  signal: KVOSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchKVO(ticker: string): Promise<KVOData> {
+  const r = await fetch(`${BASE}/kvo?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<KVOData>;
+}
