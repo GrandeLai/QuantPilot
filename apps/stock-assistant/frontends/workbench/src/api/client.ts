@@ -3015,3 +3015,40 @@ export async function fetchForceIndex(ticker: string): Promise<ForceIndexData> {
   }
   return r.json() as Promise<ForceIndexData>;
 }
+
+// ── TRIX ──────────────────────────────────────────────────────────────────────
+
+export type TRIXSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface TRIXData {
+  ticker: string;
+  trix: number | null;
+  signal_line: number | null;
+  trix_positive: boolean;
+  trix_above_signal: boolean;
+  trix_score: number;
+  signal: TRIXSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchTRIX(ticker: string): Promise<TRIXData> {
+  const r = await fetch(`${BASE}/trix?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<TRIXData>;
+}
