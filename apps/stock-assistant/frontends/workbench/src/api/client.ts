@@ -3016,6 +3016,41 @@ export async function fetchForceIndex(ticker: string): Promise<ForceIndexData> {
   return r.json() as Promise<ForceIndexData>;
 }
 
+// ── DPO ───────────────────────────────────────────────────────────────────────
+
+export type DPOSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface DPOData {
+  ticker: string;
+  dpo_value: number | null;
+  dpo_positive: boolean;
+  dpo_score: number;
+  signal: DPOSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchDPO(ticker: string): Promise<DPOData> {
+  const r = await fetch(`${BASE}/dpo?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<DPOData>;
+}
+
 // ── Supertrend ────────────────────────────────────────────────────────────────
 
 export type SupertrendSignal =

@@ -206,6 +206,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(ultimate_osc_router)
     from quantpilot_stock.api.supertrend import router as supertrend_router
     include_with_api_alias(supertrend_router)
+    from quantpilot_stock.api.dpo import router as dpo_router
+    include_with_api_alias(dpo_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)
