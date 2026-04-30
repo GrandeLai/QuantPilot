@@ -49,6 +49,7 @@ import { CCIPanel } from "../CCIPanel";
 import { ATRPanel } from "../ATRPanel";
 import { ROCPanel } from "../ROCPanel";
 import { SARPanel } from "../SARPanel";
+import { VWAPPanel } from "../VWAPPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -95,6 +96,7 @@ export default function RiskReviewCenter() {
       <ATRPanel />
       <ROCPanel />
       <SARPanel />
+      <VWAPPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />

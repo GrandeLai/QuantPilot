@@ -192,6 +192,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(roc_router)
     from quantpilot_stock.api.sar import router as sar_router
     include_with_api_alias(sar_router)
+    from quantpilot_stock.api.vwap import router as vwap_router
+    include_with_api_alias(vwap_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)

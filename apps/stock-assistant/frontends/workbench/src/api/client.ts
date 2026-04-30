@@ -2895,3 +2895,42 @@ export async function fetchSAR(ticker: string): Promise<SARData> {
   }
   return r.json() as Promise<SARData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.49 VWAP (Volume Weighted Average Price)
+// ---------------------------------------------------------------------------
+
+export type VWAPSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface VWAPData {
+  ticker: string;
+  vwap: number | null;
+  vwap_deviation_pct: number | null;
+  above_vwap: boolean;
+  vwap_slope: string;
+  vwap_score: number;
+  signal: VWAPSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchVWAP(ticker: string): Promise<VWAPData> {
+  const r = await fetch(`${BASE}/vwap?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<VWAPData>;
+}
