@@ -2612,3 +2612,45 @@ export async function fetchOBV(ticker: string): Promise<OBVData> {
   }
   return r.json() as Promise<OBVData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.42 Money Flow Index (MFI)
+// ---------------------------------------------------------------------------
+
+export type MFISignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface MFIData {
+  ticker: string;
+  mfi: number | null;
+  prev_mfi: number | null;
+  mfi_direction: string;
+  overbought: boolean;
+  oversold: boolean;
+  bullish_divergence: boolean;
+  bearish_divergence: boolean;
+  mfi_score: number;
+  signal: MFISignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchMFI(ticker: string): Promise<MFIData> {
+  const r = await fetch(`${BASE}/mfi?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<MFIData>;
+}
