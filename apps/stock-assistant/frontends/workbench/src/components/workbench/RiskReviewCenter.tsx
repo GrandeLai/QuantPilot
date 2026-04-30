@@ -60,6 +60,7 @@ import { DPOPanel } from "../DPOPanel";
 import { TSIPanel } from "../TSIPanel";
 import { DonchianPanel } from "../DonchianPanel";
 import { IchimokuPanel } from "../IchimokuPanel";
+import { KSTPanel } from "../KSTPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -117,6 +118,7 @@ export default function RiskReviewCenter() {
       <TSIPanel />
       <DonchianPanel />
       <IchimokuPanel />
+      <KSTPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />

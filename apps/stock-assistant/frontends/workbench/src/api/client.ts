@@ -3312,3 +3312,40 @@ export async function fetchIchimoku(ticker: string): Promise<IchimokuData> {
   }
   return r.json() as Promise<IchimokuData>;
 }
+
+// ── KST (Know Sure Thing) ────────────────────────────────────────────────────
+
+export type KSTSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface KSTData {
+  ticker: string;
+  kst_value: number | null;
+  signal_line: number | null;
+  kst_positive: boolean | null;
+  kst_above_signal: boolean | null;
+  kst_score: number;
+  signal: KSTSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchKST(ticker: string): Promise<KSTData> {
+  const r = await fetch(`${BASE}/kst?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<KSTData>;
+}
