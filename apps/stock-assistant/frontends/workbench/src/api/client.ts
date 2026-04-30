@@ -3575,3 +3575,42 @@ export async function fetchPPO(ticker: string): Promise<PPOData> {
   }
   return r.json() as Promise<PPOData>;
 }
+
+// ---------------------------------------------------------------------------
+// Mass Index
+// ---------------------------------------------------------------------------
+
+export type MassIndexSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface MassIndexData {
+  ticker: string;
+  mass_index: number | null;
+  in_bulge: boolean | null;
+  trending_down: boolean | null;
+  reversal_signal: boolean | null;
+  mi_score: number;
+  signal: MassIndexSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchMassIndex(ticker: string): Promise<MassIndexData> {
+  const r = await fetch(`${BASE}/mass_index?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<MassIndexData>;
+}

@@ -67,6 +67,7 @@ import { VortexPanel } from "../VortexPanel";
 import { PVTPanel } from "../PVTPanel";
 import { CMOPanel } from "../CMOPanel";
 import { PPOPanel } from "../PPOPanel";
+import { MassIndexPanel } from "../MassIndexPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -131,6 +132,7 @@ export default function RiskReviewCenter() {
       <PVTPanel />
       <CMOPanel />
       <PPOPanel />
+      <MassIndexPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />
