@@ -3535,3 +3535,43 @@ export async function fetchCMO(ticker: string): Promise<CMOData> {
   }
   return r.json() as Promise<CMOData>;
 }
+
+// ---------------------------------------------------------------------------
+// PPO
+// ---------------------------------------------------------------------------
+
+export type PPOSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface PPOData {
+  ticker: string;
+  ppo_value: number | null;
+  signal_value: number | null;
+  histogram: number | null;
+  ppo_above_signal: boolean | null;
+  ppo_positive: boolean | null;
+  ppo_score: number;
+  signal: PPOSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchPPO(ticker: string): Promise<PPOData> {
+  const r = await fetch(`${BASE}/ppo?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<PPOData>;
+}

@@ -66,6 +66,7 @@ import { ElderRayPanel } from "../ElderRayPanel";
 import { VortexPanel } from "../VortexPanel";
 import { PVTPanel } from "../PVTPanel";
 import { CMOPanel } from "../CMOPanel";
+import { PPOPanel } from "../PPOPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -129,6 +130,7 @@ export default function RiskReviewCenter() {
       <VortexPanel />
       <PVTPanel />
       <CMOPanel />
+      <PPOPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />
