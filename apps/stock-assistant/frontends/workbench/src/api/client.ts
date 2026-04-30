@@ -4117,3 +4117,31 @@ export async function fetchFisherTransform(ticker: string): Promise<FisherTransf
   }
   return r.json() as Promise<FisherTransformData>;
 }
+
+// ---------------------------------------------------------------------------
+// Stochastic RSI (F.83)
+// ---------------------------------------------------------------------------
+export interface StochRSIData {
+  ticker: string;
+  k_value: number | null;
+  d_value: number | null;
+  stoch_rsi_score: number;
+  signal: "strong_bull" | "bull" | "neutral" | "bear" | "strong_bear" | "no_data";
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchStochRSI(ticker: string): Promise<StochRSIData> {
+  const r = await fetch(`${BASE}/stoch_rsi?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<StochRSIData>;
+}

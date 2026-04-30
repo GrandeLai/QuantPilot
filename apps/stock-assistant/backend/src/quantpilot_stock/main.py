@@ -260,6 +260,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(connors_rsi_router)
     from quantpilot_stock.api.fisher_transform import router as fisher_transform_router
     include_with_api_alias(fisher_transform_router)
+    from quantpilot_stock.api.stoch_rsi import router as stoch_rsi_router
+    include_with_api_alias(stoch_rsi_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)
