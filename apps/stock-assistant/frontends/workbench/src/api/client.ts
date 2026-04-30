@@ -3233,3 +3233,41 @@ export async function fetchTRIX(ticker: string): Promise<TRIXData> {
   }
   return r.json() as Promise<TRIXData>;
 }
+
+// ── Donchian Channels ────────────────────────────────────────────────────────
+
+export type DonchianSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface DonchianData {
+  ticker: string;
+  upper: number | null;
+  lower: number | null;
+  middle: number | null;
+  position: number | null;
+  channel_width_pct: number | null;
+  donchian_score: number;
+  signal: DonchianSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchDonchian(ticker: string): Promise<DonchianData> {
+  const r = await fetch(`${BASE}/donchian?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<DonchianData>;
+}

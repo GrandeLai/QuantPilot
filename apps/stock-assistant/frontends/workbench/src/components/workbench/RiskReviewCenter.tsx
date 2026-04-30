@@ -58,6 +58,7 @@ import { UltimateOscPanel } from "../UltimateOscPanel";
 import { SupertrendPanel } from "../SupertrendPanel";
 import { DPOPanel } from "../DPOPanel";
 import { TSIPanel } from "../TSIPanel";
+import { DonchianPanel } from "../DonchianPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -113,6 +114,7 @@ export default function RiskReviewCenter() {
       <SupertrendPanel />
       <DPOPanel />
       <TSIPanel />
+      <DonchianPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />
