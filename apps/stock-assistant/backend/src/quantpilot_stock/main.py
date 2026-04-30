@@ -176,6 +176,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(rsi_signal_router)
     from quantpilot_stock.api.stochastic import router as stochastic_router
     include_with_api_alias(stochastic_router)
+    from quantpilot_stock.api.obv import router as obv_router
+    include_with_api_alias(obv_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)

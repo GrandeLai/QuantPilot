@@ -2571,3 +2571,44 @@ export async function fetchMAAlignment(ticker: string): Promise<MAAlignmentData>
   }
   return r.json() as Promise<MAAlignmentData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.41 On-Balance Volume (OBV)
+// ---------------------------------------------------------------------------
+
+export type OBVSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface OBVData {
+  ticker: string;
+  obv: number | null;
+  obv_ema20: number | null;
+  obv_above_ema: boolean;
+  obv_5d_change_pct: number | null;
+  price_5d_change_pct: number | null;
+  price_obv_trend: string;
+  obv_score: number;
+  signal: OBVSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchOBV(ticker: string): Promise<OBVData> {
+  const r = await fetch(`${BASE}/obv?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<OBVData>;
+}
