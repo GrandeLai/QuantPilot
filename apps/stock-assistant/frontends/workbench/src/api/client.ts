@@ -3016,6 +3016,43 @@ export async function fetchForceIndex(ticker: string): Promise<ForceIndexData> {
   return r.json() as Promise<ForceIndexData>;
 }
 
+// ── TSI ───────────────────────────────────────────────────────────────────────
+
+export type TSISignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface TSIData {
+  ticker: string;
+  tsi_value: number | null;
+  signal_line: number | null;
+  tsi_positive: boolean;
+  tsi_above_signal: boolean;
+  tsi_score: number;
+  signal: TSISignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchTSI(ticker: string): Promise<TSIData> {
+  const r = await fetch(`${BASE}/tsi?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<TSIData>;
+}
+
 // ── DPO ───────────────────────────────────────────────────────────────────────
 
 export type DPOSignal =
