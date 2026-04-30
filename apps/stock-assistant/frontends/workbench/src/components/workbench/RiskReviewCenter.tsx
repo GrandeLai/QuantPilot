@@ -44,6 +44,7 @@ import StochasticPanel from "../StochasticPanel";
 import { OBVPanel } from "../OBVPanel";
 import { MFIPanel } from "../MFIPanel";
 import { CMFPanel } from "../CMFPanel";
+import { WilliamsRPanel } from "../WilliamsRPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -85,6 +86,7 @@ export default function RiskReviewCenter() {
       <OBVPanel />
       <MFIPanel />
       <CMFPanel />
+      <WilliamsRPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />

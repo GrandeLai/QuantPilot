@@ -2695,3 +2695,43 @@ export async function fetchCMF(ticker: string): Promise<CMFData> {
   }
   return r.json() as Promise<CMFData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.44 Williams %R
+// ---------------------------------------------------------------------------
+
+export type WilliamsRSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface WilliamsRData {
+  ticker: string;
+  williams_r: number | null;
+  prev_williams_r: number | null;
+  wr_direction: string;
+  overbought: boolean;
+  oversold: boolean;
+  wr_score: number;
+  signal: WilliamsRSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchWilliamsR(ticker: string): Promise<WilliamsRData> {
+  const r = await fetch(`${BASE}/williams-r?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<WilliamsRData>;
+}
