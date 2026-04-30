@@ -218,6 +218,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(kst_router)
     from quantpilot_stock.api.chaikin_osc import router as chaikin_osc_router
     include_with_api_alias(chaikin_osc_router)
+    from quantpilot_stock.api.elder_ray import router as elder_ray_router
+    include_with_api_alias(elder_ray_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)

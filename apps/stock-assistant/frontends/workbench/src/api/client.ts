@@ -3384,3 +3384,41 @@ export async function fetchChaikinOsc(ticker: string): Promise<ChaikinOscData> {
   }
   return r.json() as Promise<ChaikinOscData>;
 }
+
+// ── Elder Ray Index ──────────────────────────────────────────────────────────
+
+export type ElderRaySignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface ElderRayData {
+  ticker: string;
+  bull_power: number | null;
+  bear_power: number | null;
+  ema13: number | null;
+  bull_positive: boolean | null;
+  bear_rising: boolean | null;
+  elder_ray_score: number;
+  signal: ElderRaySignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchElderRay(ticker: string): Promise<ElderRayData> {
+  const r = await fetch(`${BASE}/elder_ray?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<ElderRayData>;
+}

@@ -62,6 +62,7 @@ import { DonchianPanel } from "../DonchianPanel";
 import { IchimokuPanel } from "../IchimokuPanel";
 import { KSTPanel } from "../KSTPanel";
 import { ChaikinOscPanel } from "../ChaikinOscPanel";
+import { ElderRayPanel } from "../ElderRayPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -121,6 +122,7 @@ export default function RiskReviewCenter() {
       <IchimokuPanel />
       <KSTPanel />
       <ChaikinOscPanel />
+      <ElderRayPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />
