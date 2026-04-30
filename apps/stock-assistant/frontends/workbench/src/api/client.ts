@@ -2855,3 +2855,43 @@ export async function fetchROC(ticker: string): Promise<ROCData> {
   }
   return r.json() as Promise<ROCData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.48 Parabolic SAR
+// ---------------------------------------------------------------------------
+
+export type SARSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface SARData {
+  ticker: string;
+  sar: number | null;
+  sar_distance_pct: number | null;
+  sar_bullish: boolean;
+  sar_direction: string;
+  trend_bars: number;
+  sar_score: number;
+  signal: SARSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchSAR(ticker: string): Promise<SARData> {
+  const r = await fetch(`${BASE}/sar?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<SARData>;
+}
