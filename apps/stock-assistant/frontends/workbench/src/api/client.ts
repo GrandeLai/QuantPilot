@@ -2934,3 +2934,45 @@ export async function fetchVWAP(ticker: string): Promise<VWAPData> {
   }
   return r.json() as Promise<VWAPData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.50 Keltner Channel
+// ---------------------------------------------------------------------------
+
+export type KeltnerSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface KeltnerData {
+  ticker: string;
+  upper: number | null;
+  middle: number | null;
+  lower: number | null;
+  kc_position: number | null;
+  above_upper: boolean;
+  below_lower: boolean;
+  channel_width_pct: number | null;
+  kc_score: number;
+  signal: KeltnerSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchKeltner(ticker: string): Promise<KeltnerData> {
+  const r = await fetch(`${BASE}/keltner?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<KeltnerData>;
+}
