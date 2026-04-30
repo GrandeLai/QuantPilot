@@ -3886,3 +3886,31 @@ export async function fetchCV(ticker: string): Promise<CVData> {
   }
   return r.json() as Promise<CVData>;
 }
+
+// ── DEMA (Double Exponential Moving Average) — F.75 ───────────────────────────
+
+export interface DEMAData {
+  ticker: string;
+  dema_value: number | null;
+  price_above_dema: boolean | null;
+  dema_slope_positive: boolean | null;
+  dema_score: number;
+  signal: "strong_bull" | "bull" | "neutral" | "bear" | "strong_bear" | "no_data";
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchDEMA(ticker: string): Promise<DEMAData> {
+  const r = await fetch(`${BASE}/dema?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<DEMAData>;
+}

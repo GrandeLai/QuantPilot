@@ -75,6 +75,7 @@ import { STCPanel } from "../STCPanel";
 import { CKSPanel } from "../CKSPanel";
 import { PriceOscPanel } from "../PriceOscPanel";
 import { ChaikinVolPanel } from "../ChaikinVolPanel";
+import { DEMAPanel } from "../DEMAPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -147,6 +148,7 @@ export default function RiskReviewCenter() {
       <CKSPanel />
       <PriceOscPanel />
       <ChaikinVolPanel />
+      <DEMAPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />
