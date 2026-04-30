@@ -59,6 +59,7 @@ import { SupertrendPanel } from "../SupertrendPanel";
 import { DPOPanel } from "../DPOPanel";
 import { TSIPanel } from "../TSIPanel";
 import { DonchianPanel } from "../DonchianPanel";
+import { IchimokuPanel } from "../IchimokuPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -115,6 +116,7 @@ export default function RiskReviewCenter() {
       <DPOPanel />
       <TSIPanel />
       <DonchianPanel />
+      <IchimokuPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />

@@ -3271,3 +3271,44 @@ export async function fetchDonchian(ticker: string): Promise<DonchianData> {
   }
   return r.json() as Promise<DonchianData>;
 }
+
+// ── Ichimoku Cloud ───────────────────────────────────────────────────────────
+
+export type IchimokuSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface IchimokuData {
+  ticker: string;
+  tenkan: number | null;
+  kijun: number | null;
+  senkou_a: number | null;
+  senkou_b: number | null;
+  chikou_above: boolean | null;
+  price_vs_cloud: string;
+  cloud_bullish: boolean | null;
+  tk_bullish: boolean | null;
+  ichimoku_score: number;
+  signal: IchimokuSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchIchimoku(ticker: string): Promise<IchimokuData> {
+  const r = await fetch(`${BASE}/ichimoku?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<IchimokuData>;
+}

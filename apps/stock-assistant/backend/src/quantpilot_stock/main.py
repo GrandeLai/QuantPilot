@@ -212,6 +212,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(tsi_router)
     from quantpilot_stock.api.donchian import router as donchian_router
     include_with_api_alias(donchian_router)
+    from quantpilot_stock.api.ichimoku import router as ichimoku_router
+    include_with_api_alias(ichimoku_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)
