@@ -3692,3 +3692,42 @@ export async function fetchHMA(ticker: string): Promise<HMAData> {
   }
   return r.json() as Promise<HMAData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.70 KAMA — Kaufman Adaptive Moving Average
+// ---------------------------------------------------------------------------
+
+export type KAMASignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface KAMAData {
+  ticker: string;
+  kama_value: number | null;
+  close_value: number | null;
+  price_above_kama: boolean | null;
+  kama_rising: boolean | null;
+  kama_score: number;
+  signal: KAMASignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchKAMA(ticker: string): Promise<KAMAData> {
+  const r = await fetch(`${BASE}/kama?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<KAMAData>;
+}
