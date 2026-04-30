@@ -47,6 +47,7 @@ import { CMFPanel } from "../CMFPanel";
 import { WilliamsRPanel } from "../WilliamsRPanel";
 import { CCIPanel } from "../CCIPanel";
 import { ATRPanel } from "../ATRPanel";
+import { ROCPanel } from "../ROCPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -91,6 +92,7 @@ export default function RiskReviewCenter() {
       <WilliamsRPanel />
       <CCIPanel />
       <ATRPanel />
+      <ROCPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />

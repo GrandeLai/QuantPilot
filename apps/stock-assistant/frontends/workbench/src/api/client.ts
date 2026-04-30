@@ -2816,3 +2816,42 @@ export async function fetchATR(ticker: string): Promise<ATRData> {
   }
   return r.json() as Promise<ATRData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.47 Rate of Change (ROC)
+// ---------------------------------------------------------------------------
+
+export type ROCSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface ROCData {
+  ticker: string;
+  roc: number | null;
+  prev_roc: number | null;
+  roc_direction: string;
+  roc_positive: boolean;
+  roc_score: number;
+  signal: ROCSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchROC(ticker: string): Promise<ROCData> {
+  const r = await fetch(`${BASE}/roc?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<ROCData>;
+}
