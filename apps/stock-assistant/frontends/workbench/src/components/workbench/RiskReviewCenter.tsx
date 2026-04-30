@@ -69,6 +69,7 @@ import { CMOPanel } from "../CMOPanel";
 import { PPOPanel } from "../PPOPanel";
 import { MassIndexPanel } from "../MassIndexPanel";
 import { KVOPanel } from "../KVOPanel";
+import { HMAPanel } from "../HMAPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -135,6 +136,7 @@ export default function RiskReviewCenter() {
       <PPOPanel />
       <MassIndexPanel />
       <KVOPanel />
+      <HMAPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />

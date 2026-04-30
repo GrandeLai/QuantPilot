@@ -3653,3 +3653,42 @@ export async function fetchKVO(ticker: string): Promise<KVOData> {
   }
   return r.json() as Promise<KVOData>;
 }
+
+// ---------------------------------------------------------------------------
+// F.69 HMA — Hull Moving Average
+// ---------------------------------------------------------------------------
+
+export type HMASignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface HMAData {
+  ticker: string;
+  hma_value: number | null;
+  close_value: number | null;
+  price_above_hma: boolean | null;
+  hma_rising: boolean | null;
+  hma_score: number;
+  signal: HMASignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchHMA(ticker: string): Promise<HMAData> {
+  const r = await fetch(`${BASE}/hma?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<HMAData>;
+}
