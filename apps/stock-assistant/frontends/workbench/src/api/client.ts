@@ -3496,3 +3496,42 @@ export async function fetchPVT(ticker: string): Promise<PVTData> {
   }
   return r.json() as Promise<PVTData>;
 }
+
+// ---------------------------------------------------------------------------
+// CMO
+// ---------------------------------------------------------------------------
+
+export type CMOSignal =
+  | "strong_bull"
+  | "bull"
+  | "neutral"
+  | "bear"
+  | "strong_bear"
+  | "no_data";
+
+export interface CMOData {
+  ticker: string;
+  cmo_value: number | null;
+  signal_value: number | null;
+  cmo_above_signal: boolean | null;
+  cmo_positive: boolean | null;
+  cmo_score: number;
+  signal: CMOSignal;
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchCMO(ticker: string): Promise<CMOData> {
+  const r = await fetch(`${BASE}/cmo?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<CMOData>;
+}
