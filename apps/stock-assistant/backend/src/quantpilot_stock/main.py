@@ -222,6 +222,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(elder_ray_router)
     from quantpilot_stock.api.vortex import router as vortex_router
     include_with_api_alias(vortex_router)
+    from quantpilot_stock.api.pvt import router as pvt_router
+    include_with_api_alias(pvt_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)

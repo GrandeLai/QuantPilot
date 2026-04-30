@@ -64,6 +64,7 @@ import { KSTPanel } from "../KSTPanel";
 import { ChaikinOscPanel } from "../ChaikinOscPanel";
 import { ElderRayPanel } from "../ElderRayPanel";
 import { VortexPanel } from "../VortexPanel";
+import { PVTPanel } from "../PVTPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -125,6 +126,7 @@ export default function RiskReviewCenter() {
       <ChaikinOscPanel />
       <ElderRayPanel />
       <VortexPanel />
+      <PVTPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />
