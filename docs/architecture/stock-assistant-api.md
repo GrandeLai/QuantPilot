@@ -3,7 +3,7 @@
 **Backend**: `apps/stock-assistant/backend/` (Python, FastAPI)
 **Port**: 8001 (dev)
 **Base URL**: `http://localhost:8001/api`
-**Last reviewed**: 2026-05-07
+**Last reviewed**: 2026-05-08
 
 > **来源**：路由声明扫描自 `apps/stock-assistant/backend/src/quantpilot_stock/api/*.py`。运行 `(cd apps/stock-assistant/backend && uv run uvicorn quantpilot_stock.main:app --port 8001)` 后访问 `http://localhost:8001/docs` 可看自动生成的 OpenAPI 交互文档（Swagger UI）。
 >
@@ -21,9 +21,8 @@
 | `data.py` | `/api/data` | 行情拉取与查询 | 9 |
 | `insights.py` | `/api/insights` | 市场体制 / 相关性洞察 | 2 |
 | `options.py` | `/api/options` | 期权希腊字母 / IV / 情景 | 4 |
-| `paper.py` | `/api/paper` | 模拟盘 session 与订单 | 8 |
 | `platform.py` | `/api/platform` | 平台状态汇总 | 1 |
-| `portfolio.py` | `/api/portfolio` | 组合策略与权益 | 7 |
+| `portfolio.py` | `/api/portfolio` | broker 账户快照与权益 | 6 |
 | `screener.py` | `/api/screener` | 选股 / 选币 + 评分 + 同行 / 宏观 | 8 |
 | `security.py` | `/api/security` | API Key 管理（keyring） | 4 |
 | `sentiment.py` | `/api/sentiment` | 新闻情绪 | 2 |
@@ -140,23 +139,6 @@
 
 ---
 
-### `paper.py` — 模拟盘（8）
-
-| 方法 | 路径 |
-|---|---|
-| POST | `/api/paper/sessions` |
-| GET | `/api/paper/sessions` |
-| GET | `/api/paper/sessions/{session_id}` |
-| DELETE | `/api/paper/sessions/{session_id}` |
-| POST | `/api/paper/sessions/{session_id}/orders` |
-| GET | `/api/paper/sessions/{session_id}/orders` |
-| POST | `/api/paper/sessions/{session_id}/orders/enqueue` |
-| GET | `/api/paper/sessions/{session_id}/orders/queue` |
-
-队列实现：Redis Streams（`orders:{session_id}`），见 `quantpilot_common/redis/order_queue.py`。
-
----
-
 ### `platform.py` — 平台总览（1）
 
 | 方法 | 路径 |
@@ -167,17 +149,18 @@
 
 ---
 
-### `portfolio.py` — 组合管理（7）
+### `portfolio.py` — 账户组合（6）
 
 | 方法 | 路径 |
 |---|---|
-| POST | `/api/portfolio/strategies` |
-| GET | `/api/portfolio/strategies` |
-| DELETE | `/api/portfolio/strategies/{name}` |
+| POST | `/api/portfolio/strategies`（410 Gone；本地模拟策略槽位已移除） |
+| GET | `/api/portfolio/strategies`（兼容空列表） |
+| DELETE | `/api/portfolio/strategies/{name}`（410 Gone；本地模拟策略槽位已移除） |
 | GET | `/api/portfolio/summary` |
 | GET | `/api/portfolio/equity` |
-| GET | `/api/portfolio/correlation` |
 | GET | `/api/portfolio/available-strategies` |
+
+`/api/portfolio/summary` 现在来自统一交易 provider 的 broker 账户快照；本地模拟盘 session、自定义撮合和策略净值相关性已移除。
 
 ---
 

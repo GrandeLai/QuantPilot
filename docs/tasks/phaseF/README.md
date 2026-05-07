@@ -15,7 +15,7 @@
 ### 风控三件套（Top-5 #5）— 优先做，零外部 API 依赖
 
 - **F.1.1** `phaseF.risk-engine-core` — Kelly Fraction + Vol Target 数学引擎（纯 numpy/scipy） ⬅ **本任务起点**
-- **F.1.2** `phaseF.risk-sharpe-decay` — 滚动 Sharpe 衰减监控（基于 paper trading 历史）
+- **F.1.2** `phaseF.risk-sharpe-decay` — 滚动 Sharpe 衰减监控（基于实盘前验证回测结果与 broker 账户权益快照）
 - **F.1.3** `phaseF.risk-var-cvar` — Historical VaR / CVaR + 简单尾部模型
 - **F.1.4** `phaseF.risk-api-endpoints` — `/api/risk/*` 路由暴露引擎能力
 - **F.1.5** `phaseF.risk-metrics-panel` — workbench 前端 RiskReviewCenter 接入

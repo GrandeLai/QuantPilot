@@ -65,7 +65,7 @@ class Settings(BaseSettings):
     okx_api_key: str = Field(default="", description="OKX API Key")
     okx_api_secret: str = Field(default="", description="OKX API Secret")
     okx_passphrase: str = Field(default="", description="OKX API Passphrase（创建 API Key 时设定）")
-    okx_demo: bool = Field(default=True, description="使用模拟盘（True = x-simulated-trading:1）")
+    okx_demo: bool = Field(default=True, description="使用 OKX demo sandbox（True = x-simulated-trading:1）")
 
     # ML 模型超参数
     ml_lgbm_n_estimators: int = Field(default=50, description="LightGBM 树的数量")

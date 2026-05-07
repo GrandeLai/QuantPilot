@@ -1,17 +1,15 @@
-"""多策略组合管理 API.
+"""账户组合 API.
 
 端点:
-  POST /portfolio/strategies           添加策略
-  GET  /portfolio/strategies           列出所有策略
-  DELETE /portfolio/strategies/{name}  移除策略
-  GET  /portfolio/summary              组合概览（同时记录历史快照）
-  GET  /portfolio/correlation          相关性矩阵
+  POST /portfolio/strategies           已移除：模拟策略槽位不再提供
+  GET  /portfolio/strategies           已移除：返回空列表
+  DELETE /portfolio/strategies/{name}  已移除：模拟策略槽位不再提供
+  GET  /portfolio/summary              broker 账户组合概览（同时记录历史快照）
   GET  /portfolio/equity               权益曲线（历史净值序列）
   GET  /portfolio/available-strategies 可运行策略目录（模板 + 用户策略）
 """
 from __future__ import annotations
 
-import threading
 from datetime import datetime, timedelta, timezone
 from typing import Any, Literal
 
@@ -19,15 +17,14 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
 from quantpilot_common.config import get_settings
-from quantpilot_stock.portfolio.manager import PortfolioManager
-from quantpilot_stock.portfolio.snapshots import PortfolioSnapshot, SnapshotStorage, StrategySnapshot
 from quantpilot_common.strategy_persistence import StrategyStorage
+from quantpilot_stock.broker.provider import get_trading_provider
+from quantpilot_stock.broker.types import TradingProviderError
+from quantpilot_stock.portfolio.snapshots import PortfolioSnapshot, SnapshotStorage
 
-router = APIRouter(prefix="/portfolio", tags=["组合管理"])
+router = APIRouter(prefix="/portfolio", tags=["账户组合"])
 
-_manager = PortfolioManager(total_cash=10_000_000.0)
 _storage = SnapshotStorage()
-_lock = threading.Lock()
 
 
 class AddStrategyRequest(BaseModel):
@@ -41,84 +38,70 @@ class AddStrategyRequest(BaseModel):
 
 @router.post("/strategies")
 def add_strategy(req: AddStrategyRequest) -> dict[str, str]:
-    """添加策略到组合."""
-    from quantpilot.strategy.loader import load_strategy_class
-
-    cls = load_strategy_class(req.strategy_class)
-    if cls is None:
-        raise HTTPException(status_code=404, detail=f"策略 '{req.strategy_class}' 未找到")
-    try:
-        strategy = cls()
-        if req.params:
-            strategy.default_params = {**strategy.default_params, **req.params}
-        _manager.add_strategy(req.name, strategy, req.symbol, req.timeframe, req.allocation)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
-    return {"message": f"策略 '{req.name}' 已加入组合"}
+    """拒绝旧模拟策略槽位入口."""
+    raise HTTPException(
+        status_code=410,
+        detail=(
+            "模拟策略槽位已移除；策略上线前请先使用 /api/backtest/run 做实盘前验证，"
+            "通过后再进入 /api/trading 执行。"
+        ),
+    )
 
 
 @router.get("/strategies")
 def list_strategies() -> dict[str, Any]:
-    """列出所有策略槽位."""
-    return {
-        "count": len(_manager.strategies),
-        "strategies": [
-            {
-                "name": name,
-                "symbol": slot.session.symbol,
-                "allocation": slot.allocation,
-                "bars_processed": slot.session.bars_processed,
-            }
-            for name, slot in _manager.strategies.items()
-        ],
-    }
+    """列出策略槽位.
+
+    本地模拟盘策略槽位已移除，保留空响应用于前端兼容。
+    """
+    return {"count": 0, "strategies": []}
 
 
 @router.delete("/strategies/{name}")
 def remove_strategy(name: str) -> dict[str, str]:
-    """从组合中移除策略."""
-    _manager.remove_strategy(name)
-    return {"message": f"策略 '{name}' 已移除"}
+    """拒绝旧模拟策略槽位删除入口."""
+    raise HTTPException(
+        status_code=410,
+        detail=f"模拟策略槽位已移除，无需删除策略 '{name}'。",
+    )
 
 
 @router.get("/summary")
 def portfolio_summary() -> dict[str, Any]:
-    """获取组合总览，同时记录历史快照用于 equity 曲线和 daily_pnl."""
-    current_prices = {
-        slot.session.symbol: slot.session.positions.get(
-            slot.session.symbol,
-            type("Pos", (), {"avg_price": 0.0})(),
-        ).avg_price
-        for slot in _manager.strategies.values()
+    """获取 broker 账户组合总览，同时记录历史快照用于 equity 曲线和 daily_pnl."""
+    try:
+        account = get_trading_provider().get_account_overview()
+    except TradingProviderError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
+
+    total_cash = round(account.available_cash, 2)
+    total_allocated = round(account.positions_market_value, 2)
+    total_portfolio_value = round(account.total_assets, 2)
+    summary: dict[str, Any] = {
+        "total_cash": total_cash,
+        "total_allocated": total_allocated,
+        "total_portfolio_value": total_portfolio_value,
+        "strategies": [],
     }
-    summary = _manager.summary(current_prices)
 
     # 记录快照
     now_iso = datetime.now(timezone.utc).isoformat()
-    total_pnl = sum(s["pnl"] for s in summary["strategies"])
     _storage.save_snapshot(
         PortfolioSnapshot(
             timestamp=now_iso,
-            total_value=summary["total_portfolio_value"],
-            total_cash=summary["total_cash"],
-            total_pnl=total_pnl,
+            total_value=total_portfolio_value,
+            total_cash=total_cash,
+            total_pnl=round(account.total_pnl, 2),
         )
     )
-    for s in summary["strategies"]:
-        _storage.save_strategy_snapshot(
-            StrategySnapshot(
-                timestamp=now_iso,
-                strategy_name=s["name"],
-                portfolio_value=s["portfolio_value"],
-                pnl=s["pnl"],
-                allocation=s["allocation"],
-            )
-        )
 
     # 计算 daily_pnl
     snap_24h = _storage.snapshot_24h_ago()
     if snap_24h is not None:
-        daily_pnl = summary["total_portfolio_value"] - snap_24h.total_value
+        daily_pnl = total_portfolio_value - snap_24h.total_value
         daily_pnl_pct = (
             daily_pnl / snap_24h.total_value * 100 if snap_24h.total_value > 0 else 0.0
         )
@@ -128,6 +111,11 @@ def portfolio_summary() -> dict[str, Any]:
 
     return {
         **summary,
+        "provider": account.provider.value,
+        "mode": account.mode.value,
+        "positions_market_value": round(account.positions_market_value, 2),
+        "total_pnl": round(account.total_pnl, 2),
+        "total_pnl_pct": round(account.total_pnl_pct, 6),
         "daily_pnl": round(daily_pnl, 2),
         "daily_pnl_pct": round(daily_pnl_pct, 4),
     }
@@ -162,12 +150,6 @@ def portfolio_equity(
         for s in snaps
     ]
     return {"period": period, "points": points, "count": len(points)}
-
-
-@router.get("/correlation")
-def correlation_matrix() -> dict[str, Any]:
-    """返回策略净值序列相关性矩阵."""
-    return {"correlation": _manager.correlation_matrix()}
 
 
 @router.get("/available-strategies")

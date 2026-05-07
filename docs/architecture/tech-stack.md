@@ -1,7 +1,7 @@
 # QuantPilot 技术实现详解
 
 > **范围**：技术选型 + 关键代码位置 + 设计取舍
-> **最后更新**：2026-04-29
+> **最后更新**：2026-05-08
 
 按运行时层切分技术栈。每条都给出"选了什么 / 为什么 / 关键文件"。
 
@@ -15,13 +15,13 @@
 |---|---|---|
 | FastAPI + uvicorn | async-first；自动 OpenAPI；Pydantic v2 校验 | `apps/stock-assistant/backend/src/quantpilot_stock/main.py` |
 | WebSocket（标准库 + FastAPI 内建） | 实时行情广播 / 信号订阅 | `apps/stock-assistant/backend/src/quantpilot_stock/api/ws.py` |
-| API 路由分包 | 按业务域分文件（trading / paper / portfolio / ...） | `apps/stock-assistant/backend/src/quantpilot_stock/api/*.py` |
+| API 路由分包 | 按业务域分文件（trading / portfolio / advisor / ...） | `apps/stock-assistant/backend/src/quantpilot_stock/api/*.py` |
 
 ### 1.2 Broker 层
 
 | 选型 | 理由 | 关键文件 |
 |---|---|---|
-| `longbridge>=0.4` | 主交易目标（美 / 港股，模拟 + 实盘） | `quantpilot_stock/broker/longbridge.py` |
+| `longbridge>=0.4` | 主交易目标（美 / 港股，sandbox/testnet + 实盘） | `quantpilot_stock/broker/longbridge.py` |
 | `futu-api>=9.3`（Linux 限定） | 备选 broker；arm64 macOS 装不上故 marker 限定 | `quantpilot_stock/broker/futu.py` |
 | `okx>=2.1` | 加密交易（现货 / 永续 / 期权） | `quantpilot_stock/broker/okx_*.py` |
 | 统一抽象 `TradingProvider` | 屏蔽不同 broker 差异，对 API 路由暴露统一形状 | `quantpilot_stock/broker/types.py` |
@@ -49,8 +49,8 @@
 | 选型 | 理由 | 关键文件 |
 |---|---|---|
 | DuckDB（read+write） | 单文件、列存、零运维；支持 parquet 导入导出 | `quantpilot_common/data/storage.py` |
-| Redis 7 + `redis.asyncio` | 实时行情缓存 + 订单队列（Streams） | `quantpilot_common/redis/` |
-| SQLite | 配置 / 审计 / paper 账户 | `quantpilot_stock/paper/` |
+| Redis 7 + `redis.asyncio` | 实时行情缓存 | `quantpilot_common/redis/` |
+| SQLite | 配置 / 审计 | `quantpilot_stock/portfolio/snapshots.py` 等 |
 | `keyring>=25` | broker API key OS-level 加密存储 | `quantpilot_stock/security/` |
 | GitPython | 策略文件 Git 版本管理 | `quantpilot_common/strategy_persistence/git_manager.py` |
 
@@ -131,7 +131,7 @@
 | 组件 | 用途 |
 |---|---|
 | `ChartPanel.tsx` | TradingView Lightweight Charts |
-| `Trading*.tsx` / `Paper*.tsx` | 多 broker 下单 / 模拟交易 |
+| `Trading*.tsx` / `BrokerTradingPanel.tsx` | 多 broker 交易执行 / sandbox 安全模式 |
 | `Crypto*.tsx` / `Options*.tsx` | 加密 / 期权专用面板 |
 | `Advisor.tsx` / `Screener*.tsx` | 结构化投顾 / 选股 |
 | `Sentiment*.tsx` / `Screener*.tsx` | 情绪 / 选股 |
@@ -142,7 +142,7 @@
 
 ### 3.4 量化研究台（quant frontend, 5175）
 
-3 Tab：回测 / 优化 / Walk-Forward。无图表库依赖（用纯 SVG 自绘 equity curve，避免拖大 bundle）。
+3 Tab：实盘前验证回测 / 优化 / Walk-Forward。无图表库依赖（用纯 SVG 自绘 equity curve，避免拖大 bundle）。
 
 ### 3.5 共享前端组件
 

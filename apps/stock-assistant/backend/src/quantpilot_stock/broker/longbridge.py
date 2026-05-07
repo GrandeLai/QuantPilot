@@ -1,4 +1,4 @@
-"""Longbridge 官方模拟账户 Provider."""
+"""Longbridge sandbox Provider."""
 
 from __future__ import annotations
 
@@ -38,7 +38,7 @@ from quantpilot_stock.security.keystore import load_api_key
 
 
 class LongbridgeTradingProvider:
-    """基于 Longbridge 官方 OpenAPI 的模拟账户 provider."""
+    """基于 Longbridge 官方 OpenAPI 的 sandbox provider."""
 
     def __init__(self) -> None:
         self._settings = get_settings()
@@ -62,10 +62,10 @@ class LongbridgeTradingProvider:
                     TradingOrderType.LIMIT,
                 ],
                 notes=[
-                    "底层交易能力基于 Longbridge 官方模拟账户。",
-                    "官方模拟账户支持港股 / 美股股票、ETF、港股轮证。",
-                    "官方模拟账户支持美股股票做空，但当前 UI 未开放完整做空流程。",
-                    "官方模拟账户暂不支持美股 OTC、盘前盘后交易、期权交易。",
+                    "底层交易能力基于 Longbridge sandbox。",
+                    "Longbridge sandbox 支持港股 / 美股股票、ETF、港股轮证。",
+                    "Longbridge sandbox 支持美股股票做空，但当前 UI 未开放完整做空流程。",
+                    "Longbridge sandbox 暂不支持美股 OTC、盘前盘后交易、期权交易。",
                 ],
             ),
         )
@@ -388,12 +388,12 @@ class LongbridgeTradingProvider:
         change = last_price - prev_close
         restrictions: list[str] = []
         if security.asset_type == TradingAssetType.OPTION:
-            restrictions.append("Longbridge 模拟账户暂不支持期权交易")
+            restrictions.append("Longbridge sandbox 暂不支持期权交易")
         if security.asset_type == TradingAssetType.OTC:
-            restrictions.append("Longbridge 模拟账户暂不支持美股 OTC")
+            restrictions.append("Longbridge sandbox 暂不支持美股 OTC")
         session = self._trade_session_for_market(security.market)
         if session in {TradingSessionStatus.PRE_MARKET, TradingSessionStatus.POST_MARKET}:
-            restrictions.append("Longbridge 模拟账户暂不支持盘前盘后交易")
+            restrictions.append("Longbridge sandbox 暂不支持盘前盘后交易")
 
         return TradingQuote(
             symbol=symbol,

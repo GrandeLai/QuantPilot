@@ -1,6 +1,6 @@
 """统一交易 API.
 
-以 Longbridge 官方模拟账户为主目标，mock provider 仅作为本地兜底。
+以 broker sandbox/testnet 为安全执行目标，mock provider 仅作为本地兜底。
 """
 
 from __future__ import annotations

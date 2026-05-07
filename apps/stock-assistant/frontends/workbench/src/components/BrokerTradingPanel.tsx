@@ -1,10 +1,10 @@
 /**
- * 模拟交易面板 — Longbridge 模拟账户优先，mock provider 兜底。
+ * 交易执行面板 — broker sandbox/testnet 优先，mock provider 兜底。
  *
  * 说明：
- * - 当前 UI 不再依赖本地 paper session / 自定义撮合引擎
+ * - 当前 UI 不依赖本地撮合 session / 自定义撮合引擎
  * - 页面所有交易、资产、持仓、委托、成交、资金流水均通过统一 /api/trading 链路获取
- * - 若 Longbridge 未配置或不可用，后端会显式回退到 mock provider，并在页面上展示提示
+ * - 若 broker 未配置或不可用，后端会显式回退到 mock provider，并在页面上展示提示
  */
 import { startTransition, useDeferredValue, useEffect, useState } from "react";
 import {
@@ -277,7 +277,7 @@ function ProviderBanner({ status }: { status: TradingProviderStatus | null }) {
                   ? "当前使用 Mock Fallback"
                   : isFutu
                     ? "当前接入 Futu Provider"
-                    : "当前接入 Longbridge 模拟账户"}
+                    : "当前接入 Longbridge Sandbox"}
               </div>
               <div className="text-xs text-muted-foreground">
                 {status.reason ?? "交易、资产、持仓、委托、成交均通过统一交易 provider 链路提供。"}
@@ -451,7 +451,7 @@ function EmptyState({ title, detail }: { title: string; detail: string }) {
   );
 }
 
-export default function PaperTradingPanel() {
+export default function BrokerTradingPanel() {
   const {
     query,
     selectedSecurity,
@@ -508,14 +508,14 @@ export default function PaperTradingPanel() {
   });
   const detailGuideKey =
     mainTab === "positions"
-      ? "trading.paper.positions"
+      ? "trading.execution.positions"
       : mainTab === "orders"
-        ? (orderTab === "today" ? "trading.paper.orders.today" : "trading.paper.orders.history")
+        ? (orderTab === "today" ? "trading.execution.orders.today" : "trading.execution.orders.history")
         : mainTab === "executions"
           ? (executionTab === "today"
-            ? "trading.paper.executions.today"
-            : "trading.paper.executions.history")
-          : "trading.paper.cashflows";
+            ? "trading.execution.executions.today"
+            : "trading.execution.executions.history")
+          : "trading.execution.cashflows";
 
   const refreshOrders = async (todayPage = pageState.todayOrders, historyPage = pageState.historyOrders) => {
     try {
@@ -714,10 +714,10 @@ export default function PaperTradingPanel() {
     if (!selectedSecurity) return "请先通过代码或名称选择交易标的";
     if (!quote) return "当前行情尚未加载完成，请稍后再试";
     if (quote.restrictions.length > 0 || !quote.tradeable) {
-      return quote.restrictions[0] ?? "当前标的不在 Longbridge 模拟账户支持范围内";
+      return quote.restrictions[0] ?? "当前标的不在 broker sandbox 支持范围内";
     }
     if (quote.trade_session !== "regular") {
-      return `当前处于 ${sessionLabel(quote.trade_session)}，Longbridge 模拟账户仅支持常规交易时段`;
+      return `当前处于 ${sessionLabel(quote.trade_session)}，broker sandbox 仅支持常规交易时段`;
     }
 
     const quantity = Number.parseInt(draft.quantity, 10);
@@ -860,14 +860,14 @@ export default function PaperTradingPanel() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold tracking-tight">模拟交易</h2>
+            <h2 className="text-2xl font-bold tracking-tight">交易执行</h2>
             <Badge variant="outline" className="border-border/60 bg-card/60">
               Longbridge First
             </Badge>
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted-foreground">
-            交易、资产、持仓、委托、成交与资金流水统一走 Longbridge 官方模拟账户能力。
-            若当前未配置 Longbridge 凭证，系统会自动回退到结构一致的 mock provider 以便本地验证 UI 闭环。
+            交易、资产、持仓、委托、成交与资金流水统一走 broker 执行链路。
+            若当前未配置 broker 凭证，系统会自动回退到结构一致的 mock provider 以便本地验证 UI 闭环。
           </p>
         </div>
         <Button variant="outline" onClick={() => void refreshAll()} disabled={refreshing}>
@@ -880,7 +880,7 @@ export default function PaperTradingPanel() {
       <FeedbackBanner feedback={feedback} />
 
       {loadingDashboard ? (
-        <LoadingState text="正在加载模拟账户总览…" />
+        <LoadingState text="正在加载交易账户总览…" />
       ) : sectionError.dashboard ? (
         <Card className="border-red-500/20 bg-red-500/10">
           <CardContent className="px-5 py-4 text-sm text-red-300">{sectionError.dashboard}</CardContent>
@@ -980,7 +980,7 @@ export default function PaperTradingPanel() {
               <CardHeader className="space-y-1 pb-4">
                 <CardTitle className="text-lg font-semibold">交易下单</CardTitle>
                 <p className="text-xs leading-relaxed text-muted-foreground">
-                  当前仅开放 Longbridge 模拟账户已覆盖并在本项目完成接线的标准市价 / 限价单。
+                  当前仅开放 broker sandbox 已覆盖并在本项目完成接线的标准市价 / 限价单。
                   对 OTC、盘前盘后、期权等官方不支持场景会在产品层直接限制。
                 </p>
               </CardHeader>
@@ -1053,7 +1053,7 @@ export default function PaperTradingPanel() {
                   ) : (
                     <EmptyState
                       title="尚未选择交易标的"
-                      detail="请通过代码或名称搜索支持的港美股票 / ETF。当前版本不展示 Longbridge 模拟账户不支持的交易入口。"
+                      detail="请通过代码或名称搜索支持的港美股票 / ETF。当前版本不展示 broker sandbox 不支持的交易入口。"
                     />
                   )}
                 </div>
@@ -1161,7 +1161,7 @@ export default function PaperTradingPanel() {
                     disabled={submittingOrder || !selectedSecurity}
                   >
                     {submittingOrder ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <ShoppingCart className="mr-2 h-4 w-4" />}
-                    提交模拟订单
+                    提交订单
                   </Button>
                 </div>
               </CardContent>
@@ -1638,7 +1638,7 @@ export default function PaperTradingPanel() {
         </>
       )}
 
-      <FeatureGuideButton guideKey="trading.paper" className="bottom-5 right-5" />
+      <FeatureGuideButton guideKey="trading.execution" className="bottom-5 right-5" />
 
       <ConfirmDialog
         open={confirm.open}

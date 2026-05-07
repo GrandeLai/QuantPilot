@@ -4,7 +4,7 @@
 - 本地无 Longbridge 凭证 / SDK 时的 UI 验证
 - 集成测试与演示兜底
 
-注意：它不是产品主路径。主目标始终是 Longbridge 官方模拟账户。
+注意：它不是产品主路径。主目标始终是 broker sandbox/testnet。
 """
 
 from __future__ import annotations
@@ -96,9 +96,9 @@ class MockTradingProvider:
                     TradingOrderType.LIMIT,
                 ],
                 notes=[
-                    "Mock provider 仅用于本地兜底，正式模拟交易目标为 Longbridge 官方模拟账户。",
-                    "官方模拟账户不支持美股 OTC、盘前盘后交易、期权交易。",
-                    "美股做空能力在官方模拟账户支持，但当前 UI 未开放独立融券做空流程。",
+                    "Mock provider 仅用于本地兜底，正式安全执行目标为 broker sandbox/testnet。",
+                    "Broker sandbox/testnet 不支持美股 OTC、盘前盘后交易、期权交易。",
+                    "美股做空能力取决于 broker sandbox/testnet，当前 UI 未开放独立融券做空流程。",
                 ],
             ),
         )
@@ -227,7 +227,7 @@ class MockTradingProvider:
         sell_max_qty = int(position["available_quantity"]) if position is not None else 0
         reason = None
         if request.side == TradingOrderSide.SELL and sell_max_qty <= 0:
-            reason = "当前未持有可卖数量；模拟账户支持美股做空，但当前 UI 未开放做空下单流程。"
+            reason = "当前未持有可卖数量；broker sandbox/testnet 支持能力取决于券商，当前 UI 未开放做空下单流程。"
         return TradingOrderEstimate(
             symbol=request.symbol,
             side=request.side,
@@ -442,7 +442,7 @@ class MockTradingProvider:
     def _validate_security_for_trade(self, symbol: str) -> TradingSecurity:
         security = self._require_supported_security(symbol)
         if security.asset_type in {TradingAssetType.OPTION, TradingAssetType.OTC}:
-            raise TradingProviderError("当前 Longbridge 模拟账户不支持该资产类型", code="unsupported_asset")
+            raise TradingProviderError("当前 broker sandbox/testnet 不支持该资产类型", code="unsupported_asset")
 
         session = self._trade_session_for_market(security.market)
         if session in {
@@ -452,7 +452,7 @@ class MockTradingProvider:
             TradingSessionStatus.MIDDAY_BREAK,
         }:
             raise TradingProviderError(
-                "当前不在 Longbridge 模拟账户支持的常规交易时段内",
+                "当前不在 broker sandbox/testnet 支持的常规交易时段内",
                 code="unsupported_session",
             )
         return security

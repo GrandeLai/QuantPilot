@@ -1,14 +1,14 @@
 # QuantPilot 功能总结
 
-> **状态**：Phase A–E 完工，Phase G1 共享市场宇宙落地
-> **最后更新**：2026-05-07
+> **状态**：Phase A–E 完工，Phase G1/G2 落地
+> **最后更新**：2026-05-08
 
 按"是否有人参与决策"切线，QuantPilot 的能力分配在两个 app 中：
 
 | 维度 | stock-assistant (Python, 8001) | quant-assistant (Rust, 8002) |
 |---|---|---|
 | 决策模式 | 人参与 | 自动化、规则化 |
-| 主要工作流 | broker 接入 / 实盘 / 投顾 / portfolio | 回测 / 优化 / walk-forward / 推理 |
+| 主要工作流 | broker 接入 / 交易执行 / 投顾 / portfolio / 实盘前验证 | 回测计算 / 优化 / walk-forward / 推理 |
 | 数据流 | 写入 market.duckdb | read-only 消费 |
 | 支持资产 | 美股 / ETF / 港股 / A 股 / 期权 / OKX 加密 | 美股 / ETF / 港股 / A 股 / OKX 加密 |
 | ML | 不做训练，不做推理 | 仅 ONNX 推理 |
@@ -23,10 +23,11 @@
 | 能力 | 模块 | 路由前缀 |
 |---|---|---|
 | 统一交易接口（Longbridge / FuTu / Mock） | `quantpilot_stock.broker.*` | `/api/trading` |
-| 模拟账户（持仓 / 订单 / 现金流） | `quantpilot_stock.paper` | `/api/paper` |
 | 加密交易（OKX 现货 / 永续 / 期权） | `quantpilot_stock.broker.okx_*` + 直接路由 | `/api/crypto` |
 | 期权希腊字母 / 隐含波动率 / 情景分析 | `quantpilot_stock.options` | `/api/options` |
 | API Key 管理（keyring 加密） | `quantpilot_stock.security` | `/api/security` |
+
+已移除：本地模拟盘产品能力（`quantpilot_stock.paper`、`/api/paper`、自定义撮合 engine、模拟策略槽位）。Broker sandbox/testnet 仅作为交易通道安全模式保留。
 
 支持 broker 列表（`get_status` 返回 `TradingProviderStatus`）：
 - **Longbridge**（美股、港股，主要目标）
@@ -85,7 +86,7 @@
 | `POST /api/indicators` | SMA / EMA 指标计算 |
 | `POST /api/ml/predict` | ONNX 模型推理（按 model_id 加载 + features 数组输入） |
 
-详细 request / response 见 [`quant-assistant-api.md`](quant-assistant-api.md)。
+详细 request / response 见 [`quant-assistant-api.md`](quant-assistant-api.md)。该端点也是 stock-assistant 与 quant-assistant 共用的实盘前验证测试入口。
 
 ### 2.2 内部能力（不直接暴露端点）
 
@@ -102,7 +103,7 @@
 
 | Tab | 组件 | 调用 |
 |---|---|---|
-| 回测 | `BacktestPanel.tsx` | `POST /api/backtest/run` + 权益曲线 SVG 图 |
+| 实盘前验证 | `BacktestPanel.tsx` | `POST /api/backtest/run` + 权益曲线 SVG 图 |
 | 参数优化 | `OptimizationPanel.tsx` | `POST /api/optimize` + 排名表 |
 | Walk-Forward | `WalkForwardPanel.tsx` | `POST /api/walk-forward` + AbortController + 客户端校验 |
 
@@ -118,7 +119,7 @@
 | `common/python/quantpilot_common/config` | Pydantic Settings 全局配置 |
 | `common/python/quantpilot_common/data/fetchers` | yfinance / akshare / OKX 拉数据 |
 | `common/python/quantpilot_common/data/universe` | 双产品共享支持市场宇宙 |
-| `common/python/quantpilot_common/redis` | 异步 redis 客户端 + price_cache + order_queue |
+| `common/python/quantpilot_common/redis` | 异步 redis 客户端 + price_cache |
 | `common/python/quantpilot_common/strategy_persistence` | 策略文件 Git 版本管理（gitpython） |
 | `common/python/quantpilot_common/data/storage` | DuckDB 客户端（stock 写、其他读） |
 | `common/data-store/market.duckdb` | 共享行情库（stock-assistant 单写） |

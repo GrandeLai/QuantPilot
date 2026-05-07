@@ -1,6 +1,6 @@
 /**
  * 统一交易 API 客户端.
- * Longbridge 模拟账户为主目标，mock provider 为本地兜底。
+ * Broker sandbox/testnet 为主目标，mock provider 为本地兜底。
  */
 
 const BASE = "/api/trading";

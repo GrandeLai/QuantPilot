@@ -85,9 +85,9 @@ export const SIDEBAR_NAV: Record<WorkbenchTab, SidebarNavItem[]> = {
     },
     {
       key: "backtest",
-      label: "策略回测",
+      label: "实盘前验证",
       icon: PlayCircle,
-      description: "加密策略历史回测",
+      description: "股票 / 加密通用回测",
     },
   ],
 
@@ -96,7 +96,7 @@ export const SIDEBAR_NAV: Record<WorkbenchTab, SidebarNavItem[]> = {
       key: "trading",
       label: "交易执行",
       icon: Zap,
-      description: "实盘 / 模拟盘",
+      description: "账户 / 下单 / 风控",
     },
     {
       key: "crypto_spot",

@@ -3,7 +3,7 @@
 覆盖 2026-04 前端增强计划中的关键闭环：
 - /api 路由别名在开发环境可用
 - 用户策略进入可运行策略目录
-- 模拟盘历史记录接口可被前端消费
+- 本地模拟盘接口已下线，前端应改走回测验证与交易执行链路
 """
 
 from pathlib import Path
@@ -59,36 +59,8 @@ def test_available_strategies_include_user_strategies(
     assert any(item["id"] == "user001" and item["source"] == "user" for item in strategies)
 
 
-def test_paper_order_history_endpoint_returns_frontend_shape(client: TestClient) -> None:
-    """图表与模拟盘页面需要可直接消费的成交记录列表."""
-    session_id = "frontend-contract-session"
+def test_local_paper_api_is_not_exposed(client: TestClient) -> None:
+    """本地模拟盘接口不应继续暴露给前端."""
+    response = client.get("/api/paper/sessions")
 
-    create_resp = client.post(
-        "/api/paper/sessions",
-        json={
-            "session_id": session_id,
-            "symbol": "AAPL",
-            "timeframe": "1d",
-            "initial_cash": 100000,
-        },
-    )
-    assert create_resp.status_code in (200, 409)
-
-    buy_resp = client.post(
-        f"/api/paper/sessions/{session_id}/orders",
-        json={"symbol": "AAPL", "side": "buy", "quantity": 10, "price": 100.0},
-    )
-    assert buy_resp.status_code == 200
-
-    sell_resp = client.post(
-        f"/api/paper/sessions/{session_id}/orders",
-        json={"symbol": "AAPL", "side": "sell", "quantity": 10, "price": 110.0},
-    )
-    assert sell_resp.status_code == 200
-
-    history_resp = client.get(f"/api/paper/sessions/{session_id}/orders")
-    assert history_resp.status_code == 200
-    body = history_resp.json()
-    assert body["session_id"] == session_id
-    assert len(body["orders"]) >= 1
-    assert body["orders"][0]["symbol"] == "AAPL"
+    assert response.status_code == 404

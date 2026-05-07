@@ -74,7 +74,7 @@ function SectionContent({
     case "validation/crypto_research":
       return <CryptoResearchPanel />;
     case "validation/backtest":
-      return <CryptoPanel allowedTabs={["backtest"]} defaultTab="backtest" />;
+      return <BacktestPanel />;
 
     // ── 运行中心 ────────────────────────────────────────────────────────────
     case "run/trading":

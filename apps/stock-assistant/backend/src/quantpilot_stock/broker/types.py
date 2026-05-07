@@ -53,7 +53,7 @@ class TradingOrderSide(StrEnum):
 class TradingOrderType(StrEnum):
     """当前启用的订单类型.
 
-    以 Longbridge 模拟账户能力为边界，当前版本优先启用常规
+    以 broker sandbox/testnet 能力为边界，当前版本优先启用常规
     market / limit 两类标准订单，不伪装支持未落地的复杂条件单流程。
     """
 
@@ -98,7 +98,7 @@ class TradingSessionStatus(StrEnum):
 
 
 class TradingCapability(BaseModel):
-    """Longbridge 模拟账户能力边界."""
+    """Broker sandbox/testnet 能力边界."""
 
     supported_markets: list[TradingMarket]
     supported_asset_types: list[TradingAssetType]

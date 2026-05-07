@@ -21,7 +21,7 @@ const featureGuides = {
       },
       {
         title: "需要动作时再联动右侧功能",
-        description: "看完图之后，可以去右侧自选区换标的，或者直接用快捷下单做模拟操作。",
+        description: "看完图之后，可以去右侧自选区换标的，或者直接用快捷下单进入交易执行流程。",
         tips: ["如果数据不够新，可以点顶部刷新按钮重新拉行情。"],
       },
     ],
@@ -126,8 +126,8 @@ const featureGuides = {
   },
   "market.chart.order": {
     title: "快捷下单操作指南",
-    summary: "这块用来从图表旁边直接发模拟订单，适合边看边练，不用跳出看盘页。",
-    goal: "先确认可交易，再提交数量合适的模拟单。",
+    summary: "这块用来从图表旁边进入交易执行，适合边看行情边处理下单，不用跳出看盘页。",
+    goal: "先确认可交易，再提交数量合适的订单。",
     steps: [
       {
         title: "先看标的是否已映射",
@@ -142,7 +142,7 @@ const featureGuides = {
         description: "如果当前是 mock fallback、休市或数量不合法，面板会先给出提醒，再决定要不要提交。",
       },
     ],
-    quickTips: ["在图表页下单更适合练习和快反，不适合做复杂组合交易。"],
+    quickTips: ["在图表页下单更适合快反，不适合做复杂组合交易。"],
   },
   "market.chart.news": {
     title: "新闻资讯操作指南",
@@ -170,7 +170,7 @@ const featureGuides = {
     steps: [
       {
         title: "先确认有没有记录",
-        description: "如果当前为空，先去模拟交易下单并成交，这里才会开始出现记录。",
+        description: "如果当前为空，先去交易执行页完成订单并成交，这里才会开始出现记录。",
       },
       {
         title: "重点看方向、价格和时间",
@@ -198,25 +198,6 @@ const featureGuides = {
       {
         title: "保存后再跑回测",
         description: "不要一边改一边猜结果，先点保存，再用右上角按钮跳去回测页验证。",
-      },
-    ],
-  },
-  "strategy.live": {
-    title: "实盘运行操作指南",
-    summary: "这里管理策略部署和组合运行，适合把通过验证的策略放进持续观察环境。",
-    goal: "先确认策略可用，再部署，再观察净值和风险。",
-    steps: [
-      {
-        title: "先确认策略已经保存",
-        description: "未保存的策略不要直接部署，先把代码和参数固定下来。",
-      },
-      {
-        title: "填写部署信息",
-        description: "选择策略、标的、周期和资金分配，部署前先想清楚这份策略要承担多大仓位。",
-      },
-      {
-        title: "部署后盯组合状态",
-        description: "重点看净值、日盈亏、回撤和活跃策略数量，确认运行状态有没有偏离预期。",
       },
     ],
   },
@@ -254,13 +235,13 @@ const featureGuides = {
       },
       {
         title: "最后回到回测验证",
-        description: "无论模型说得多好，只有回测和模拟盘能说明它值不值得继续用。",
+        description: "无论模型说得多好，只有实盘前回测验证能说明它值不值得继续推进。",
       },
     ],
   },
-  "trading.paper": {
-    title: "模拟交易操作指南",
-    summary: "这里是统一的模拟交易工作台，适合练下单、看账户、查委托和做复盘。",
+  "trading.execution": {
+    title: "交易执行操作指南",
+    summary: "这里是统一的交易执行工作台，适合看账户、查委托、处理订单和做复盘。",
     goal: "先查标的，再估算，再下单，最后复查结果。",
     steps: [
       {
@@ -291,12 +272,12 @@ const featureGuides = {
         description: "看到信号后，先回看走势、成交量和风险条件，确认它不是噪音。",
       },
       {
-        title: "决定执行时去模拟交易",
-        description: "想验证信号可用性，优先在模拟交易里先练，不要直接跳到正式策略判断。",
+        title: "决定执行时去交易页",
+        description: "想处理信号时，先回到图表、回测和风控条件确认，再进入交易执行。",
       },
     ],
   },
-  "trading.paper.positions": {
+  "trading.execution.positions": {
     title: "持仓标签操作指南",
     summary: "这里专门看你现在拿着什么仓位，以及这些仓位赚了还是亏了。",
     goal: "先确认仓位结构，再决定要不要调仓或快速卖出。",
@@ -315,7 +296,7 @@ const featureGuides = {
       },
     ],
   },
-  "trading.paper.orders.today": {
+  "trading.execution.orders.today": {
     title: "今日委托操作指南",
     summary: "这里看今天还在处理中的委托，适合追踪订单有没有排队、成交或撤掉。",
     goal: "盯住今天的订单状态变化。",
@@ -334,7 +315,7 @@ const featureGuides = {
       },
     ],
   },
-  "trading.paper.orders.history": {
+  "trading.execution.orders.history": {
     title: "历史委托操作指南",
     summary: "这里用来复查过去的委托记录，适合排查你以前到底是怎么下单的。",
     goal: "把过去的下单行为复盘清楚。",
@@ -353,7 +334,7 @@ const featureGuides = {
       },
     ],
   },
-  "trading.paper.executions.today": {
+  "trading.execution.executions.today": {
     title: "当日成交操作指南",
     summary: "这里专门看今天已经成交的订单，适合确认实际成交价和执行时间。",
     goal: "判断今天的真实成交质量。",
@@ -372,7 +353,7 @@ const featureGuides = {
       },
     ],
   },
-  "trading.paper.executions.history": {
+  "trading.execution.executions.history": {
     title: "历史成交操作指南",
     summary: "这里适合回头统计过去真实成交过的单子，看自己长期执行有没有偏差。",
     goal: "复盘长期成交质量，而不是只看单次结果。",
@@ -391,7 +372,7 @@ const featureGuides = {
       },
     ],
   },
-  "trading.paper.cashflows": {
+  "trading.execution.cashflows": {
     title: "资金流水操作指南",
     summary: "这里看账户资金怎么变化，适合确认每一笔交易或账户动作有没有真正反映到账上。",
     goal: "看清资金进出，而不是只盯持仓盈亏。",
@@ -412,7 +393,7 @@ const featureGuides = {
   },
   "backtest.workspace": {
     title: "回测操作指南",
-    summary: "这里适合做历史验证，先看策略过去表现，再决定值不值得继续推进到模拟交易。",
+    summary: "这里适合做实盘前验证，先看策略过去表现，再决定值不值得进入交易执行。",
     goal: "先把参数配对，再跑，再读结果。",
     steps: [
       {
@@ -428,7 +409,7 @@ const featureGuides = {
         description: "不要只盯总收益，先看最大回撤、波动和交易次数，判断它是不是能长期拿得住。",
       },
     ],
-    quickTips: ["回测好看，只说明过去不错；能不能上模拟盘，还要再看稳定性。"],
+    quickTips: ["回测好看，只说明过去不错；能不能进入实盘，还要看稳定性和风险承受。"],
   },
   "options.payoff": {
     title: "盈亏图操作指南",

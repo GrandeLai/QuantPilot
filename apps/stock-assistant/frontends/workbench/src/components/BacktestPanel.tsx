@@ -1,6 +1,6 @@
 /**
- * 回测面板 — 策略历史回测.
- * 流程: 选策略 → 配置参数 → 拉 K 线 → POST /backtest/run → 展示绩效
+ * 回测面板 — 实盘前验证测试.
+ * 流程: 选策略 → 配置参数 → 拉 K 线 → POST /backtest/run → 展示验证绩效
  */
 import { useEffect, useRef, useState } from "react";
 import {
@@ -14,7 +14,6 @@ import {
   RefreshCw,
   ChevronDown,
   ChevronUp,
-  ArrowRight,
 } from "lucide-react";
 import FeatureGuideButton from "@/components/guides/FeatureGuideButton";
 import { cn } from "../lib/utils";
@@ -100,10 +99,9 @@ function MetricTile({
 
 interface BacktestPanelProps {
   onResult?: (result: BacktestResult) => void;
-  onGoToPaper?: () => void;
 }
 
-export default function BacktestPanel({ onResult, onGoToPaper }: BacktestPanelProps = {}) {
+export default function BacktestPanel({ onResult }: BacktestPanelProps = {}) {
   // ── 配置状态
   const [strategies, setStrategies] = useState<AvailableStrategy[]>([]);
   const [strategyId, setStrategyId] = useState("");
@@ -586,18 +584,6 @@ export default function BacktestPanel({ onResult, onGoToPaper }: BacktestPanelPr
               </div>
             </div>
 
-            {/* 前往模拟交易验证 CTA */}
-            {onGoToPaper && (
-              <div className="flex justify-end pt-2">
-                <button
-                  onClick={onGoToPaper}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-blue-900/20"
-                >
-                  <ArrowRight className="w-4 h-4" />
-                  前往模拟交易验证 →
-                </button>
-              </div>
-            )}
           </div>
         )}
       </main>

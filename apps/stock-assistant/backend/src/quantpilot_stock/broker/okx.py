@@ -1,8 +1,8 @@
-"""OKX 现货交易 Provider — 支持模拟盘和实盘.
+"""OKX 现货交易 Provider — 支持 demo sandbox 和实盘.
 
 认证方式：HMAC-SHA256 + Base64，每个私有请求附加 4 个请求头。
 配置：QUANTPILOT_OKX_API_KEY / OKX_API_SECRET / OKX_PASSPHRASE / OKX_DEMO
-模拟盘：与实盘相同 URL，区别在于请求头 x-simulated-trading: 1。
+Demo sandbox：与实盘相同 URL，区别在于请求头 x-simulated-trading: 1。
 """
 from __future__ import annotations
 

@@ -145,7 +145,7 @@ export default function ChartBottomPanels() {
         <div className="flex-1 overflow-x-auto overflow-y-auto custom-scrollbar">
           {positions.length === 0 ? (
             <div className="flex items-center justify-center h-full text-[11px] text-gray-600">
-              暂无成交记录 — 在模拟交易中发起订单后显示
+              暂无成交记录 — 在交易执行中发起订单后显示
             </div>
           ) : (
             <table className="w-full text-left text-xs">

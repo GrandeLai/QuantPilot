@@ -1,7 +1,7 @@
 # QuantPilot — 设计文档
 
-> **文档版本**：v0.4.1
-> **最后更新**：2026-05-07（双产品共享市场宇宙）
+> **文档版本**：v0.4.2
+> **最后更新**：2026-05-08（移除本地模拟盘，回测收敛为实盘前验证）
 > **作者**：赖俊金
 > **状态**：Active
 
@@ -24,6 +24,7 @@
 | v0.3.0 | 2026-04-28 | Phase A–E 完工；Rust 量化后端全 API + 前端接线；删除 Python 量化临时后端 |
 | v0.4.0 | 2026-04-28 | A1–A3 + B1：equity curve 图表、Walk-Forward 面板、/api/ml/predict 端点、ApiError DRY |
 | v0.4.1 | 2026-05-07 | G1：双产品共享市场宇宙；量化投资与股票投资助手均支持美股、ETF、港股、A 股与 OKX 加密标的 |
+| v0.4.2 | 2026-05-08 | 移除 stock-assistant 本地模拟盘 `/api/paper` 与自定义撮合引擎；回测统一定位为 stock-assistant 与 quant-assistant 共用的实盘前验证测试 |
 
 ---
 
@@ -31,7 +32,7 @@
 
 **Vision**：本地优先、证据驱动的个人量化交易平台。
 
-**当前状态**：Phase A–E + G1 完工 — stock-assistant（Python，生产就绪）+ quant-assistant（Rust，核心 API 全通）+ 双产品共享市场宇宙。
+**当前状态**：Phase A–E + G1 + G2 完工 — stock-assistant（Python，生产就绪）+ quant-assistant（Rust，核心 API 全通）+ 双产品共享市场宇宙 + 通用实盘前回测验证。
 
 ---
 
@@ -70,10 +71,11 @@ QuantPilot Monorepo
 ### stock-assistant（股票投资助手，Python）
 
 - **定位**：人参与决策的交易工作流
-- **功能**：Longbridge / FuTu / OKX broker 接入，paper trading，持仓管理，选股，情绪分析，结构化投顾
+- **功能**：Longbridge / FuTu / OKX broker 接入，交易执行，broker 账户持仓管理，选股，情绪分析，结构化投顾，实盘前回测验证入口
 - **支持资产**：美股 / ETF / 港股 / A 股 / 期权 / OKX 加密现货与衍生品
 - **市场数据写入方**：yfinance / akshare / OKX → `common/data-store/market.duckdb`
 - **不做**：自动化量化研究，ML 训练，无人值守执行
+- **已移除**：本地模拟盘产品功能（`quantpilot_stock.paper`、`/api/paper`、自定义撮合 engine、模拟策略槽位）。Broker sandbox/testnet 仅作为交易通道安全模式保留，不作为独立产品入口。
 
 ### quant-assistant（量化投资，Rust）
 
@@ -87,6 +89,14 @@ QuantPilot Monorepo
 - **支持资产**：美股 / ETF / 港股 / A 股 / OKX 加密现货与衍生品（从 stock-assistant 数据层获取 K 线后计算）
 - **市场数据只读方**：读 `market.duckdb` 或通过 stock-assistant 的 `/api/data/*` 获取
 - **不做**：broker 接入，LLM 调用，人决策界面
+
+### 通用实盘前回测验证
+
+- **定位**：回测不是独立玩具功能，而是任何策略或信号进入交易执行前的验证测试。
+- **计算归属**：`quant-assistant` 的 Rust `POST /api/backtest/run` 是唯一回测计算 owner。
+- **使用方式**：`stock-assistant` 前端通过 HTTP/proxy 调用回测 API；不得 import `apps/quant-assistant/` 源码。
+- **共享契约**：`common/schemas/backtest_config.schema.json` 与 `common/schemas/backtest_result.schema.json` 作为跨产品结果契约。
+- **覆盖资产**：美股 / ETF / 港股 / A 股 / OKX 加密均可进入相同验证链路。
 
 ### 共享市场宇宙
 

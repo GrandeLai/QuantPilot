@@ -55,7 +55,7 @@ export default function ChartOrderEntry() {
         if (!security) {
           setQuote(null);
           setEstimate(null);
-          setMessage("当前图表标的未映射到模拟交易支持列表，请在交易页使用完整代码下单。");
+          setMessage("当前图表标的未映射到交易支持列表，请在交易页使用完整代码下单。");
           return;
         }
         const [quoteItem] = await fetchTradingQuotes([security.symbol]);
@@ -137,7 +137,7 @@ export default function ChartOrderEntry() {
       ? "Mock fallback"
       : providerStatus?.provider === "futu"
         ? "Futu provider"
-        : "Longbridge 模拟账户已连接";
+        : "Longbridge sandbox 已连接";
 
   return (
     <div className="relative flex h-1/2 flex-col bg-[#131722] p-4 text-xs">
@@ -242,7 +242,7 @@ export default function ChartOrderEntry() {
 
             {providerStatus?.provider === "mock" ? (
               <div className="rounded border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-[10px] text-amber-300">
-                当前为 mock fallback。填入 Longbridge 配置后，主交易页与快捷下单会自动切换到官方模拟账户。
+                当前为 mock fallback。填入 Longbridge 配置后，主交易页与快捷下单会自动切换到 broker sandbox。
               </div>
             ) : providerStatus?.provider === "futu" ? (
               <div className="rounded border border-sky-500/20 bg-sky-500/10 px-3 py-2 text-[10px] text-sky-300">
