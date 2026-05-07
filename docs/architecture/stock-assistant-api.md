@@ -16,6 +16,7 @@
 | 模块 | Prefix | 业务域 | 路由数 |
 |---|---|---|---|
 | `alerts.py` | `/api/alerts` | 告警系统（规则、事件、检查） | 5 |
+| `advisor.py` | `/api/advisor` | 股票 / 加密机会与风险卡片 | 5 |
 | `crypto.py` | `/api/crypto` | OKX 加密：现货、永续合约、期权 | 18 |
 | `data.py` | `/api/data` | 行情拉取与查询 | 9 |
 | `insights.py` | `/api/insights` | 市场体制 / 相关性洞察 | 2 |
@@ -52,6 +53,18 @@
 | POST | `/api/alerts/check` |
 
 支持的规则类型：价格阈值、指标交叉、新闻情绪、自定义事件。触发后通过 `quantpilot_stock.alerts.notifiers` 发送（飞书 / Telegram）。
+
+---
+
+### `advisor.py` — 投资助手（5）
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/advisor/overview` | 组合总览 |
+| GET | `/api/advisor/opportunities` | 美股机会卡片，支持 `symbols=AAPL,NVDA` |
+| GET | `/api/advisor/risks` | 美股风险卡片，支持 `symbols=AAPL,NVDA` |
+| GET | `/api/advisor/crypto/opportunities` | 加密机会卡片 |
+| GET | `/api/advisor/crypto/risks` | 加密风险卡片 |
 
 ---
 

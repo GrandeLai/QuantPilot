@@ -59,7 +59,8 @@
 
 | 能力 | 模块 | 路由前缀 |
 |---|---|---|
-| 证据驱动推荐 | `quantpilot_stock.api.advisor` | `/api/advisor/recommendations` |
+| 股票机会 / 风险卡片 | `quantpilot_stock.api.advisor` | `/api/advisor/opportunities`、`/api/advisor/risks` |
+| 加密机会 / 风险卡片 | `quantpilot_stock.api.advisor` | `/api/advisor/crypto/opportunities`、`/api/advisor/crypto/risks` |
 | Agent 中间件 + 熔断 / 退避 / fallback | `quantpilot_stock.agent` | (内部) |
 
 ### 1.5 平台

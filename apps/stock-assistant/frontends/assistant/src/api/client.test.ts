@@ -7,7 +7,25 @@ import {
   fetchCryptoResearchLatestOptimization,
   fetchCryptoResearchOptimization,
   fetchCryptoRisks,
+  fetchOpportunities,
 } from "./client.ts";
+
+test("fetchOpportunities calls the stock opportunity advisor endpoint", async () => {
+  let capturedUrl = "";
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    capturedUrl = String(input);
+    return new Response(JSON.stringify({ items: [] }), { status: 200 });
+  }) as typeof fetch;
+
+  try {
+    const result = await fetchOpportunities<{ items: [] }>();
+    assert.equal(capturedUrl, "/api/advisor/opportunities");
+    assert.deepEqual(result, { items: [] });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
 
 test("fetchCryptoOpportunities calls the crypto opportunity advisor endpoint", async () => {
   let capturedUrl = "";
