@@ -34,58 +34,6 @@ import TechnicalScorePanel from "../TechnicalScorePanel";
 import BetaCorrelationPanel from "../BetaCorrelationPanel";
 import SeasonalityPanel from "../SeasonalityPanel";
 import RelativeStrengthPanel from "../RelativeStrengthPanel";
-import ReversalSignalPanel from "../ReversalSignalPanel";
-import ADXTrendPanel from "../ADXTrendPanel";
-import MAAlignmentPanel from "../MAAlignmentPanel";
-import MACDPanel from "../MACDPanel";
-import BollingerPanel from "../BollingerPanel";
-import RSISignalPanel from "../RSISignalPanel";
-import StochasticPanel from "../StochasticPanel";
-import { OBVPanel } from "../OBVPanel";
-import { MFIPanel } from "../MFIPanel";
-import { CMFPanel } from "../CMFPanel";
-import { WilliamsRPanel } from "../WilliamsRPanel";
-import { CCIPanel } from "../CCIPanel";
-import { ATRPanel } from "../ATRPanel";
-import { ROCPanel } from "../ROCPanel";
-import { SARPanel } from "../SARPanel";
-import { VWAPPanel } from "../VWAPPanel";
-import { KeltnerPanel } from "../KeltnerPanel";
-import { ForceIndexPanel } from "../ForceIndexPanel";
-import { TRIXPanel } from "../TRIXPanel";
-import { AroonPanel } from "../AroonPanel";
-import { UltimateOscPanel } from "../UltimateOscPanel";
-import { SupertrendPanel } from "../SupertrendPanel";
-import { DPOPanel } from "../DPOPanel";
-import { TSIPanel } from "../TSIPanel";
-import { DonchianPanel } from "../DonchianPanel";
-import { IchimokuPanel } from "../IchimokuPanel";
-import { KSTPanel } from "../KSTPanel";
-import { ChaikinOscPanel } from "../ChaikinOscPanel";
-import { ElderRayPanel } from "../ElderRayPanel";
-import { VortexPanel } from "../VortexPanel";
-import { PVTPanel } from "../PVTPanel";
-import { CMOPanel } from "../CMOPanel";
-import { PPOPanel } from "../PPOPanel";
-import { MassIndexPanel } from "../MassIndexPanel";
-import { KVOPanel } from "../KVOPanel";
-import { HMAPanel } from "../HMAPanel";
-import { KAMAPanel } from "../KAMAPanel";
-import { STCPanel } from "../STCPanel";
-import { CKSPanel } from "../CKSPanel";
-import { PriceOscPanel } from "../PriceOscPanel";
-import { ChaikinVolPanel } from "../ChaikinVolPanel";
-import { DEMAPanel } from "../DEMAPanel";
-import { TEMAPanel } from "../TEMAPanel";
-import { AlligatorPanel } from "../AlligatorPanel";
-import { AwesomeOscPanel } from "../AwesomeOscPanel";
-import { ChoppinessPanel } from "../ChoppinessPanel";
-import { ElderImpulsePanel } from "../ElderImpulsePanel";
-import { ConnorsRSIPanel } from "../ConnorsRSIPanel";
-import { FisherTransformPanel } from "../FisherTransformPanel";
-import { StochRSIPanel } from "../StochRSIPanel";
-import { VROCPanel } from "../VROCPanel";
-import { PivotPointsPanel } from "../PivotPointsPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -117,58 +65,6 @@ export default function RiskReviewCenter() {
       <BetaCorrelationPanel />
       <SeasonalityPanel />
       <RelativeStrengthPanel />
-      <ReversalSignalPanel />
-      <ADXTrendPanel />
-      <MAAlignmentPanel />
-      <MACDPanel />
-      <BollingerPanel />
-      <RSISignalPanel />
-      <StochasticPanel />
-      <OBVPanel />
-      <MFIPanel />
-      <CMFPanel />
-      <WilliamsRPanel />
-      <CCIPanel />
-      <ATRPanel />
-      <ROCPanel />
-      <SARPanel />
-      <VWAPPanel />
-      <KeltnerPanel />
-      <ForceIndexPanel />
-      <TRIXPanel />
-      <AroonPanel />
-      <UltimateOscPanel />
-      <SupertrendPanel />
-      <DPOPanel />
-      <TSIPanel />
-      <DonchianPanel />
-      <IchimokuPanel />
-      <KSTPanel />
-      <ChaikinOscPanel />
-      <ElderRayPanel />
-      <VortexPanel />
-      <PVTPanel />
-      <CMOPanel />
-      <PPOPanel />
-      <MassIndexPanel />
-      <KVOPanel />
-      <HMAPanel />
-      <KAMAPanel />
-      <STCPanel />
-      <CKSPanel />
-      <PriceOscPanel />
-      <ChaikinVolPanel />
-      <DEMAPanel />
-      <TEMAPanel />
-      <AlligatorPanel />
-      <AwesomeOscPanel />
-      <ChoppinessPanel />
-      <ElderImpulsePanel />
-      <ConnorsRSIPanel />
-      <FisherTransformPanel />
-      <StochRSIPanel />
-      <VROCPanel />
-      <PivotPointsPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />
