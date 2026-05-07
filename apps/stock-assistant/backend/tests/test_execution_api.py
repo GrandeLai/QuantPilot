@@ -1,7 +1,6 @@
 """执行 API 端点测试（Phase F.3.5）."""
 from __future__ import annotations
 
-from datetime import datetime, timezone
 
 import pytest
 from fastapi import FastAPI

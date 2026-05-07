@@ -16,8 +16,6 @@ from quantpilot_stock.quant_signals.engine import (
     BeneishMScore,
     RussellMembership,
     _estimate_rank_from_cap,
-    _proximity_score,
-    _rebalance_signal,
     _risk_level,
     _safe_div,
     compute_beneish_mscore,

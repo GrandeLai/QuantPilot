@@ -1,5 +1,4 @@
 import polars as pl
-import pytest
 from quantpilot_stock.screener.scoring import ScoreBreakdown, ScoringEngine
 
 def _make_df(n: int = 60) -> pl.DataFrame:

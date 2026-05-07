@@ -7,10 +7,7 @@ import pytest
 
 from quantpilot_stock.tlh.engine import (
     TaxLot,
-    TLHCandidate,
-    WashSaleWarning,
     _REPLACEMENT_MAP,
-    _WASH_SALE_WINDOW_DAYS,
     estimate_tax_saving,
     get_replacement_tickers,
     scan_tlh_candidates,

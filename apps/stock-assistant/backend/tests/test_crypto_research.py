@@ -1,7 +1,6 @@
 """API tests for /crypto/research/* endpoints (phaseF.assistant-advisor-backend)."""
 from __future__ import annotations
 
-from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient

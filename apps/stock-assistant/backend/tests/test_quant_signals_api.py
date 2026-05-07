@@ -6,7 +6,7 @@ All yfinance calls are mocked; no real network requests are made.
 from __future__ import annotations
 
 from datetime import date
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient

@@ -12,7 +12,6 @@ from pydantic import BaseModel
 
 from quantpilot_stock.pead.engine import (
     EarningsEvent,
-    EarningsSurpriseGrade,
     PEADSignal,
     compute_pead_signal,
 )

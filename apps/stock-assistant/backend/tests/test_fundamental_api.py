@@ -4,8 +4,6 @@ from __future__ import annotations
 from datetime import date
 from unittest.mock import MagicMock, patch
 
-import pandas as pd
-import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 

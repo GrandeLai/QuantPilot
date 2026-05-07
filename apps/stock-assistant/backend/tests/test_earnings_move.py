@@ -18,7 +18,6 @@ import pytest
 from fastapi.testclient import TestClient
 
 from quantpilot_stock.earnings_move.engine import (
-    EarningsMoveData,
     _atm_straddle,
     _earnings_move_grade,
     _find_nearest_expiry_after,

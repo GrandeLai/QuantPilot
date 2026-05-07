@@ -8,12 +8,11 @@ phaseF.options-gex-api
 """
 from __future__ import annotations
 
-from dataclasses import asdict
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query
 
-from quantpilot_stock.options.chain_provider import OptionsContract, fetch_chain_yfinance
+from quantpilot_stock.options.chain_provider import fetch_chain_yfinance
 from quantpilot_stock.options.gex_engine import GEXSnapshot, compute_gex_snapshot
 
 router = APIRouter(prefix="/options/gex", tags=["options-gex"])

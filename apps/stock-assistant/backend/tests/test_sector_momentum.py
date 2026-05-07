@@ -11,7 +11,7 @@ Covers:
 from __future__ import annotations
 
 from datetime import date
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pandas as pd
 import pytest
@@ -90,7 +90,6 @@ class TestPctReturn:
 
 def _make_mock_download(tickers: list[str], n_rows: int = 130) -> pd.DataFrame:
     """Build a mock multi-column Close DataFrame as yf.download returns."""
-    import numpy as np
 
     index = pd.date_range(end=date.today(), periods=n_rows, freq="B")
     data = {}

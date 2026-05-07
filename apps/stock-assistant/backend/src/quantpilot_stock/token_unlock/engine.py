@@ -23,7 +23,6 @@ Data source:
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass, field
 from datetime import date, datetime, timezone
 from typing import Any, Literal

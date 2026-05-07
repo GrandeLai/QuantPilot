@@ -1,14 +1,11 @@
 """TWAP/VWAP 分单引擎 + TCA 单元测试（Phase F.3.4）."""
 from __future__ import annotations
 
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 import pytest
 
 from quantpilot_stock.execution.engine import (
-    ChildOrder,
-    ExecutionReport,
-    TCARecord,
     adv_check,
     compute_tca,
     create_twap_slices,

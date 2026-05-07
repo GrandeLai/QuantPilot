@@ -4,7 +4,6 @@
 """
 from __future__ import annotations
 
-import asyncio
 import json
 from datetime import date
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -18,7 +17,6 @@ from quantpilot_stock.edgar.client import (
     get_recent_8k_filings,
     get_form4_transactions,
 )
-from quantpilot_stock.edgar.models import EightKFiling, EightKItem, Form4Transaction
 
 
 # ── HTML 清洗测试 ──────────────────────────────────────────────────────────────
@@ -136,7 +134,7 @@ def _make_submissions_response(ticker: str) -> dict:
 class TestGetRecent8KFilings:
     @pytest.mark.asyncio
     async def test_returns_list_of_filings(self):
-        subs_json = json.dumps(_make_submissions_response("AAPL"))
+        json.dumps(_make_submissions_response("AAPL"))
         doc_html = """
 <html><body>
 Item 5.02. Departure of Officers.

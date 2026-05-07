@@ -1,13 +1,12 @@
 """Tests for options chain provider (phaseF.options-gex-provider)."""
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
-from typing import Any
+from datetime import datetime, timezone
 
 import pandas as pd
 import pytest
 
-from quantpilot_stock.options.chain_provider import OptionsContract, fetch_chain_yfinance
+from quantpilot_stock.options.chain_provider import fetch_chain_yfinance
 
 
 # ---------- helpers ----------------------------------------------------------

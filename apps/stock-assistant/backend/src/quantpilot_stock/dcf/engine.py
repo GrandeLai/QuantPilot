@@ -18,7 +18,7 @@ Data: yfinance free tier (financials, balance_sheet, cash_flow, info).
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import date
 from typing import Literal
 

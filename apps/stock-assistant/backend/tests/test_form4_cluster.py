@@ -3,10 +3,8 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 
-import pytest
 
 from quantpilot_stock.edgar.form4_engine import (
-    InsiderCluster,
     _compute_signal_strength,
     _extract_role_label,
     _is_key_insider,

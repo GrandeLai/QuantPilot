@@ -18,7 +18,6 @@ import pytest
 from fastapi.testclient import TestClient
 
 from quantpilot_stock.unusual_options.engine import (
-    UnusualContract,
     UnusualOptionsData,
     _options_grade,
     _parse_chain,

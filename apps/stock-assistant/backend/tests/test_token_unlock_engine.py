@@ -6,13 +6,12 @@ HTTP calls to DefiLlama are mocked; no real network access.
 from __future__ import annotations
 
 from datetime import date, timedelta
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
 from quantpilot_stock.token_unlock.engine import (
     TokenUnlockCalendar,
-    TokenUnlockEvent,
     _normalise_category,
     _parse_event,
     _signal_from_score,

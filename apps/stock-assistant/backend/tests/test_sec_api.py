@@ -2,12 +2,10 @@
 from __future__ import annotations
 
 from datetime import date
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, patch
 
-import pytest
 from fastapi.testclient import TestClient
 
-from quantpilot_stock.edgar.diff_engine import EightKDiff, ItemDiff, ParagraphDiff
 from quantpilot_stock.edgar.form4_engine import InsiderCluster
 from quantpilot_stock.edgar.models import EightKFiling, EightKItem, Form4Transaction
 

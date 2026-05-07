@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from unittest.mock import patch
 
 import pytest
 
 from quantpilot_stock.crypto_whale.engine import (
     CEXInflowData,
-    WhaleTransfer,
     _compute_pressure_score,
     _pressure_signal,
     _wei_to_eth,

@@ -102,7 +102,7 @@ def execute_manual_order(session_id: str, req: ManualOrderRequest) -> dict[str, 
 
     以传入的 price 为成交价，直接更新 PaperSession 资金和持仓。
     """
-    from quantpilot_common.contracts import Order, OrderSide
+    from quantpilot_common.contracts import OrderSide
 
     with _lock:
         if session_id not in _sessions:

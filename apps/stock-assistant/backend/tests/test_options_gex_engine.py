@@ -1,14 +1,13 @@
 """Tests for GEX engine (phaseF.options-gex-engine)."""
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 
 import pytest
 
 from quantpilot_stock.options.chain_provider import OptionsContract
 from quantpilot_stock.options.gex_engine import (
     GEXByStrike,
-    GEXSnapshot,
     _find_gamma_flip,
     _find_high_vol_trigger,
     _find_major_magnet,

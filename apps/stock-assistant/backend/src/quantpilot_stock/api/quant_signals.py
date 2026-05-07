@@ -12,7 +12,6 @@ from pydantic import BaseModel
 
 from quantpilot_stock.quant_signals.engine import (
     BeneishMScore,
-    PiotroskiCriteria,
     PiotroskiScore,
     RussellMembership,
     SloanAccruals,

@@ -10,14 +10,12 @@
 """
 from __future__ import annotations
 
-from datetime import date
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query
 from loguru import logger
 
 from quantpilot_stock.fundamental.engine import (
-    EarningsSurprise,
     PEADSignal,
     PiotroskiScore,
     compute_pead_signal,

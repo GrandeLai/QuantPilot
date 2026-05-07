@@ -1,8 +1,7 @@
 """API tests for /options/gex/* endpoints (phaseF.options-gex-api)."""
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
-from typing import Any
+from datetime import datetime, timezone
 
 import pytest
 from fastapi.testclient import TestClient

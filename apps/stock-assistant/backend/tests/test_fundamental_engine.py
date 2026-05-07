@@ -4,16 +4,12 @@
 """
 from __future__ import annotations
 
-from datetime import date
 from unittest.mock import MagicMock, patch
 
 import pandas as pd
 import pytest
 
 from quantpilot_stock.fundamental.engine import (
-    EarningsSurprise,
-    PEADSignal,
-    PiotroskiScore,
     _classify_surprise,
     _safe_float,
     _signal_strength_from_surprise,
@@ -35,7 +31,6 @@ class TestSafeFloat:
         assert _safe_float(None) == 0.0
 
     def test_nan_returns_default(self) -> None:
-        import math
         assert _safe_float(float("nan")) == 0.0
 
     def test_string_fails_returns_default(self) -> None:

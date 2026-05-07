@@ -15,7 +15,6 @@ from quantpilot_stock.eps_revision.engine import (
     AnalystTargets,
     EpsRevisionMomentum,
     EpsRevisionPeriod,
-    _overall_direction,
     _revision_direction,
     _revision_score,
     _safe_float,

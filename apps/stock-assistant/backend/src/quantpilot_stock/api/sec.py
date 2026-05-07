@@ -19,7 +19,6 @@ from fastapi import APIRouter, HTTPException, Query
 from loguru import logger
 
 from quantpilot_stock.edgar.client import (
-    get_cik,
     get_form4_transactions,
     get_recent_8k_filings,
 )

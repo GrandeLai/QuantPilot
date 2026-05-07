@@ -6,7 +6,6 @@ from datetime import date
 import pytest
 
 from quantpilot_stock.edgar.diff_engine import (
-    EightKDiff,
     ItemDiff,
     ParagraphDiff,
     _diff_paragraphs,

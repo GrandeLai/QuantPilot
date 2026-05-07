@@ -16,7 +16,6 @@ import pytest
 from fastapi.testclient import TestClient
 
 from quantpilot_stock.analyst_consensus.engine import (
-    AnalystConsensusData,
     _analyst_grade,
     compute_analyst_consensus,
 )
