@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from quantpilot_stock.screener.pipeline import AnalysisPipeline, Decision, PhaseUpdate
+from quantpilot_stock.screener.pipeline import AnalysisPipeline
 
 
 @pytest.mark.asyncio

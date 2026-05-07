@@ -29,7 +29,7 @@
 
 ## 1. 项目概述
 
-**Vision**：本地优先、LLM 原生的个人量化交易平台。
+**Vision**：本地优先、证据驱动的个人量化交易平台。
 
 **当前状态**：Phase A–E + G1 完工 — stock-assistant（Python，生产就绪）+ quant-assistant（Rust，核心 API 全通）+ 双产品共享市场宇宙。
 
@@ -70,7 +70,7 @@ QuantPilot Monorepo
 ### stock-assistant（股票投资助手，Python）
 
 - **定位**：人参与决策的交易工作流
-- **功能**：Longbridge / FuTu / OKX broker 接入，paper trading，持仓管理，选股，情绪分析，LLM 投顾
+- **功能**：Longbridge / FuTu / OKX broker 接入，paper trading，持仓管理，选股，情绪分析，结构化投顾
 - **支持资产**：美股 / ETF / 港股 / A 股 / 期权 / OKX 加密现货与衍生品
 - **市场数据写入方**：yfinance / akshare / OKX → `common/data-store/market.duckdb`
 - **不做**：自动化量化研究，ML 训练，无人值守执行

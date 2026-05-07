@@ -1,7 +1,7 @@
 """Stock-assistant FastAPI 主应用入口（apps/stock-assistant/backend）.
 
 覆盖股票 + 期权 + 加密的人决策交易、portfolio、screener、sentiment、
-LLM 投顾、agent。
+结构化投顾、agent。
 """
 
 from collections.abc import AsyncGenerator
@@ -79,7 +79,6 @@ def create_app() -> FastAPI:
     from quantpilot_stock.api.crypto_research import router as crypto_research_router
     from quantpilot_stock.api.data import router as data_router
     from quantpilot_stock.api.insights import router as insights_router
-    from quantpilot_stock.api.llm import router as llm_router
     from quantpilot_stock.api.options import router as options_router
     from quantpilot_stock.api.paper import router as paper_router
     from quantpilot_stock.api.platform import router as platform_router
@@ -94,7 +93,6 @@ def create_app() -> FastAPI:
     include_with_api_alias(security_router)
     include_with_api_alias(paper_router)
     include_with_api_alias(alerts_router)
-    include_with_api_alias(llm_router)
     include_with_api_alias(trading_router)
     include_with_api_alias(options_router)
     include_with_api_alias(portfolio_router)

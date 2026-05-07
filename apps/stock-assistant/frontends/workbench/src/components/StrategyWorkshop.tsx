@@ -1,5 +1,5 @@
 /**
- * 策略工坊 — 策略全生命周期管理（代码编辑 → LLM 生成 → 参数优化 → 实盘运行）
+ * 策略工坊 — 策略全生命周期管理（代码编辑 → 参数优化 → 实盘运行）
  * 合并了原 StrategyPanel + PortfolioPanel 的全部功能，去除独立「组合」导航入口。
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -53,7 +53,6 @@ import { cn } from "../lib/utils";
 import StrategyEditor from "./StrategyEditor";
 import MLStrategyPanel from "./MLStrategyPanel";
 import OptimizationPanel from "./OptimizationPanel";
-import StrategyGeneratorPanel from "./StrategyGeneratorPanel";
 import MetricCard from "./ui/MetricCard";
 
 // ── 数据类型 ──────────────────────────────────────────────────────────────────
@@ -96,11 +95,10 @@ interface AvailableStrategy {
 
 // ── 子标签 ────────────────────────────────────────────────────────────────────
 
-type Sub = "code" | "generate" | "live" | "optimize" | "ml";
+type Sub = "code" | "live" | "optimize" | "ml";
 
 const SUBS: { key: Sub; label: string }[] = [
   { key: "code",     label: "代码编辑" },
-  { key: "generate", label: "LLM 生成" },
   { key: "live",     label: "实盘运行" },
   { key: "optimize", label: "参数优化" },
   { key: "ml",       label: "机器学习" },
@@ -744,9 +742,7 @@ export default function StrategyWorkshop({ onNavigate }: Props) {
   const guideKey =
     sub === "code"
       ? "strategy.code"
-      : sub === "generate"
-        ? "strategy.generate"
-        : sub === "live"
+      : sub === "live"
           ? "strategy.live"
           : sub === "optimize"
             ? "strategy.optimize"
@@ -1007,7 +1003,6 @@ export default function StrategyWorkshop({ onNavigate }: Props) {
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto custom-scrollbar px-8 py-5">
-            {sub === "generate" && <StrategyGeneratorPanel />}
             {sub === "optimize" && <OptimizationPanel />}
             {sub === "ml"       && <MLStrategyPanel />}
           </div>

@@ -27,14 +27,13 @@
 | 统一抽象 `TradingProvider` | 屏蔽不同 broker 差异，对 API 路由暴露统一形状 | `quantpilot_stock/broker/types.py` |
 | Mock provider | 无凭证场景 / CI / 演示 | `quantpilot_stock/broker/mock.py` |
 
-### 1.3 LLM 层
+### 1.3 Agent 层
 
 | 选型 | 理由 | 关键文件 |
 |---|---|---|
-| `litellm>=1.40` | 单 SDK 路由 GPT-4o / Claude / DeepSeek / Ollama，避免分别写 4 个 SDK | `quantpilot_stock/llm/` |
+| `litellm>=1.40` | 仅用于内部 agent 的模型路由，不对外暴露通用 chat API | `quantpilot_stock/agent/provider.py` |
 | Circuit Breaker + 指数退避 | 任一模型挂掉自动切换 | `quantpilot_stock/agent/router.py` |
-| 中间件链（middleware hook） | 注入 system prompt / 日志 / 限流 | `quantpilot_stock/agent/agent.py` |
-| 流式 SSE 输出 | `/api/llm/stream` | `quantpilot_stock/api/llm.py` |
+| 中间件链（middleware hook） | 注入证据约束 / 日志 / 限流 | `quantpilot_stock/agent/agent.py` |
 
 ### 1.4 数据 / 计算
 
@@ -134,7 +133,7 @@
 | `ChartPanel.tsx` | TradingView Lightweight Charts |
 | `Trading*.tsx` / `Paper*.tsx` | 多 broker 下单 / 模拟交易 |
 | `Crypto*.tsx` / `Options*.tsx` | 加密 / 期权专用面板 |
-| `LLMChat.tsx` / `Advisor.tsx` | LLM 投顾 |
+| `Advisor.tsx` / `Screener*.tsx` | 结构化投顾 / 选股 |
 | `Sentiment*.tsx` / `Screener*.tsx` | 情绪 / 选股 |
 
 ### 3.3 决策辅助（assistant, 5174）

@@ -12,7 +12,7 @@
 | 数据流 | 写入 market.duckdb | read-only 消费 |
 | 支持资产 | 美股 / ETF / 港股 / A 股 / 期权 / OKX 加密 | 美股 / ETF / 港股 / A 股 / OKX 加密 |
 | ML | 不做训练，不做推理 | 仅 ONNX 推理 |
-| LLM | 多模型路由 + agent | 不接 LLM |
+| Agent | 仅服务证据驱动推荐 | 不接 LLM |
 
 ---
 
@@ -55,12 +55,11 @@
 | 情绪分析（VADER + RSS） | `quantpilot_stock.sentiment` | `/api/sentiment` |
 | Insights（基本面 / 同行 / 宏观） | `quantpilot_stock.insights` | `/api/insights` |
 
-### 1.4 LLM 投顾与 Agent
+### 1.4 结构化投顾与 Agent
 
 | 能力 | 模块 | 路由前缀 |
 |---|---|---|
-| 多模型路由（GPT-4o / Claude / DeepSeek / Ollama） | `quantpilot_stock.llm` | `/api/llm` |
-| 流式 chat / generate-strategy | `quantpilot_stock.api.llm` | `/api/llm/stream`、`/api/llm/generate-strategy` |
+| 证据驱动推荐 | `quantpilot_stock.api.advisor` | `/api/advisor/recommendations` |
 | Agent 中间件 + 熔断 / 退避 / fallback | `quantpilot_stock.agent` | (内部) |
 
 ### 1.5 平台

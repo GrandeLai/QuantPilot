@@ -19,7 +19,6 @@
 | `crypto.py` | `/api/crypto` | OKX 加密：现货、永续合约、期权 | 18 |
 | `data.py` | `/api/data` | 行情拉取与查询 | 9 |
 | `insights.py` | `/api/insights` | 市场体制 / 相关性洞察 | 2 |
-| `llm.py` | `/api/llm` | 多模型 LLM 路由 + 流式 + 策略生成 | 4 |
 | `options.py` | `/api/options` | 期权希腊字母 / IV / 情景 | 4 |
 | `paper.py` | `/api/paper` | 模拟盘 session 与订单 | 8 |
 | `platform.py` | `/api/platform` | 平台状态汇总 | 1 |
@@ -114,19 +113,6 @@
 |---|---|
 | POST | `/api/insights/regime` |
 | POST | `/api/insights/correlate` |
-
----
-
-### `llm.py` — LLM（4）
-
-| 方法 | 路径 | 说明 |
-|---|---|---|
-| GET | `/api/llm/models` | 可用模型列表（GPT-4o / Claude / DeepSeek / Ollama） |
-| POST | `/api/llm/chat` | 同步 chat |
-| POST | `/api/llm/stream` | SSE 流式 |
-| POST | `/api/llm/generate-strategy` | LLM 生成 Python 策略代码 |
-
-底层 `litellm`，详细见 [`tech-stack.md §1.3`](tech-stack.md)。
 
 ---
 

@@ -1,6 +1,6 @@
 /**
  * 策略管理面板 — 仿 quantpilot-studio 设计.
- * 布局：左侧折叠树侧栏 + 右侧编辑区（子标签：代码 / LLM / 优化 / ML）
+ * 布局：左侧折叠树侧栏 + 右侧编辑区（子标签：代码 / 优化 / ML）
  */
 import { useEffect, useRef, useState } from "react";
 import type { editor as MonacoEditor } from "monaco-editor";
@@ -37,15 +37,13 @@ import { cn } from "../lib/utils";
 import StrategyEditor from "./StrategyEditor";
 import MLStrategyPanel from "./MLStrategyPanel";
 import OptimizationPanel from "./OptimizationPanel";
-import StrategyGeneratorPanel from "./StrategyGeneratorPanel";
 
 // ── 子标签 ───────────────────────────────────────────────────────────────────
 
-type Sub = "code" | "generate" | "optimize" | "ml";
+type Sub = "code" | "optimize" | "ml";
 
 const SUBS: { key: Sub; label: string }[] = [
   { key: "code",     label: "代码编辑" },
-  { key: "generate", label: "LLM 生成" },
   { key: "optimize", label: "参数优化" },
   { key: "ml",       label: "机器学习" },
 ];
@@ -630,7 +628,6 @@ export default function StrategyPanel({ onNavigate }: Props) {
         ) : (
           /* 其他子面板 */
           <div className="flex-1 overflow-y-auto custom-scrollbar px-8 py-5">
-            {sub === "generate" && <StrategyGeneratorPanel />}
             {sub === "optimize" && <OptimizationPanel />}
             {sub === "ml"       && <MLStrategyPanel />}
           </div>

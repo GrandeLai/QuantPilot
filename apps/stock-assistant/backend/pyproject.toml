@@ -1,7 +1,7 @@
 [project]
 name = "quantpilot-stock"
 version = "0.1.0"
-description = "QuantPilot 股票交易助手后端：股票/期权/加密的人决策交易、portfolio、screener、LLM 投顾"
+description = "QuantPilot 股票交易助手后端：股票/期权/加密的人决策交易、portfolio、screener、结构化投顾"
 requires-python = ">=3.12"
 readme = "README.md"
 dependencies = [
