@@ -5,6 +5,7 @@ import {
   ShieldAlert,
   Sparkles,
 } from "lucide-react";
+import { instrumentsForProduct } from "@quantpilot/common-frontend/markets";
 import type { ComponentType } from "react";
 
 import { OpportunityPool } from "./components/OpportunityPool";
@@ -24,6 +25,8 @@ const TAB_ICONS: Record<AssistantTab, ComponentType<{ size?: number }>> = {
   risk: ShieldAlert,
   review: Sparkles,
 };
+
+const SUPPORTED_MARKETS = instrumentsForProduct("stock-assistant");
 
 function renderView(tab: AssistantTab) {
   switch (tab) {
@@ -67,6 +70,24 @@ export default function App() {
             </div>
           </div>
         </header>
+
+        <section
+          aria-label="Supported markets"
+          className="flex flex-wrap items-center gap-2 border border-[#2A2D35] bg-[#151619] rounded-xl px-4 py-3"
+        >
+          <span className="text-[10px] uppercase tracking-wider font-bold text-[#8E9299]">
+            Markets
+          </span>
+          {SUPPORTED_MARKETS.map((instrument) => (
+            <span
+              key={instrument.symbol}
+              className="px-2 py-1 rounded-md border border-[#2A2D35] bg-[#0E1014] text-[11px] text-white font-mono"
+              title={`${instrument.name} · ${instrument.exchange}`}
+            >
+              {instrument.symbol}
+            </span>
+          ))}
+        </section>
 
         <nav aria-label="Investment assistant views">
           <ul className="flex flex-wrap gap-2 list-none p-0 m-0">

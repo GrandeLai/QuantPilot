@@ -85,6 +85,7 @@ import { ConnorsRSIPanel } from "../ConnorsRSIPanel";
 import { FisherTransformPanel } from "../FisherTransformPanel";
 import { StochRSIPanel } from "../StochRSIPanel";
 import { VROCPanel } from "../VROCPanel";
+import { PivotPointsPanel } from "../PivotPointsPanel";
 
 export default function RiskReviewCenter() {
   return (
@@ -167,6 +168,7 @@ export default function RiskReviewCenter() {
       <FisherTransformPanel />
       <StochRSIPanel />
       <VROCPanel />
+      <PivotPointsPanel />
       <TokenUnlockPanel />
       <DCFPanel />
       <ShortInterestPanel />

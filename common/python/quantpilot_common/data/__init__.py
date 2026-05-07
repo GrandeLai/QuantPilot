@@ -10,6 +10,12 @@ from quantpilot_common.data.models import (
     SymbolInfo,
 )
 from quantpilot_common.data.storage import MarketDataStorage
+from quantpilot_common.data.universe import (
+    DEFAULT_MARKET_UNIVERSE,
+    SupportedInstrument,
+    find_supported_instrument,
+    list_supported_instruments,
+)
 
 __all__ = [
     "AssetType",
@@ -20,7 +26,11 @@ __all__ = [
     "DataQueryRequest",
     "OHLCVResponse",
     "MarketDataStorage",
+    "SupportedInstrument",
+    "DEFAULT_MARKET_UNIVERSE",
+    "find_supported_instrument",
     "get_storage",
+    "list_supported_instruments",
 ]
 
 

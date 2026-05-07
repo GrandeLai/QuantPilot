@@ -3,7 +3,7 @@
 **Backend**: `apps/stock-assistant/backend/` (Python, FastAPI)
 **Port**: 8001 (dev)
 **Base URL**: `http://localhost:8001/api`
-**Last reviewed**: 2026-04-29
+**Last reviewed**: 2026-05-07
 
 > **来源**：路由声明扫描自 `apps/stock-assistant/backend/src/quantpilot_stock/api/*.py`。运行 `(cd apps/stock-assistant/backend && uv run uvicorn quantpilot_stock.main:app --port 8001)` 后访问 `http://localhost:8001/docs` 可看自动生成的 OpenAPI 交互文档（Swagger UI）。
 >
@@ -17,7 +17,7 @@
 |---|---|---|---|
 | `alerts.py` | `/api/alerts` | 告警系统（规则、事件、检查） | 5 |
 | `crypto.py` | `/api/crypto` | OKX 加密：现货、永续合约、期权 | 18 |
-| `data.py` | `/api/data` | 行情拉取与查询 | 8 |
+| `data.py` | `/api/data` | 行情拉取与查询 | 9 |
 | `insights.py` | `/api/insights` | 市场体制 / 相关性洞察 | 2 |
 | `llm.py` | `/api/llm` | 多模型 LLM 路由 + 流式 + 策略生成 | 4 |
 | `options.py` | `/api/options` | 期权希腊字母 / IV / 情景 | 4 |
@@ -91,13 +91,14 @@
 
 ---
 
-### `data.py` — 行情数据（8）
+### `data.py` — 行情数据（9）
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
 | GET | `/api/data/bars` | 拉历史 K 线（OHLCV） |
 | POST | `/api/data/fetch` | 触发后台拉取 + 入库 |
-| GET | `/api/data/symbols` | 标的搜索 |
+| GET | `/api/data/symbols` | 已入库标的列表 |
+| GET | `/api/data/universe` | 双产品共享支持市场宇宙，可用 `product=quant-assistant|stock-assistant` 过滤 |
 | GET | `/api/data/range` | 已存数据时间区间 |
 | GET | `/api/data/onchain/btc` | BTC 链上指标列表 |
 | GET | `/api/data/prices` | 批量最新价 |

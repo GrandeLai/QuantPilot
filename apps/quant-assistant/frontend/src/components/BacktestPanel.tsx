@@ -4,6 +4,12 @@
  */
 import { useRef, useState } from "react";
 import {
+  findInstrument,
+  instrumentsForProduct,
+  type DataSource,
+  type SupportedInstrument,
+} from "@quantpilot/common-frontend/markets";
+import {
   History,
   Play,
   BarChart3,
@@ -55,6 +61,7 @@ const INPUT_CLS =
   "w-full h-9 bg-[#161b22] border border-[#30363d] rounded-lg px-3 text-sm text-white outline-none focus:border-blue-500/50 transition-colors placeholder-[#8b949e]/50";
 
 const TIMEFRAMES = ["1d", "1w", "1h", "4h"];
+const QUICK_INSTRUMENTS = instrumentsForProduct("quant-assistant");
 
 // ── 辅助组件 ─────────────────────────────────────────────────────────────────
 
@@ -104,6 +111,54 @@ export default function BacktestPanel({ onResult }: BacktestPanelProps = {}) {
   const [errorMsg, setErrorMsg] = useState("");
   const [result, setResult] = useState<BacktestResult | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const selectedInstrument = findInstrument(symbol);
+
+  const resolveSource = (instrument: SupportedInstrument | undefined): DataSource =>
+    instrument?.default_source ?? "auto";
+
+  const defaultStartDate = () => {
+    const start = new Date();
+    start.setFullYear(start.getFullYear() - 2);
+    return start.toISOString().slice(0, 10);
+  };
+
+  const fetchBars = async () => {
+    const barsRes = await fetch(
+      `/api/data/bars?symbol=${encodeURIComponent(symbol)}&timeframe=${encodeURIComponent(timeframe)}&limit=${limit}`,
+      { signal: abortRef.current?.signal },
+    );
+    if (!barsRes.ok) throw new Error(`获取 K 线失败: ${await barsRes.text()}`);
+    return (await barsRes.json()) as {
+      bars: Array<{ close: number; time?: string | null; timestamp?: string | null }>;
+    };
+  };
+
+  const ensureBars = async () => {
+    const minimumBars = Math.max(2, slowPeriod + 1);
+    let barsJson = await fetchBars();
+    if (barsJson.bars?.length >= minimumBars) return barsJson;
+
+    const fetchRes = await fetch("/api/data/fetch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        symbol,
+        timeframe,
+        start: defaultStartDate(),
+        source: resolveSource(selectedInstrument),
+      }),
+      signal: abortRef.current?.signal,
+    });
+    if (!fetchRes.ok) throw new Error(`触发数据拉取失败: ${await fetchRes.text()}`);
+
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      barsJson = await fetchBars();
+      if (barsJson.bars?.length >= minimumBars) return barsJson;
+    }
+
+    return barsJson;
+  };
 
   // ── 执行回测
   const runBacktest = async () => {
@@ -114,16 +169,10 @@ export default function BacktestPanel({ onResult }: BacktestPanelProps = {}) {
     abortRef.current = new AbortController();
 
     try {
-      // Step 1: 获取 K 线数据（stock-assistant proxy）
-      const barsRes = await fetch(
-        `/api/data/bars?symbol=${encodeURIComponent(symbol)}&timeframe=${encodeURIComponent(timeframe)}&limit=${limit}`,
-        { signal: abortRef.current.signal },
-      );
-      if (!barsRes.ok) throw new Error(`获取 K 线失败: ${await barsRes.text()}`);
-
-      const barsJson = (await barsRes.json()) as { bars: Array<{ close: number; time?: string }> };
-      if (!barsJson.bars || barsJson.bars.length < 2) {
-        throw new Error("K 线数据不足（需 ≥ 2 根），请先在「看盘」拉取历史数据");
+      // Step 1: 获取 K 线数据（stock-assistant proxy）；缺数据时触发数据拉取。
+      const barsJson = await ensureBars();
+      if (!barsJson.bars || barsJson.bars.length < Math.max(2, slowPeriod + 1)) {
+        throw new Error("K 线数据不足，请检查 stock-assistant 数据源或缩短慢线周期");
       }
 
       setStatus("running");
@@ -131,7 +180,7 @@ export default function BacktestPanel({ onResult }: BacktestPanelProps = {}) {
       // Step 2: 提交回测请求（Rust quant-assistant proxy）
       const req = {
         symbol,
-        bars: barsJson.bars.map((b) => ({ close: b.close, time: b.time ?? null })),
+        bars: barsJson.bars.map((b) => ({ close: b.close, time: b.time ?? b.timestamp ?? null })),
         fast_period: fastPeriod,
         slow_period: slowPeriod,
         initial_cash: initialCash,
@@ -186,6 +235,29 @@ export default function BacktestPanel({ onResult }: BacktestPanelProps = {}) {
           <div className="space-y-2">
             <label className="text-[10px] uppercase font-bold text-[#8b949e] tracking-wider block">标的代码</label>
             <input value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())} className={INPUT_CLS} placeholder="AAPL" />
+            {selectedInstrument && (
+              <div className="text-[10px] text-[#8b949e] leading-relaxed">
+                {selectedInstrument.name} · {selectedInstrument.exchange} · {selectedInstrument.asset_type}
+              </div>
+            )}
+            <div className="grid grid-cols-3 gap-1 pt-1">
+              {QUICK_INSTRUMENTS.slice(0, 9).map((instrument) => (
+                <button
+                  key={instrument.symbol}
+                  type="button"
+                  onClick={() => setSymbol(instrument.symbol)}
+                  className={cn(
+                    "h-7 rounded-md border text-[10px] font-mono font-bold transition-all",
+                    symbol === instrument.symbol
+                      ? "border-blue-500 bg-blue-600 text-white"
+                      : "border-[#30363d] bg-[#161b22] text-[#8b949e] hover:text-white",
+                  )}
+                  title={`${instrument.name} · ${instrument.exchange}`}
+                >
+                  {instrument.symbol}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* 时间周期 */}
@@ -269,9 +341,9 @@ export default function BacktestPanel({ onResult }: BacktestPanelProps = {}) {
             </div>
             <div>
               <p className="text-white font-semibold text-lg">配置并运行 MA Crossover 回测</p>
-              <p className="text-[#8b949e] text-sm mt-1">在左侧设置标的、周期、MA 参数，点击「运行回测」</p>
+              <p className="text-[#8b949e] text-sm mt-1">支持美股、ETF、港股、A 股与 OKX 加密标的</p>
             </div>
-            <p className="text-[10px] text-[#434651] font-mono">注：需先在「看盘」拉取标的历史数据</p>
+            <p className="text-[10px] text-[#434651] font-mono">缺少 K 线时会通过 stock-assistant 数据层自动拉取</p>
           </div>
         )}
 

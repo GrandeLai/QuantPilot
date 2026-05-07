@@ -92,3 +92,22 @@ class TestListSymbols:
         assert resp.status_code == 200
         assert set(resp.json()["symbols"]) == {"AAPL", "TSLA"}
         app.dependency_overrides = {}
+
+
+class TestMarketUniverse:
+    def test_universe_lists_us_equities_and_crypto(self) -> None:
+        client = TestClient(app)
+        resp = client.get("/data/universe?product=quant-assistant")
+
+        assert resp.status_code == 200
+        body = resp.json()
+        symbols = {item["symbol"]: item for item in body["instruments"]}
+        assert body["product"] == "quant-assistant"
+        assert symbols["AAPL"]["default_source"] == "yfinance"
+        assert symbols["BTC-USDT"]["default_source"] == "auto"
+
+    def test_universe_rejects_unknown_product(self) -> None:
+        client = TestClient(app)
+        resp = client.get("/data/universe?product=unknown")
+
+        assert resp.status_code == 422

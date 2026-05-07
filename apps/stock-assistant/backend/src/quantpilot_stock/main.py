@@ -264,6 +264,8 @@ def create_app() -> FastAPI:
     include_with_api_alias(stoch_rsi_router)
     from quantpilot_stock.api.vroc import router as vroc_router
     include_with_api_alias(vroc_router)
+    from quantpilot_stock.api.pivot_points import router as pivot_points_router
+    include_with_api_alias(pivot_points_router)
 
     from quantpilot_stock.api.ws import router as ws_router
     app.include_router(ws_router)

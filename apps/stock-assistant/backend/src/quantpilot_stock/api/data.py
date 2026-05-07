@@ -4,6 +4,7 @@
   GET  /data/bars              查询 K 线数据
   POST /data/fetch             触发数据拉取
   GET  /data/symbols           查询已有标的列表
+  GET  /data/universe          查询双产品支持的市场/标的宇宙
   GET  /data/range             查询数据时间范围
   GET  /data/onchain/btc       获取 BTC 链上指标
   GET  /data/onchain/btc/{metric}  获取单个 BTC 链上指标
@@ -25,6 +26,7 @@ from quantpilot_common.data.models import (
     OHLCVResponse,
 )
 from quantpilot_common.data.storage import MarketDataStorage
+from quantpilot_common.data.universe import ProductId, list_supported_instruments
 
 _CRYPTO_QUOTES = ("USDT", "BUSD", "USDC", "BTC", "ETH", "OKB")
 
@@ -158,6 +160,22 @@ def fetch_data(
 def list_symbols(storage: StorageDep) -> dict[str, list[str]]:
     """列出数据库中已有数据的标的."""
     return {"symbols": storage.list_symbols()}
+
+
+@router.get("/universe")
+def get_market_universe(
+    product: ProductId | None = Query(
+        default=None,
+        description="按产品过滤：quant-assistant 或 stock-assistant",
+    ),
+) -> dict[str, Any]:
+    """返回两个产品共享的可选市场与标的清单."""
+    instruments = list_supported_instruments(product)
+    return {
+        "count": len(instruments),
+        "product": product,
+        "instruments": [instrument.model_dump(mode="json") for instrument in instruments],
+    }
 
 
 @router.get("/range")

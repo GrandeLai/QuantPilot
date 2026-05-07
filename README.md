@@ -12,10 +12,10 @@ QuantPilot 是两个独立产品 + 共享基础的 monorepo。
 
 | App | 语言 | 职责 | 端口 |
 |---|---|---|---|
-| apps/stock-assistant/ | Python | 股票/期权/加密的人决策交易、portfolio、screener、LLM 投顾 | 8001 (API), 5173 (workbench), 5174 (assistant) |
-| apps/quant-assistant/ | Rust | 自动化量化研究：回测、参数优化、walk-forward、技术指标 | 8002 (API), 5175 (frontend) |
+| apps/stock-assistant/ | Python | 股票投资助手：美股/ETF/港股/A 股/期权/加密的人决策交易、portfolio、screener、LLM 投顾 | 8001 (API), 5173 (workbench), 5174 (assistant) |
+| apps/quant-assistant/ | Rust | 量化投资：对美股/ETF/港股/A 股/加密标的做回测、参数优化、walk-forward、技术指标 | 8002 (API), 5175 (frontend) |
 
-两个 app 互不 import 对方源码，通过 common/data-store/market.duckdb 共享行情数据。
+两个 app 互不 import 对方源码，通过 `common/data-store/market.duckdb` 共享行情数据。支持市场范围由 `common/python/quantpilot_common/data/universe.py` 与 `common/frontend-components/src/markets.ts` 统一维护。
 
 ## 仓库结构
 
@@ -35,7 +35,7 @@ common/
 ├── schemas/                JSON Schema 单源 → Py/Rust/TS codegen
 ├── data-store/             共享 DuckDB 行情库（stock 单写）+ golden 基准
 ├── python/                 共享 Python 设施（config/redis/data/contracts）
-└── frontend-components/    跨前端共享 TS 组件
+└── frontend-components/    跨前端共享 TS 组件与市场宇宙
 
 tools/
 ├── ml-trainer/             ML 训练 → ONNX（Phase B+）
@@ -116,6 +116,7 @@ bash common/schemas/codegen.sh   # 改 schema 后必跑
 | docs/MIGRATION.md | Phase A–E 迁移历史 + 模块归属变更 |
 | docs/architecture/quant-assistant-api.md | Rust HTTP API 完整参考（5 个端点） |
 | docs/architecture/frontend-routing.md | Vite proxy 路由表 |
+| docs/tasks/phaseG/dual-product-market-universe.md | 双产品共享市场宇宙任务 |
 | CLAUDE.md | Claude Code 工作指令（命令、规范、不变式） |
 
 ## 许可证

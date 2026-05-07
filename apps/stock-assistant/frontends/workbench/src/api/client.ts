@@ -4172,3 +4172,37 @@ export async function fetchVROC(ticker: string): Promise<VROCData> {
   }
   return r.json() as Promise<VROCData>;
 }
+
+// ---------------------------------------------------------------------------
+// Pivot Points (F.85)
+// ---------------------------------------------------------------------------
+export interface PivotPointsData {
+  ticker: string;
+  pp: number | null;
+  r1: number | null;
+  r2: number | null;
+  r3: number | null;
+  s1: number | null;
+  s2: number | null;
+  s3: number | null;
+  close: number | null;
+  pivot_score: number;
+  signal: "strong_bull" | "bull" | "neutral" | "bear" | "strong_bear" | "no_data";
+  interpretation: string;
+  as_of_date: string;
+  data_available: boolean;
+}
+
+export async function fetchPivotPoints(ticker: string): Promise<PivotPointsData> {
+  const r = await fetch(`${BASE}/pivot_points?ticker=${encodeURIComponent(ticker)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    try {
+      const j = JSON.parse(text);
+      throw new Error(j.detail ?? text);
+    } catch {
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+  }
+  return r.json() as Promise<PivotPointsData>;
+}

@@ -1,7 +1,7 @@
 # QuantPilot 功能总结
 
-> **状态**：Phase A–E 完工，Phase F 启动
-> **最后更新**：2026-04-29
+> **状态**：Phase A–E 完工，Phase G1 共享市场宇宙落地
+> **最后更新**：2026-05-07
 
 按"是否有人参与决策"切线，QuantPilot 的能力分配在两个 app 中：
 
@@ -10,6 +10,7 @@
 | 决策模式 | 人参与 | 自动化、规则化 |
 | 主要工作流 | broker 接入 / 实盘 / 投顾 / portfolio | 回测 / 优化 / walk-forward / 推理 |
 | 数据流 | 写入 market.duckdb | read-only 消费 |
+| 支持资产 | 美股 / ETF / 港股 / A 股 / 期权 / OKX 加密 | 美股 / ETF / 港股 / A 股 / OKX 加密 |
 | ML | 不做训练，不做推理 | 仅 ONNX 推理 |
 | LLM | 多模型路由 + agent | 不接 LLM |
 
@@ -49,6 +50,7 @@
 | 行情拉取（yfinance / akshare / OKX） | `quantpilot_common.data.fetchers` | `/api/data` |
 | 行情入库（market.duckdb 单写方） | `quantpilot_common.data.storage` | （后台任务） |
 | 标的搜索 / 元信息 | `quantpilot_common.data.fetchers.*.search_symbols` | `/api/data/symbols` |
+| 双产品市场宇宙 | `quantpilot_common.data.universe` | `/api/data/universe` |
 | 选股 / 选币 screener | `quantpilot_stock.screener` | `/api/screener` |
 | 情绪分析（VADER + RSS） | `quantpilot_stock.sentiment` | `/api/sentiment` |
 | Insights（基本面 / 同行 / 宏观） | `quantpilot_stock.insights` | `/api/insights` |
@@ -105,7 +107,7 @@
 | 参数优化 | `OptimizationPanel.tsx` | `POST /api/optimize` + 排名表 |
 | Walk-Forward | `WalkForwardPanel.tsx` | `POST /api/walk-forward` + AbortController + 客户端校验 |
 
-行情数据通过 vite proxy 走 `/api/data/*` → stock-assistant (8001)。
+行情数据通过 vite proxy 走 `/api/data/*` → stock-assistant (8001)。回测页从共享市场宇宙提供美股、ETF、港股、A 股与 OKX 加密快捷标的；如 DuckDB 暂无 K 线，会先触发 stock-assistant 数据层补数，再把 OHLCV 交给 Rust API 计算。
 
 ---
 
@@ -116,6 +118,7 @@
 | `common/schemas/` | JSON Schema 单源（`ohlcv`、`symbol`、`factor`、`signal`、`backtest_config`、`backtest_result`） |
 | `common/python/quantpilot_common/config` | Pydantic Settings 全局配置 |
 | `common/python/quantpilot_common/data/fetchers` | yfinance / akshare / OKX 拉数据 |
+| `common/python/quantpilot_common/data/universe` | 双产品共享支持市场宇宙 |
 | `common/python/quantpilot_common/redis` | 异步 redis 客户端 + price_cache + order_queue |
 | `common/python/quantpilot_common/strategy_persistence` | 策略文件 Git 版本管理（gitpython） |
 | `common/python/quantpilot_common/plugins` | pluggy hookspec（on_bar / on_signal / on_alert） |
@@ -123,7 +126,7 @@
 | `common/data-store/market.duckdb` | 共享行情库（stock-assistant 单写） |
 | `common/data-store/golden/` | 跨语言行为等价基准数据集（Phase A 骨架） |
 | `common/data-store/models/<model_id>/` | ONNX 模型 + meta.json |
-| `common/frontend-components/` | 跨前端共享 TS 类型 + UI 组件 |
+| `common/frontend-components/` | 跨前端共享 TS 类型 + UI 组件 + market universe |
 
 ---
 
@@ -145,4 +148,5 @@
 | C | ✅ (Phase D) | walk-forward / optimize / indicators API |
 | D | ✅ 2026-04-28 | `src/api/` 模块化 + trade tracking |
 | E | ✅ 2026-04-28 | 前端接 Rust API + A1–A3 + B1 + B4 |
+| G1 | ✅ 2026-05-07 | 双产品共享市场宇宙；两个产品均支持美股与加密等资产 |
 | F | 🔄 启动 | 风控引擎核心（risk-engine-core）等 |

@@ -1,7 +1,7 @@
 # QuantPilot — 设计文档
 
-> **文档版本**：v0.4.0
-> **最后更新**：2026-04-28（A1–A3 + B1 完工）
+> **文档版本**：v0.4.1
+> **最后更新**：2026-05-07（双产品共享市场宇宙）
 > **作者**：赖俊金
 > **状态**：Active
 
@@ -23,6 +23,7 @@
 | v0.2.0 | 2026-04-27 | Phase A 拆分完成；双产品 + 共享包结构 |
 | v0.3.0 | 2026-04-28 | Phase A–E 完工；Rust 量化后端全 API + 前端接线；删除 Python 量化临时后端 |
 | v0.4.0 | 2026-04-28 | A1–A3 + B1：equity curve 图表、Walk-Forward 面板、/api/ml/predict 端点、ApiError DRY |
+| v0.4.1 | 2026-05-07 | G1：双产品共享市场宇宙；量化投资与股票投资助手均支持美股、ETF、港股、A 股与 OKX 加密标的 |
 
 ---
 
@@ -30,7 +31,7 @@
 
 **Vision**：本地优先、LLM 原生的个人量化交易平台。
 
-**当前状态**：Phase A–E 完工 — stock-assistant（Python，生产就绪）+ quant-assistant（Rust，核心 API 全通）。
+**当前状态**：Phase A–E + G1 完工 — stock-assistant（Python，生产就绪）+ quant-assistant（Rust，核心 API 全通）+ 双产品共享市场宇宙。
 
 ---
 
@@ -66,14 +67,15 @@ QuantPilot Monorepo
 
 ## 3. 两应用职责划分
 
-### stock-assistant（Python）
+### stock-assistant（股票投资助手，Python）
 
 - **定位**：人参与决策的交易工作流
 - **功能**：Longbridge / FuTu / OKX broker 接入，paper trading，持仓管理，选股，情绪分析，LLM 投顾
+- **支持资产**：美股 / ETF / 港股 / A 股 / 期权 / OKX 加密现货与衍生品
 - **市场数据写入方**：yfinance / akshare / OKX → `common/data-store/market.duckdb`
 - **不做**：自动化量化研究，ML 训练，无人值守执行
 
-### quant-assistant（Rust）
+### quant-assistant（量化投资，Rust）
 
 - **定位**：自动化量化研究 + 规则化计算
 - **HTTP 端点**（5 个）：
@@ -82,8 +84,17 @@ QuantPilot Monorepo
   - `POST /api/walk-forward`
   - `POST /api/optimize`
   - `POST /api/indicators`
+- **支持资产**：美股 / ETF / 港股 / A 股 / OKX 加密现货与衍生品（从 stock-assistant 数据层获取 K 线后计算）
 - **市场数据只读方**：读 `market.duckdb` 或通过 stock-assistant 的 `/api/data/*` 获取
 - **不做**：broker 接入，LLM 调用，人决策界面
+
+### 共享市场宇宙
+
+- **Task**：`docs/tasks/phaseG/dual-product-market-universe.md` — [x] completed
+- **后端契约**：`common/python/quantpilot_common/data/universe.py`
+- **前端契约**：`common/frontend-components/src/markets.ts`
+- **API**：`GET /data/universe` 与 `GET /api/data/universe`
+- **默认数据源**：美股 / ETF / 港股走 `yfinance`，A 股走 `akshare`，OKX 加密走 `auto` 并由 stock-assistant 归一化到 OKX 格式。
 
 ---
 
