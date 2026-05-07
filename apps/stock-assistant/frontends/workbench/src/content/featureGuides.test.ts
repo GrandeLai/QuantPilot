@@ -32,7 +32,6 @@ const EXPECTED_KEYS = [
   "ai.chat",
   "ai.generate",
   "system.alerts",
-  "system.plugins",
   "screener.results",
   "screener.market",
   "screener.detail",

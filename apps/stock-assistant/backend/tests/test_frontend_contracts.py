@@ -6,10 +6,6 @@
 - 模拟盘历史记录接口可被前端消费
 """
 
-from __future__ import annotations
-
-import pytest
-
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -20,7 +16,6 @@ from quantpilot_common.strategy_persistence import StrategyMeta, StrategyRecord,
 def test_api_aliases_are_available(client: TestClient) -> None:
     """前端统一使用 /api 前缀时，关键 stock 接口应可访问."""
     assert client.get("/api/data/symbols").status_code == 200
-    assert client.get("/api/plugins").status_code == 200
     assert client.get("/api/crypto/status").status_code == 200
 
 

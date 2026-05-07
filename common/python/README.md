@@ -9,7 +9,6 @@ Shared Python infrastructure for QuantPilot products. Imported by `apps/stock-as
 | `quantpilot_common.config` | Pydantic settings + env loading |
 | `quantpilot_common.redis` | Redis client, pub/sub, order queue, price cache |
 | `quantpilot_common.platform` | Shared platform contracts (DomainStatus, FactEnvelope, summary service) |
-| `quantpilot_common.plugins` | Pluggy-based plugin loader (manager, spec) |
 | `quantpilot_common.data` | Data fetchers (yfinance, akshare, on-chain), DuckDB storage, scheduler |
 | `quantpilot_common.schemas` | Auto-generated types from `common/schemas/*.schema.json` (do not edit) |
 

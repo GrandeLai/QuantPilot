@@ -112,7 +112,7 @@ QuantPilot Monorepo
 
 ### stock-assistant（Python）
 
-FastAPI，Polars，LiteLLM，pluggy（插件系统），pytest，ruff / mypy
+FastAPI，Polars，LiteLLM，pytest，ruff / mypy
 
 ### quant-assistant（Rust）
 

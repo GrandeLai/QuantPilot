@@ -63,12 +63,11 @@
 | 流式 chat / generate-strategy | `quantpilot_stock.api.llm` | `/api/llm/stream`、`/api/llm/generate-strategy` |
 | Agent 中间件 + 熔断 / 退避 / fallback | `quantpilot_stock.agent` | (内部) |
 
-### 1.5 平台 / 插件
+### 1.5 平台
 
 | 能力 | 模块 | 路由前缀 |
 |---|---|---|
 | Provider 状态汇总 | `quantpilot_stock.api.platform` | `/api/platform/summary` |
-| 插件注册（pluggy hookspec） | `quantpilot_common.plugins` + `quantpilot_stock.api.plugins` | `/api/plugins` |
 | 健康检查 | `quantpilot_stock.api.platform` | `/healthz` |
 
 ---
@@ -121,7 +120,6 @@
 | `common/python/quantpilot_common/data/universe` | 双产品共享支持市场宇宙 |
 | `common/python/quantpilot_common/redis` | 异步 redis 客户端 + price_cache + order_queue |
 | `common/python/quantpilot_common/strategy_persistence` | 策略文件 Git 版本管理（gitpython） |
-| `common/python/quantpilot_common/plugins` | pluggy hookspec（on_bar / on_signal / on_alert） |
 | `common/python/quantpilot_common/data/storage` | DuckDB 客户端（stock 写、其他读） |
 | `common/data-store/market.duckdb` | 共享行情库（stock-assistant 单写） |
 | `common/data-store/golden/` | 跨语言行为等价基准数据集（Phase A 骨架） |

@@ -20,4 +20,4 @@ uv run uvicorn quantpilot_stock.main:app --port 8001 --reload
 
 ## 依赖
 
-直接依赖 `quantpilot-common`（schemas 类型 + config + redis + data fetchers + platform contracts + plugins + strategy_persistence）。
+直接依赖 `quantpilot-common`（schemas 类型 + config + redis + data fetchers + platform contracts + strategy_persistence）。

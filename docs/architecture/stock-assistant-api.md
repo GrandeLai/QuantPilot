@@ -23,7 +23,6 @@
 | `options.py` | `/api/options` | 期权希腊字母 / IV / 情景 | 4 |
 | `paper.py` | `/api/paper` | 模拟盘 session 与订单 | 8 |
 | `platform.py` | `/api/platform` | 平台状态汇总 | 1 |
-| `plugins.py` | `/api/plugins` | 插件系统（pluggy） | 2 |
 | `portfolio.py` | `/api/portfolio` | 组合策略与权益 | 7 |
 | `screener.py` | `/api/screener` | 选股 / 选币 + 评分 + 同行 / 宏观 | 8 |
 | `security.py` | `/api/security` | API Key 管理（keyring） | 4 |
@@ -31,7 +30,7 @@
 | `trading.py` | `/api/trading` | 多 broker 统一交易接口 | 17 |
 | `ws.py` | `/ws` | WebSocket（行情 + 信号） | 2 |
 
-合计 **92** HTTP/WS 端点。健康检查 `GET /healthz` 由 `main.py` 直接暴露。
+健康检查 `GET /healthz` 由 `main.py` 直接暴露。
 
 ---
 
@@ -166,17 +165,6 @@
 | GET | `/api/platform/summary` |
 
 返回各 provider 状态 + Redis / DB 连通性 + 配置摘要。
-
----
-
-### `plugins.py` — 插件（2）
-
-| 方法 | 路径 |
-|---|---|
-| GET | `/api/plugins` |
-| POST | `/api/plugins/reload` |
-
-基于 pluggy；hook：`on_bar`、`on_signal`、`on_alert`。
 
 ---
 
