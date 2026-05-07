@@ -41,7 +41,7 @@ export async function fetchRiskKellyFromReturns(returns: number[], fraction?: nu
 
 - 顶部：标题 "Risk Metrics" + 数据输入区
   - Textarea：粘贴 simple return 序列（每行一个数字 或 逗号分隔）
-  - 按钮：「Load Demo Returns」生成 500 个 N(0.0005, 0.012) 样本
+  - 输入真实组合或策略收益率序列后计算风控指标
   - 按钮：「Analyze Risk」调 `fetchRiskSummary`
 - 4 个区块（垂直堆叠或 2×2 grid，按屏幕宽度）：
   1. **Vol Target** — 4 个 MetricCard：Realized Vol / Target Vol / Scale Factor / Regime（用 badge 配合颜色：low=blue, normal=green, high=orange, crisis=red）

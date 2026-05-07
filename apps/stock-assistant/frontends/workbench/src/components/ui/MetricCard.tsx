@@ -1,6 +1,5 @@
 /**
  * MetricCard — KPI 指标卡片，可复用于各 Tab.
- * 设计语言来自 sample/quantpilot-studio + sample/quantpilot-portfolio-manager.
  */
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { cn } from "../../lib/utils";

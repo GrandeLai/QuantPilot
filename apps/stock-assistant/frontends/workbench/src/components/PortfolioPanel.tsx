@@ -1,6 +1,5 @@
 /**
  * 多策略组合管理面板.
- * UI 设计来自 sample/quantpilot-portfolio-manager，API 逻辑保留自原项目.
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {

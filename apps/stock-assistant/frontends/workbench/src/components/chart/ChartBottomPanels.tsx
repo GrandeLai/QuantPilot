@@ -24,22 +24,12 @@ interface Position {
   name: string;
 }
 
-const MOCK_NEWS: NewsItem[] = [
-  { id: 1, title: "美联储维持利率不变，市场反应平稳", timestamp: "10:32 AM", sentiment: "neutral" },
-  { id: 2, title: "科技股领涨，纳斯达克指数创历史新高", timestamp: "09:15 AM", sentiment: "positive" },
-  { id: 3, title: "原油价格回调，能源板块承压", timestamp: "08:50 AM", sentiment: "negative" },
-  { id: 4, title: "苹果公司发布新产品，股价盘前上涨 3%", timestamp: "08:20 AM", sentiment: "positive" },
-  { id: 5, title: "中国经济数据好于预期，亚太市场全线上涨", timestamp: "07:05 AM", sentiment: "positive" },
-];
-
 export default function ChartBottomPanels() {
   const { symbol } = useChartStore();
-  const [news, setNews] = useState<NewsItem[]>(MOCK_NEWS);
+  const [news, setNews] = useState<NewsItem[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
-  const [usingMockNews, setUsingMockNews] = useState(true);
 
   useEffect(() => {
-    // Try to fetch real news sentiment
     const fetchNews = async () => {
       try {
         const res = await fetch(`/api/sentiment/news?symbol=${encodeURIComponent(symbol)}&max_items=10`);
@@ -71,13 +61,10 @@ export default function ChartBottomPanels() {
                       : "neutral",
               })),
             );
-            setUsingMockNews(false);
-          } else {
-            setUsingMockNews(true);
           }
         }
       } catch {
-        setUsingMockNews(true);
+        setNews([]);
       }
     };
 
@@ -110,16 +97,15 @@ export default function ChartBottomPanels() {
             <span className="rounded-full border border-gray-800 bg-[#161b22] px-1.5 py-0.5 text-[9px] text-gray-500">
               {symbol}
             </span>
-            {usingMockNews && (
-              <span className="rounded-full border border-amber-700/30 bg-amber-500/10 px-1.5 py-0.5 text-[9px] text-amber-400">
-                Mock
-              </span>
-            )}
           </div>
           <MoreHorizontal size={14} className="text-gray-500" />
         </div>
         <div className="flex-1 overflow-y-auto custom-scrollbar">
-          {news.map((item) => (
+          {news.length === 0 ? (
+            <div className="flex h-full items-center justify-center px-3 text-center text-[11px] text-gray-600">
+              暂无新闻情绪数据
+            </div>
+          ) : news.map((item) => (
             <div
               key={item.id}
               className="px-3 py-2.5 border-b border-gray-800/50 hover:bg-[#2a2e39] cursor-pointer group"

@@ -1,6 +1,5 @@
 /**
  * QuantPilot 主应用 — 标签页导航.
- * Header / Footer 设计来自 sample/quantpilot-portfolio-manager.
  */
 import {
   Suspense,

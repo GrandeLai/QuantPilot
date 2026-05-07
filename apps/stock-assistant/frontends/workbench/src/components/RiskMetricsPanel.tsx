@@ -10,7 +10,6 @@ import {
   Calculator,
   Gauge,
   PlayCircle,
-  RefreshCw,
   ShieldAlert,
   Target,
   TrendingDown,
@@ -49,29 +48,6 @@ function parseReturns(text: string): number[] {
     .filter((n) => !Number.isNaN(n));
 }
 
-function generateDemoReturns(n = 500, seed = 42): number[] {
-  // Mulberry32 deterministic PRNG → Box-Muller → N(0.0005, 0.012)
-  let s = seed >>> 0;
-  const rand = () => {
-    s = (s + 0x6d2b79f5) >>> 0;
-    let t = s;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-  const out: number[] = [];
-  for (let i = 0; i < n; i += 2) {
-    const u1 = Math.max(rand(), 1e-9);
-    const u2 = rand();
-    const mag = Math.sqrt(-2 * Math.log(u1));
-    const z0 = mag * Math.cos(2 * Math.PI * u2);
-    const z1 = mag * Math.sin(2 * Math.PI * u2);
-    out.push(0.0005 + 0.012 * z0);
-    if (out.length < n) out.push(0.0005 + 0.012 * z1);
-  }
-  return out;
-}
-
 function fmtPct(x: number): string {
   return `${(x * 100).toFixed(2)}%`;
 }
@@ -93,16 +69,10 @@ export default function RiskMetricsPanel() {
   const [kellyLoading, setKellyLoading] = useState(false);
   const [kellyError, setKellyError] = useState<string | null>(null);
 
-  const onLoadDemo = useCallback(() => {
-    const arr = generateDemoReturns(500);
-    setReturnsText(arr.map((x) => x.toFixed(6)).join("\n"));
-    setError(null);
-  }, []);
-
   const onAnalyze = useCallback(async () => {
     const arr = parseReturns(returnsText);
     if (arr.length < 30) {
-      setError("Need at least 30 samples (paste more or click Load Demo).");
+      setError("Need at least 30 return samples from a real portfolio or strategy.");
       return;
     }
     setLoading(true);
@@ -159,14 +129,6 @@ export default function RiskMetricsPanel() {
           className="w-full bg-[#151619] border border-[#2A2D35] rounded-lg px-3 py-2 text-white text-sm font-mono focus:border-[#00C087] focus:outline-none resize-y"
         />
         <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={onLoadDemo}
-            className="flex items-center gap-1.5 px-3 py-2 bg-[#1C1E22] hover:bg-[#2A2D35] border border-[#2A2D35] text-white text-sm rounded-lg transition-colors"
-          >
-            <RefreshCw size={14} />
-            Load Demo Returns
-          </button>
           <button
             type="button"
             onClick={onAnalyze}

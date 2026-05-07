@@ -1,5 +1,5 @@
 /**
- * 新闻情绪分析面板 — 完整复现 sample/quantpilot-market-sentiment 设计.
+ * 新闻情绪分析面板.
  * 布局: 左侧配置侧栏 + 右侧主区域（情绪仪表 + 趋势图 + 新闻列表）
  */
 import { useEffect, useState, useCallback } from "react";
@@ -75,54 +75,8 @@ interface AggregateData {
   score: number;
 }
 
-// ── 默认 Mock 数据（展示用，未请求前显示） ────────────────────────────────────
-
-const MOCK_HISTORY: SentimentHistoryPoint[] = [
-  { timestamp: "09:00", bullish: 62, bearish: 24, neutral: 14, score: 72 },
-  { timestamp: "10:00", bullish: 57, bearish: 29, neutral: 14, score: 66 },
-  { timestamp: "11:00", bullish: 52, bearish: 34, neutral: 14, score: 60 },
-  { timestamp: "12:00", bullish: 44, bearish: 43, neutral: 13, score: 50 },
-  { timestamp: "13:00", bullish: 40, bearish: 48, neutral: 12, score: 46 },
-  { timestamp: "14:00", bullish: 35, bearish: 53, neutral: 12, score: 40 },
-  { timestamp: "15:00", bullish: 38, bearish: 50, neutral: 12, score: 44 },
-  { timestamp: "16:00", bullish: 45, bearish: 43, neutral: 12, score: 52 },
-];
-
-const MOCK_NEWS: NewsSentimentItem[] = [
-  {
-    id: "1", title: "Apple Reports Strong Q1 Earnings, Revenue Beats Estimates",
-    url: "#", published: "2 小时前", source: "Bloomberg",
-    description: "Apple Inc. posted better-than-expected first quarter results, driven by services growth.",
-    impact: "high", sentiment: { compound: 0.72, positive: 0.8, negative: 0.05, neutral: 0.15, label: "bullish" },
-  },
-  {
-    id: "2", title: "Fed Signals Potential Rate Pause Amid Inflation Concerns",
-    url: "#", published: "3 小时前", source: "Reuters",
-    description: "Federal Reserve officials hint at pausing rate hikes as inflation shows mixed signals.",
-    impact: "high", sentiment: { compound: -0.31, positive: 0.1, negative: 0.45, neutral: 0.45, label: "bearish" },
-  },
-  {
-    id: "3", title: "Tech Sector Sees Mixed Performance in Pre-Market Trading",
-    url: "#", published: "4 小时前", source: "CNBC",
-    description: "Technology stocks showed divergent trends with chip makers gaining while software lagged.",
-    impact: "medium", sentiment: { compound: 0.04, positive: 0.2, negative: 0.2, neutral: 0.6, label: "neutral" },
-  },
-  {
-    id: "4", title: "China Economic Data Sparks Global Market Optimism",
-    url: "#", published: "5 小时前", source: "FT",
-    description: "Better-than-expected Chinese manufacturing PMI data lifted Asian and European markets.",
-    impact: "medium", sentiment: { compound: 0.58, positive: 0.65, negative: 0.05, neutral: 0.3, label: "bullish" },
-  },
-  {
-    id: "5", title: "Oil Prices Drop on Supply Glut Fears",
-    url: "#", published: "6 小时前", source: "WSJ",
-    description: "Crude oil futures fell as OPEC+ output remained high despite demand concerns.",
-    impact: "low", sentiment: { compound: -0.45, positive: 0.05, negative: 0.5, neutral: 0.45, label: "bearish" },
-  },
-];
-
-const MOCK_AGGREGATE: AggregateData = {
-  count: 10, avg_compound: 0.11, positive_ratio: 0.60, score: 56,
+const EMPTY_AGGREGATE: AggregateData = {
+  count: 0, avg_compound: 0, positive_ratio: 0, score: 50,
 };
 
 // ── 子组件: SentimentGauge ─────────────────────────────────────────────────
@@ -410,10 +364,9 @@ export default function SentimentPanel() {
   const [symbol, setSymbol] = useState("AAPL");
   const [maxItems, setMaxItems] = useState(10);
   const [loading, setLoading] = useState(false);
-  const [aggregate, setAggregate] = useState<AggregateData>(MOCK_AGGREGATE);
-  const [history, setHistory] = useState<SentimentHistoryPoint[]>(MOCK_HISTORY);
-  const [news, setNews] = useState<NewsSentimentItem[]>(MOCK_NEWS);
-  const [isMock, setIsMock] = useState(true);
+  const [aggregate, setAggregate] = useState<AggregateData>(EMPTY_AGGREGATE);
+  const [history, setHistory] = useState<SentimentHistoryPoint[]>([]);
+  const [news, setNews] = useState<NewsSentimentItem[]>([]);
 
   const fetchSentiment = useCallback(async () => {
     setLoading(true);
@@ -423,7 +376,6 @@ export default function SentimentPanel() {
         fetch(`/api/sentiment/history?symbol=${encodeURIComponent(symbol)}`),
       ]);
 
-      let gotReal = false;
       if (newsRes.ok) {
         const data = (await newsRes.json()) as {
           aggregate: AggregateData;
@@ -431,18 +383,12 @@ export default function SentimentPanel() {
         };
         setAggregate(data.aggregate);
         setNews(data.items);
-        gotReal = true;
       }
 
       if (histRes.ok) {
         const data = (await histRes.json()) as { history: SentimentHistoryPoint[] };
         setHistory(data.history);
-        gotReal = true;
       }
-
-      if (gotReal) setIsMock(false);
-    } catch {
-      // 网络错误时保留 mock 数据
     } finally {
       setLoading(false);
     }
@@ -523,30 +469,23 @@ export default function SentimentPanel() {
           </div>
 
           {/* Aggregate stats */}
-          {!isMock && (
-            <div className="border-t border-[#2a2e39] pt-4 space-y-2">
-              <div className="text-[10px] text-[#8b949e] uppercase tracking-wider font-bold">汇总数据</div>
-              {[
-                ["新闻总数", String(aggregate.count)],
-                ["平均复合分", aggregate.avg_compound.toFixed(4)],
-                ["正面比例", `${(aggregate.positive_ratio * 100).toFixed(1)}%`],
-                ["情绪指数", String(aggregate.score)],
-              ].map(([k, v]) => (
-                <div key={k} className="flex justify-between text-xs">
-                  <span className="text-[#8b949e]">{k}</span>
-                  <span className="text-white font-mono">{v}</span>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="border-t border-[#2a2e39] pt-4 space-y-2">
+            <div className="text-[10px] text-[#8b949e] uppercase tracking-wider font-bold">汇总数据</div>
+            {[
+              ["新闻总数", String(aggregate.count)],
+              ["平均复合分", aggregate.avg_compound.toFixed(4)],
+              ["正面比例", `${(aggregate.positive_ratio * 100).toFixed(1)}%`],
+              ["情绪指数", String(aggregate.score)],
+            ].map(([k, v]) => (
+              <div key={k} className="flex justify-between text-xs">
+                <span className="text-[#8b949e]">{k}</span>
+                <span className="text-white font-mono">{v}</span>
+              </div>
+            ))}
+          </div>
 
           {/* Fetch button */}
           <div className="mt-auto space-y-2">
-            {isMock && (
-              <p className="text-[10px] text-center text-[#8b949e] italic">
-                当前显示示例数据
-              </p>
-            )}
             <button
               onClick={() => void fetchSentiment()}
               disabled={loading}

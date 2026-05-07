@@ -1,5 +1,5 @@
 /**
- * 策略管理面板 — 仿 quantpilot-studio 设计.
+ * 策略管理面板.
  * 布局：左侧折叠树侧栏 + 右侧编辑区（子标签：代码 / 优化 / ML）
  */
 import { useEffect, useRef, useState } from "react";
